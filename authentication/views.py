@@ -10,11 +10,13 @@ def home(request):
     """
     Renders the "home.html" template when the user accesses the home page
     """
+    if User.is_authenticated:
+        return render(request, "..\\..\\inventory\\templates\\database.html")
     return render(request, "home.html")
 
 def login_page(request):
     """
-    TODO: functin doc comment
+    
     """
     # Check if the HTTP request method is POST (form submission)
     if request.method == "POST":
@@ -24,20 +26,20 @@ def login_page(request):
         # Check if a user with the provided username exists
         if not User.objects.filter(username=username).exists():
             # Display an error message if the username does not exist
-            messages.error(request, 'Invalid Username')
-            return redirect('/login/')
+            messages.error(request, 'Invalid Username\n')
+            return redirect('/inventory_database/login/')
         
         # Authenticate the user with the provided username and password
         user = authenticate(username=username, password=password)
         
         if user is None:
             # Display an error message if authentication fails (invalid password)
-            messages.error(request, "Invalid Password")
-            return redirect('/login/')
+            messages.error(request, "Invalid Password\n")
+            return redirect('/inventory_database/login/')
         else:
             # Log in the user and redirect to the home page upon successful login
             login(request, user)
-            return redirect('/home/')
+            return redirect('/inventory_database/')
     
     # Render the login page template (GET request)
     return render(request, 'login.html')
@@ -47,7 +49,7 @@ def register_page(request):
     """
     TODO: function doc comment
     """
-        # Check if the HTTP request method is POST (form submission)
+    # Check if the HTTP request method is POST (form submission)
     if request.method == 'POST':
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
