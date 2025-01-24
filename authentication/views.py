@@ -12,6 +12,7 @@ def home(request):
     """
     if User.is_authenticated:
         return render(request, "..\\..\\inventory\\templates\\database.html")
+    
     return render(request, "home.html")
 
 def login_page(request):
