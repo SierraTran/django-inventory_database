@@ -21,8 +21,7 @@ from django.conf import settings
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('login/', login, name="login_page"),
-    path('home/', home, name="home"),
-
+    path("inventory_database/", include("authentication.urls")),
+    path("inventory_database/", include("inventory.urls")),
+    path("admin/", admin.site.urls),
 ]

@@ -1,51 +1,33 @@
 {% extends "master.html" %}
 
 {% block title %}
-Login
+Inventory Database | Login
 {% endblock %}
 
 
 
 {% block content %}
-<div class="container mt-5">
-    <!-- Login form -->
-    <form class="col-6 mx-auto card p-3 shadow-lg" method="post" enctype="multipart/form-data">
-        <h1 style="text-align: center;"><span style="color: green;">GeeksforGeeks</span></h1>
-
-        {% csrf_token %} <!-- CSRF token for security -->
-
-        <!-- Login heading -->
-        <h3>Login</h3>
-        <hr>
-
-        <!-- Display error/success messages -->
-        {% if messages %}
-        <div class="alert alert-primary" role="alert">
-            {% for message in messages %}
-            {{ message }}
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <!-- Username input field -->
-        <div class="form-group">
-            <label for="exampleInputEmail1">Username</label>
-            <input type="text" class="form-control" name="username" id="exampleInputEmail1" aria-describedby="emailHelp"
-                placeholder="Enter username" required>
-        </div>
-
-        <!-- Password input field -->
-        <div class="form-group">
-            <label for="exampleInputPassword1">Password</label>
-            <input type="password" name="password" class="form-control" id="exampleInputPassword1"
-                placeholder="Password" required>
-        </div>
-
-        <!-- Link to registration page -->
-        <p>Don't have an account <a href="/register/">Register</a> </p>
-
-        <!-- Submit button -->
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+<div>
+    <img class="image" height="94" width="532" src="https://hayesinstruments.com/images/HayesLetterhead.gif"
+        alt="Hayes Instrument Service">
 </div>
+<div class="page-title">Inventory Database</div>
+<form method="post"> {% csrf_token %} {{ form.as_p }}
+    <fieldset>
+        {% if messages %}
+        <p style="text-align: center; font-weight: bold;">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </p>
+        {% endif %}
+        <label for="username">
+            Username <input type="text" id="username" name="username" placeholder="username" required />
+        </label>
+        <label for="password">
+            Password <input type="password" id="password" name="password" placeholder="password" required />
+        </label>
+    </fieldset>
+    <input type="submit" value="Log In">
+</form>
 {% endblock %}
