@@ -34,7 +34,7 @@ SECRET_KEY = 'django-insecure-lj(f3$%36ah0&x2j$uiksiz*hwk$$v+!y_k96k9&km_ym^m107
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -117,7 +117,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# Since This project is only going to be used by Hayes Instruments, 
+# I used their timezone. 
+TIME_ZONE = 'EST'
 
 USE_I18N = True
 
@@ -133,3 +135,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = "home"
+
