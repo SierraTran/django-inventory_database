@@ -13,12 +13,17 @@ This project was made to simplify the process of keeping inventory. It stores in
 
 ### Django
 
+Django's authentication feature is used in this project. 
+
 ## Required Software
+
+
 
 ## Required Packages
 
 The list of required software below will also be included in the `requirements.txt` file.
 
+- Django
 - PyYAML
 - sqlalchemy_sqlany
 - sqlany-django
