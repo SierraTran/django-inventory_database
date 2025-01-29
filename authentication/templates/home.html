@@ -10,7 +10,7 @@ Inventory Database
 <h1>Hello!</h1>
     {% if request.user %}
         <p>You're logged in, {{user.username}}!</p>
-        <form action="{% url 'logout'  %}" method="post"> {% csrf_token %}
+        <form action="{% url 'logout' %}" method="post"> {% csrf_token %}
             <button type="submit">Log out</button>
         </form>
         
