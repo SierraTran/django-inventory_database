@@ -16,9 +16,7 @@ fieldset {
 label {
     display: flex;
     flex-direction: row;
-    justify-content: flex-end;
-    text-align: right;
-    width: 400px;
+    justify-content: center;
     line-height: 26px;
     margin-bottom: 10px;
 }
@@ -27,7 +25,7 @@ form {
     background-color: rgb(80%, 80%, 80%);    
     width: 60vw;
     max-width: 600px;
-    min-width: 300px;
+    min-width: 350px;
     margin: 0 auto;
     padding-bottom: 2em;
     padding-top: 1em;
@@ -37,6 +35,10 @@ input {
     height: 20px;
     flex: 0 0 200px;
     margin-left: 10px;
+}
+
+#password {
+    margin-left: 13px;
 }
 
 input[type="submit"] {
