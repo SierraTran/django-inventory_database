@@ -1,0 +1,28 @@
+{% extends "base_template.html" %}
+
+{% block title %}Inventory Database | Items{% endblock title %}
+
+{% block content %}
+<h1>
+    Hello.
+</h1>
+<p>
+    Inventory item details will be here.
+
+    <table>
+        <tr>
+            <th>Manufacturer</th>
+            <td>{{ item.manufacturer }}</td>
+        </tr>
+        <tr>
+            <th>Model</th>
+            <td>{{ item.model }}</td>
+        </tr>
+        <tr>
+            <th>Part or Unit?</th>
+            <td>{{ item.part_or_unit }}</td>
+        </tr>
+    </table>
+
+</p>
+{% endblock content %}

@@ -4,13 +4,11 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="shortcut icon" href="https://hayesinstruments.com/HayesLogo.ico">
+    {% block stylesheet %}{% endblock stylesheet %}
+    <title>{% block title %}{% endblock title %}</title>
 </head>
 <body>
-    <h1>
-        Hello.
-    </h1>
-    <p>
-        Inventory items will be here.
-    </p>
+    {% block content %}
+    {% endblock content %}
 </body>
 </html>
