@@ -1,14 +1,15 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from django.views import generic
+from django.views.generic import TemplateView, ListView
+from django.db.models import Q, CharField
 
 from .models import Item
 
 
 # Create your views here.
 # @login_required
-class ItemView(generic.ListView):
+class ItemView(ListView):
     """
     View to list all items.
     
@@ -18,6 +19,7 @@ class ItemView(generic.ListView):
     Methods:
         get_queryset(): Retrieves the list of items to be displayed.
     """
+    model = Item
     template_name = "items.html"
     context_object_name = "items_list"
 
@@ -29,14 +31,16 @@ class ItemView(generic.ListView):
             QuerySet: A queryset containing all items.
         """
         return Item.objects.all()
+    
+    
+    
+    
 
 
 # @login_required
-class ItemDetailsView(generic.ListView):
+class ItemDetailsView(TemplateView):
     model = Item
     template_name = "item-details.html"
-    context_object_name = "item"
-    
     
 
 
