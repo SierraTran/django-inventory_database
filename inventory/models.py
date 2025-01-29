@@ -28,9 +28,9 @@ class Item(models.Model):
             self (Item): The current `Item` object
 
         Returns:
-            str: The `model` and `manufacturer` of the object separated by a comma.
+            str: The `manufacturer`, a comma, `model`, and `part_number` if applicable.
 
         Example:
-            "87 Case, HP"
+            "HP, 87 Case"
         """
         return self.manufacturer + ", " + self.model + " " + self.part_number

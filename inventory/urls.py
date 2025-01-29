@@ -5,6 +5,8 @@ from . import views
 app_name = "inventory"
 
 urlpatterns = [
-    path('items', views.ItemView.as_view(), name='items'),
-    path('items/<int:id>', views.ItemDetailsView.as_view(), name='item_details'),
+    # example: /inventory_database/items
+    path('items/', views.ItemView.as_view(), name='items'),
+    # example: /inventory_database/items/9
+    path('items/<int:id>/', views.ItemDetailsView.as_view(), name='item_details'),
 ]
