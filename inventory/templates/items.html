@@ -29,45 +29,15 @@
             <div class="even">{{ item.part_number }}</div>
         </a>
     {% else %}
-    <a href="{% url 'inventory:item_details' item.id %}">
-        <div class="odd">{{ item.manufacturer }}</div>
-        <div class="odd">{{ item.model }}</div>
-        <div class="odd">{{ item.part_or_unit }}</div>
-        <div class="odd">{{ item.part_number }}</div>
-    </a>
+        <a href="{% url 'inventory:item_details' item.id %}">
+            <div class="odd">{{ item.manufacturer }}</div>
+            <div class="odd">{{ item.model }}</div>
+            <div class="odd">{{ item.part_or_unit }}</div>
+            <div class="odd">{{ item.part_number }}</div>
+        </a>
     {% endif %}
-    
-   
     {% endfor %}
 </div>
-
-{% comment %} <table>
-    <tr>
-        <th>
-            <div class="header">Manufacturer</div>
-    <div class="header">Model</div>
-    <div class="header">Part or Unit?</div>
-    <div class="header">Part Number</div>
-        </th>
-    </tr>
-</table>
-<div class="grid">
-    <div class="header">Manufacturer</div>
-    <div class="header">Model</div>
-    <div class="header">Part or Unit?</div>
-    <div class="header">Part Number</div>
-{% for item in items_list %}
-<a href="{% url 'inventory:item_details' item.id %}">
-    <div>{{ item.manufacturer }}</div>
-    <div>{{ item.model }}</div>
-    <div>{{ item.part_or_unit }}</div>
-    <div>{{ item.part_number }}</div>
-</a>
-
-{% endfor %}
-</div>  {% endcomment %}
-
-
 {% else %}
 <p>No items are available.</p>
 {% endif %}
