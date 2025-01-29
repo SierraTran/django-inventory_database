@@ -2,7 +2,8 @@
 {% load static %}
 
 {% block stylesheet %}
-<link rel="stylesheet" href="{% static 'inventory/items.css' %}" />{% endblock stylesheet %}
+<link rel="stylesheet" href="{% static 'inventory/items.css?v=1' %}" />
+{% endblock stylesheet %}
 
 {% block title %}Inventory Database | Items{% endblock title %}
 
@@ -10,6 +11,11 @@
 <h1>
     Hello.
 </h1>
+
+<form action="{% url "inventory:items" %}" method="get"> 
+    <input name="q" type="Text" placeholder="Search..." />
+</form>
+
 <p>
     Inventory items will be here.
 </p>
