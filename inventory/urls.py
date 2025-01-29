@@ -1,9 +1,10 @@
 from django.urls import path
 from . import views
 
+# This is the namespace for the inventory app
 app_name = "inventory"
 
 urlpatterns = [
-    path('items', views.items, name='items'),
-    path('items/more_info/<int:id>', views.more_info, name='more_info'),
+    path('items', views.ItemView.as_view(), name='items'),
+    path('items/<int:id>', views.ItemDetailsView.as_view(), name='item_details'),
 ]

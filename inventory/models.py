@@ -33,4 +33,4 @@ class Item(models.Model):
         Example:
             "87 Case, HP"
         """
-        return self.model + ", " + self.manufacturer
+        return self.manufacturer + ", " + self.model + " " + self.part_number

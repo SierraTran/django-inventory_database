@@ -1,0 +1,34 @@
+{% extends "base_template.html" %}
+{% load static %}
+
+{% block stylesheet %}
+<link rel="stylesheet" href="{% static 'items.css' %}" />{% endblock stylesheet %}
+
+{% block title %}Inventory Database | Items{% endblock title %}
+
+{% block content %}
+<h1>
+    Hello.
+</h1>
+<p>
+    Inventory items will be here.
+</p>
+{% if items_list %}
+<div class="grid">
+    <div>Manufacturer</div>
+    <div>Model</div>
+    <div>Part or Unit?</div>
+    <div>Part Number</div>
+    {% for item in items_list %}
+    <a href="{% url 'inventory:item_details' item.id %}">
+        <div>{{ item.manufacturer }}</div>
+        <div>{{ item.model }}</div>
+        <div>{{ item.part_or_unit }}</div>
+        <div>{{ item.part_number }}</div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<p>No items are available.</p>
+{% endif %}
+{% endblock content %}

@@ -1,1 +1,4 @@
 superuser.txt
+/inventory_database/__pycache__
+/inventory/__pycache__
+/authentication/__pycache__
