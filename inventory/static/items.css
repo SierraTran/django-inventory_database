@@ -1,8 +1,0 @@
-div.grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(1em, auto));
-}
-
-a {
-    display: contents;
-}

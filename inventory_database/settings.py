@@ -118,7 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-# Since This project is only going to be used by Hayes Instruments, 
+# Since this project is only going to be used by Hayes Instruments, 
 # I used their timezone. 
 TIME_ZONE = 'EST'
 
@@ -130,7 +130,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_ROOT = 'inventory_database/static'
+STATIC_URL = 'inventory_database/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
