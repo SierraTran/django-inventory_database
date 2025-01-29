@@ -1,5 +1,11 @@
 {% extends "master.html" %}
 
+{% load static %}
+
+{% block stylesheet %}
+<link rel="stylesheet"  type="text/css" href="{% static 'login.css?v=1' %}" />
+{% endblock stylesheet %}
+
 {% block title %}
 Inventory Database | Login
 {% endblock %}
@@ -12,7 +18,8 @@ Inventory Database | Login
         alt="Hayes Instrument Service">
 </div>
 <div class="page-title">Inventory Database</div>
-<form method="post"> {% csrf_token %} {{ form.as_p }}
+<form method="post"> {% csrf_token %} 
+
     <fieldset>
         {% if messages %}
         <p style="text-align: center; font-weight: bold;">
@@ -22,12 +29,13 @@ Inventory Database | Login
         </p>
         {% endif %}
         <label for="username">
-            Username <input type="text" id="username" name="username" placeholder="username" required />
+        Username <input type="text" id="username" name="username" placeholder="username" required />
         </label>
         <label for="password">
-            Password <input type="password" id="password" name="password" placeholder="password" required />
+        Password <input type="password" id="password" name="password" placeholder="password" required />
         </label>
     </fieldset>
     <input type="submit" value="Log In">
+
 </form>
 {% endblock %}
