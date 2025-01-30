@@ -7,7 +7,11 @@ class ItemAdmin(admin.ModelAdmin):
     # using the fields `manufacturer`, `model`, and `part_number`
     list_display = ["manufacturer", "model", "part_number"]
 
+    # Items can be filtered for being a part or unit
     list_filter = ["part_or_unit"]
+    
+    # Items are alphabetically ordered by manufacturer and then model
+    ordering = ["manufacturer", "model"]
 
 
 # Register your models here.
