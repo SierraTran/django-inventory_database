@@ -1,47 +1,39 @@
 {% extends "base_template.html" %}
+{% load static %}
+
+{% block stylesheet %}
+    <link rel="stylesheet" href="{% static "item-details.css" %}" />
+{% endblock stylesheet %}
 
 {% block title %}Inventory Database | Items{% endblock title %}
 
 {% block content %}
-<h1>
-    Hello.
-</h1>
-<p>
-    Inventory item details will be here.
-</p>
+
 {% if item %}
 <table>
     <tr>
-        <th>Manufacturer</th>
-        <td>{{ item.manufacturer }}</td>
+        <th>Manufacturer</th><td>{{ item.manufacturer }}</td>
     </tr>
     <tr>
-        <th>Model</th>
-        <td>{{ item.model }}</td>
+        <th>Model</th><td>{{ item.model }}</td>
     </tr>
     <tr>
-        <th>Part or Unit?</th>
-        <td>{{ item.part_or_unit }}</td>
+        <th>Part or Unit?</th><td>{{ item.part_or_unit }}</td>
     </tr>
     <tr>
-        <th>Part Number</th>
-        <td>{{ item.part_number }}</td>
+        <th>Part Number</th><td>{{ item.part_number }}</td>
+    </tr>
+    <tr class="description">
+        <th>Description</th><td>{{ item.description }}</td>
     </tr>
     <tr>
-        <th>Description</th>
-        <td>{{ item.description }}</td>
+        <th>Location</th><td>{{ item.location }}</td>
     </tr>
     <tr>
-        <th>Location</th>
-        <td>{{ item.location }}</td>
+        <th>Quantity</th><td>{{ item.quantity }}</td>
     </tr>
     <tr>
-        <th>Quantity</th>
-        <td>{{ item.quantity }}</td>
-    </tr>
-    <tr>
-        <th>Price</th>
-        <td>{{ item.price }}</td>
+        <th>Price</th><td>{{ item.price }}</td>
     </tr>
 </table>
 {% else %}
