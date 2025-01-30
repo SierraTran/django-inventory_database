@@ -8,10 +8,13 @@
     <title>{% block title %}{% endblock title %}</title>
 </head>
 <body>
-    <div class="header"></div>
+    <div class="header">
+        {% block header %}
+        {% endblock header %}
+    </div>
     <div class="content">
-    {% block content %}
-    {% endblock content %}
+        {% block content %}
+        {% endblock content %}
     </div>
 </body>
 </html>
