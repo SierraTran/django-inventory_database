@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView, ListView
 from django.db.models import Q, CharField
@@ -8,8 +9,8 @@ from .models import Item
 
 
 # Create your views here.
-# @login_required
-class ItemView(ListView):
+#@login_required
+class ItemView(LoginRequiredMixin, ListView):
     """
     View to list all items.
 
@@ -36,8 +37,7 @@ class ItemView(ListView):
         return Item.objects.all().order_by("model").order_by("manufacturer")
 
 
-# @login_required
-class ItemDetailsView(TemplateView):
+class ItemDetailsView(LoginRequiredMixin, TemplateView):
     model = Item
     template_name = "item-details.html"
     context_object_name = "item"
@@ -46,7 +46,27 @@ class ItemDetailsView(TemplateView):
         return super().get_context_data(**kwargs)
 
 
+@login_required
 def getItemDetails(request, pk):
     item = get_object_or_404(Item, pk=pk)
     context = {"item": item}
     return render(request, "item-details.html", context)
+
+@login_required
+def filterItems(request):
+    query = request.GET.get('q')
+    part_or_unit = request.GET.get('part_or_unit')
+    items_list = Item.objects.all()
+    
+    if query:
+        items_list = items_list.filter(
+            Q(manufacturer__icontains=query) |
+            Q(model__icontains=query) |
+            Q(part_number__icontains=query) |
+            Q(description__icontains=query)
+        )
+    
+    if part_or_unit:
+        items_list = items_list.filter(part_or_unit=part_or_unit)
+    
+    return render(request, 'items.html', {'items_list': items_list})
