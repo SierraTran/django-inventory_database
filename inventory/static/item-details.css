@@ -9,9 +9,6 @@ div.header {
     align-items: center;
 }
 
-img.image{
-    
-}
 
 div.user {
     background-color: pink;
@@ -25,29 +22,23 @@ div.page-title {
 	padding-bottom: 1em;
 }
 
-div.grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(1em, auto));
-    min-width: 500px;
-    margin: 2em auto;
-}
-
-div.field-name {
-    font-weight: bold;
-}
-
-div.odd {
+table {
+    margin: 0 auto;
+    width: 75%;
+    max-width: 900px;
     background-color: rgb(238, 238, 238);
+    border-collapse: collapse;
 }
 
-a {
-    display: contents;
-    color: black;
+td {
+    padding: 10px;
 }
 
-a:hover {
-    color: red;
+tr.description {
+    border-top: 1px solid rgb(155, 155, 155);
+    border-bottom: 1px solid rgb(155, 155, 155);
 }
 
-
-
+tr.description > td {
+    padding-bottom: 2em;
+}
