@@ -139,5 +139,7 @@ STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-LOGIN_REDIRECT_URL = "home"
-LOGOUT_REDIRECT_URL = "home"
+# The login redirect url and logout redirect url
+# will bring the user back to "/inventory_database/"
+LOGIN_REDIRECT_URL = "../../"
+LOGOUT_REDIRECT_URL = "../../"
