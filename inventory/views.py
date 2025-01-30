@@ -9,7 +9,6 @@ from .models import Item
 
 
 # Create your views here.
-#@login_required
 class ItemView(LoginRequiredMixin, ListView):
     """
     View to list all items.
@@ -52,21 +51,21 @@ def getItemDetails(request, pk):
     context = {"item": item}
     return render(request, "item-details.html", context)
 
-@login_required
-def filterItems(request):
-    query = request.GET.get('q')
-    part_or_unit = request.GET.get('part_or_unit')
-    items_list = Item.objects.all()
+# @login_required
+# def filterItems(request):
+#     query = request.GET.get('q')
+#     part_or_unit = request.GET.get('part_or_unit')
+#     items_list = Item.objects.all()
     
-    if query:
-        items_list = items_list.filter(
-            Q(manufacturer__icontains=query) |
-            Q(model__icontains=query) |
-            Q(part_number__icontains=query) |
-            Q(description__icontains=query)
-        )
+#     if query:
+#         items_list = items_list.filter(
+#             Q(manufacturer__icontains=query) |
+#             Q(model__icontains=query) |
+#             Q(part_number__icontains=query) |
+#             Q(description__icontains=query)
+#         )
     
-    if part_or_unit:
-        items_list = items_list.filter(part_or_unit=part_or_unit)
+#     if part_or_unit:
+#         items_list = items_list.filter(part_or_unit=part_or_unit)
     
-    return render(request, 'items.html', {'items_list': items_list})
+#     return render(request, 'items.html', {'items_list': items_list})
