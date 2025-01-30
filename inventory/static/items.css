@@ -6,16 +6,11 @@ div.header {
     display: flex;
     margin-bottom: 2em;
     justify-content: space-between;
-    align-items: center;
-}
-
-img.image{
-    
+    align-items: center;    
 }
 
 div.user {
     background-color: pink;
-    padding : auto auto;
 }
 
 div.page-title {
@@ -27,8 +22,8 @@ div.page-title {
 
 div.grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(1em, auto));
-    min-width: 500px;
+    grid-template-columns: repeat(6, minmax(1em, auto));
+    min-width: 600px;
     margin: 2em auto;
 }
 
