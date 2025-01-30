@@ -1,20 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8"/>
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="shortcut icon" href="https://hayesinstruments.com/HayesLogo.ico">
     {% block stylesheet %}{% endblock stylesheet %}
     <title>{% block title %}{% endblock title %}</title>
 </head>
+
 <body>
     <div class="header">
+
+        <img class="image" height="94" width="532" src="https://hayesinstruments.com/images/HayesLetterhead.gif"
+            alt="Hayes Instrument Service">
+        <div class="user">Hello</div>
         {% block header %}
         {% endblock header %}
     </div>
+    <div class="page-title">Inventory Database</div>
     <div class="content">
         {% block content %}
         {% endblock content %}
     </div>
 </body>
+
 </html>
