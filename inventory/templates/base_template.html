@@ -14,7 +14,7 @@
 
         <img class="image" height="94" width="532" src="https://hayesinstruments.com/images/HayesLetterhead.gif"
             alt="Hayes Instrument Service">
-        <div class="user">Hello</div>
+        <div class="user">Hello, {{ request.user.username }}</div>
         {% block header %}
         {% endblock header %}
     </div>
