@@ -9,6 +9,10 @@ body {
     font-family: arial, sans-serif;     
 }
 
+p {
+    text-align: center;
+}
+
 fieldset {
     border: 0;
 }
@@ -22,7 +26,7 @@ label {
 }
 
 form {
-    background-color: rgb(238, 238, 238);    
+    background-color: rgb(200, 200, 200);    
     width: 60vw;
     max-width: 600px;
     min-width: 350px;
