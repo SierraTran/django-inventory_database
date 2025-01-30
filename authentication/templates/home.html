@@ -8,8 +8,9 @@ Inventory Database
 
 {% block content %}
 <h1>Hello!</h1>
-    {% if request.user %}
-        <p>You're logged in, {{user.username}}!</p>
+    {% if request.user.is_authenticated %}
+        <p>You're logged in, {{user.username}}!</p>        
+        <p><a href="{% url "inventory:items" %}">Browse the database.</a></p>        
         <form action="{% url 'logout' %}" method="post"> {% csrf_token %}
             <button type="submit">Log out</button>
         </form>        
