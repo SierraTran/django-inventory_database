@@ -43,7 +43,7 @@ def login_page(request):
     # Render the login page template (GET request)
     return render(request, 'login.html')
 
-@login_required
-def logout_view(request):
-    logout(request)
-    return redirect(reverse(home))
+# @login_required
+# def logout_view(request):
+#     logout(request)
+#     return redirect(reverse(home))
