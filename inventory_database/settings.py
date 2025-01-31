@@ -94,6 +94,18 @@ DATABASES = {
     }
 }
 
+# For sqlany-django, 
+# DATABASES = {
+#   'default' : {
+#       'ENGINE': 'sqlany_django',
+#       'NAME': 'django',
+#       'USER': 'dba',
+#       'PASSWORD': 'sql',
+#       'HOST': 'myhost',
+#       'PORT': 'portnum'
+#   }
+# }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
