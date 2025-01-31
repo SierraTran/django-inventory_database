@@ -48,15 +48,21 @@ class ItemDetailsView(LoginRequiredMixin, TemplateView):
 @login_required
 def getItemDetails(request, pk):
     item = get_object_or_404(Item, pk=pk)
-    context = {"item": item}
+    current_user = request.user
+    user_group = current_user.groups.first()  # Get the first group the user belongs to
+    context = {
+        "item": item,
+        "user_group": user_group,
+    }
     return render(request, "item-details.html", context)
+
 
 # @login_required
 # def filterItems(request):
 #     query = request.GET.get('q')
 #     part_or_unit = request.GET.get('part_or_unit')
 #     items_list = Item.objects.all()
-    
+
 #     if query:
 #         items_list = items_list.filter(
 #             Q(manufacturer__icontains=query) |
@@ -64,8 +70,8 @@ def getItemDetails(request, pk):
 #             Q(part_number__icontains=query) |
 #             Q(description__icontains=query)
 #         )
-    
+
 #     if part_or_unit:
 #         items_list = items_list.filter(part_or_unit=part_or_unit)
-    
+
 #     return render(request, 'items.html', {'items_list': items_list})
