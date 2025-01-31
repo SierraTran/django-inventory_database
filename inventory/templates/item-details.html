@@ -9,35 +9,63 @@
 
 {% block content %}
 
+<h1>
+    {{ user_group.name }} View
+</h1>
+
 {% if item %}
-<table>
-    <tr>
-        <th>Manufacturer</th><td>{{ item.manufacturer }}</td>
-    </tr>
-    <tr>
-        <th>Model</th><td>{{ item.model }}</td>
-    </tr>
-    <tr>
-        <th>Part or Unit?</th><td>{{ item.part_or_unit }}</td>
-    </tr>
-    <tr>
-        <th>Part Number</th><td>{{ item.part_number }}</td>
-    </tr>
-    <tr class="description">
-        <th>Description</th><td>{{ item.description }}</td>
-    </tr>
-    <tr>
-        <th>Location</th><td>{{ item.location }}</td>
-    </tr>
-    <tr>
-        <th>Quantity</th><td>{{ item.quantity }}</td>
-    </tr>
-    <tr>
-        <th>Price</th><td>{{ item.price }}</td>
-    </tr>
-</table>
+    <table>
+        <tr>
+            <th>Manufacturer</th><td>{{ item.manufacturer }}</td>
+        </tr>
+        <tr>
+            <th>Model</th><td>{{ item.model }}</td>
+        </tr>
+        <tr>
+            <th>Part or Unit?</th><td>{{ item.part_or_unit }}</td>
+        </tr>
+        <tr>
+            <th>Part Number</th><td>{{ item.part_number }}</td>
+        </tr>
+        <tr class="description">
+            <th>Description</th><td>{{ item.description }}</td>
+        </tr>
+        <tr>
+            <th>Location</th><td>{{ item.location }}</td>
+        </tr>
+        <tr>
+            <th>Quantity</th><td>{{ item.quantity }}</td>
+        </tr>
+        <tr>
+            <th>Price</th><td>{{ item.price }}</td>
+        </tr>
+    </table>
 {% else %}
     No details are available.
+{% endif %}
+
+
+{% comment %} 
+    The user group "viewer" is the lowest group in the hierarchy. 
+    Viewers can only go back on the item-details page. 
+
+    Since users must be logged in to see this page, we're going to assume they  
+    at least have viewer permissions and allow the "back" button to be shown on 
+    the page.
+{% endcomment %}
+<div class="buttons set1">
+    <button type="button" id="back">Back</button>
+    {% if user_group.name != "None" or user_group.name != "Viewer" %}
+    <button type="button" id="edit">Edit</button>
+    {% endif %}
+</div>
+
+
+{% if user_group.name != "None" or user_group.name != "Viewer" or user_group.name != "Regular User" %}
+<div class="buttons set2">
+    <button type="button" id="use">Use</button>
+    <button type="button" id="order-more">Order More</button>
+</div>
 {% endif %}
 
 {% endblock content %}
