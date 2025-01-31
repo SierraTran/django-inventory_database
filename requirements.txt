@@ -1,5 +1,4 @@
 Django
 PyYAML
-sqlalchemy_sqlany
-sqlany-django
 sqlanydb
+sqlany-django
