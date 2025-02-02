@@ -9,10 +9,6 @@
 
 {% block content %}
 
-<h1>
-    {{ user_group.name }} View
-</h1>
-
 {% if item %}
     <table>
         <tr>
@@ -53,19 +49,19 @@
     at least have viewer permissions and allow the "back" button to be shown on 
     the page.
 {% endcomment %}
-<div class="buttons set1">
+ <div class="buttons set1">
     <button type="button" id="back">Back</button>
-    {% if user_group.name != "None" or user_group.name != "Viewer" %}
-    <button type="button" id="edit">Edit</button>
+    {% if user_group.name != None and user_group.name != 'Viewer' %}
+        <button type="button" id="edit">Edit</button>
     {% endif %}
 </div>
 
 
-{% if user_group.name != "None" or user_group.name != "Viewer" or user_group.name != "Regular User" %}
+{% if user_group.name != None and user_group.name != 'Viewer' and user_group.name != 'Regular User' %}
 <div class="buttons set2">
     <button type="button" id="use">Use</button>
     <button type="button" id="order-more">Order More</button>
 </div>
-{% endif %}
+{% endif %} 
 
 {% endblock content %}
