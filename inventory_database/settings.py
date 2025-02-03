@@ -132,7 +132,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = "en-us"
 
 # Since this project is only going to be used by Hayes Instruments,
-# I used their timezone.
+# I used the EST timezone.
 TIME_ZONE = "EST"
 
 USE_I18N = True
@@ -158,3 +158,7 @@ LOGIN_REDIRECT_URL = "../../"
 # The logout redurect url "../login"
 # will bring the user back to the login page ("/inventory_database/accounts/login/")
 LOGOUT_REDIRECT_URL = "../login"
+
+# If the user closes the browser, the session will expire and the user will 
+# have to log in again.
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
