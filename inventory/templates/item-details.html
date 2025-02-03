@@ -52,13 +52,15 @@
     the page automatically.
 {% endcomment %}
  <div class="buttons set1">
-    <button type="button" id="back" onclick="window.location.href='{% url 'inventory:items' %}';">Back</button>
+    <button type="button" id="back" onclick="window.location.href='{% url 'inventory:items' %}';">
+        Back
+    </button>
     {% if user_group.name != None and user_group.name != 'Viewer' %}
-        <button type="button" id="edit">Edit</button>
+        <button type="button" id="update" onclick="window.location.href='{% url 'inventory:update-item' item.id %}';">
+            Update
+        </button>
     {% endif %}
 </div>
-
-
 {% if user_group.name != None and user_group.name != 'Viewer' and user_group.name != 'Regular User' %}
 <div class="buttons set2">
     <button type="button" id="use">Use</button>
