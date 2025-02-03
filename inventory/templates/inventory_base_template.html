@@ -12,13 +12,15 @@
 <body>
     <div class="header">
 
-        <img class="image" height="94" width="532" src="https://hayesinstruments.com/images/HayesLetterhead.gif"
-            alt="Hayes Instrument Service">
+        <a href="{% url 'authentication:home' %}">
+            <img class="image" height="94" width="532" src="https://hayesinstruments.com/images/HayesLetterhead.gif"
+                alt="Hayes Instrument Service">
+        </a>
         <div class="user">Hello, {{ request.user.username }}</div>
         {% block header %}
         {% endblock header %}
     </div>
-    <div class="page-title">Inventory Database</div>
+    <div class="page-title">{% block page-title %}{% endblock page-title %}</div>
     <div class="content">
         {% block content %}
         {% endblock content %}

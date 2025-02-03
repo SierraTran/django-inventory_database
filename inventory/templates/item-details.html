@@ -5,7 +5,9 @@
     <link rel="stylesheet" href="{% static "item-details.css" %}" />
 {% endblock stylesheet %}
 
-{% block title %}Inventory Database | Items{% endblock title %}
+{% block title %}Inventory Database | {{ item }} {% endblock title %}
+
+{% block page-title %} {{ item }} {% endblock page-title %}
 
 {% block content %}
 
@@ -47,10 +49,10 @@
 
     Since users must be logged in to see this page, we're going to assume they  
     at least have viewer permissions and allow the "back" button to be shown on 
-    the page.
+    the page automatically.
 {% endcomment %}
  <div class="buttons set1">
-    <button type="button" id="back">Back</button>
+    <button type="button" id="back" onclick="window.location.href='{% url 'inventory:items' %}';">Back</button>
     {% if user_group.name != None and user_group.name != 'Viewer' %}
         <button type="button" id="edit">Edit</button>
     {% endif %}
