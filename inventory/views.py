@@ -1,11 +1,15 @@
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
+
+# from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.views.generic import TemplateView, ListView
-from django.db.models import Q, CharField
+
+# from django.db.models import Q, CharField
 
 from .models import Item
+from .forms import ItemForm
 
 
 # Create your views here.
@@ -55,6 +59,24 @@ def getItemDetails(request, pk):
         "user_group": user_group,
     }
     return render(request, "item-details.html", context)
+
+
+@permission_required("inventory.change_item", raise_exception=True)
+def updateItem(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+    user = request.user
+    form = ItemForm(request.POST or None, instance=item)
+    
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect("/" + pk)
+
+    context = {
+        "item": item,
+        "user": user,
+        "form": form,
+    }
+    return render(request, "update-item.html", context)
 
 
 # @login_required

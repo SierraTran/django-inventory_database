@@ -9,4 +9,5 @@ urlpatterns = [
     path("items/", views.ItemView.as_view(), name="items"),
     # example: /inventory_database/items/9
     path("items/<int:pk>/", views.getItemDetails, name="item_details"),
+    path("items/<int:pk>/update", views.updateItem, name="update-item"),
 ]
