@@ -2,10 +2,33 @@
 
 This project was made to simplify the process of keeping inventory. It stores information about parts and units in the company.
 
+## Table of Contents
+- [Inventory Database](#inventory-database)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Technologies Used](#technologies-used)
+    - [Python](#python)
+    - [Django](#django)
+  - [Required Software](#required-software)
+  - [Required Packages](#required-packages)
+  - [Setup Instructions](#setup-instructions)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [Contributing](#contributing)
+  - [Author](#author)
+
 ## Features
 
 - User Authentication
 - Search
+
+## Technologies Used
+
+### Python 
+### Django 
+- Quick development and deployment
+- Authentication 
+
 
 ## Required Software
 
@@ -19,7 +42,6 @@ The list of required software below will also be included in the `requirements.t
 
 - Django
 - PyYAML
-- sqlalchemy_sqlany
 - sqlany-django
 - sqlanydb
 
@@ -27,7 +49,7 @@ The list of required software below will also be included in the `requirements.t
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/yourusername/django-inventory_database.git
+    git clone https://github.com/SierraTran/django-inventory_database.git
     ```
 2. Navigate to the project directory:
     ```bash
