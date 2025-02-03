@@ -1,0 +1,52 @@
+body {
+    font-family: arial, sans-serif;
+}
+
+div.header {
+    display: flex;
+    margin-bottom: 2em;
+    justify-content: space-between;
+    align-items: center;    
+}
+
+div.user {
+    background-color: pink;
+}
+
+div.page-title {
+    font-size: 110%;
+    font-weight: bold;
+    text-align: center;
+    padding-bottom: 1em;
+}
+
+table, .buttons {
+    margin: 0 auto;
+    width: 75%;
+    max-width: 900px;
+}
+
+table {
+    background-color: rgb(238, 238, 238);
+    border-collapse: collapse;
+}
+
+td {
+    padding: 10px;
+}
+
+tr.description {
+    border-top: 3px solid rgb(225, 225, 225);
+    border-bottom: 3px solid rgb(225, 225, 225);
+}
+
+input {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+}
+
+input {
+    width: 40%;
+    height: 2em;
+}

@@ -1,0 +1,14 @@
+body {
+    font-family: arial, sans-serif;
+}
+
+div.header {
+    display: flex;
+    margin-bottom: 2em;
+    justify-content: space-between;
+    align-items: center;    
+}
+
+div.user {
+    background-color: pink;
+}

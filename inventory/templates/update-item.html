@@ -1,0 +1,28 @@
+{% extends "inventory_base_template.html" %}
+{% load static %}
+
+{% block stylesheet %}
+    <link rel="stylesheet" href="{% static "update-item.css" %}" />
+{% endblock stylesheet %}
+
+{% block content %}
+This is the update-item page for {{ item }}.
+
+<form method="post"> {% csrf_token %}
+    <table>
+    {% for field in form %}
+    {% if field.label_tag == 'Description:' %}
+    <tr class="description">
+    {% else %}
+    <tr>
+    {% endif %}
+        
+            <th>{{ field.label_tag }}</th>
+           <td>{{ field }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+    
+    <input type="submit" value="Update">
+</form>
+{% endblock content %}
