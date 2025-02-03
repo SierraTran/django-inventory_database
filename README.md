@@ -3,6 +3,7 @@
 This project was made to simplify the process of keeping inventory. It stores information about parts and units in the company.
 
 ## Table of Contents
+
 - [Inventory Database](#inventory-database)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
@@ -24,16 +25,22 @@ This project was made to simplify the process of keeping inventory. It stores in
 
 ## Technologies Used
 
-### Python 
-### Django 
-- Quick development and deployment
-- Authentication 
+### Python
 
+This is the main programming language for the project.
+
+More info about [Python](https://www.python.org/)
+
+### Django
+
+This is the web framework used to build the application.
+
+More info about [Django](https://www.djangoproject.com/)
 
 ## Required Software
 
-- Python 3.x
-- Django 3.x
+- Python 3.13.1
+- Django 5.1.5
 - SQL Anywhere
 
 ## Required Packages
@@ -48,22 +55,31 @@ The list of required software below will also be included in the `requirements.t
 ## Setup Instructions
 
 1. Clone the repository:
+
     ```bash
     git clone https://github.com/SierraTran/django-inventory_database.git
     ```
+
 2. Navigate to the project directory:
+
     ```bash
     cd django-inventory_database
     ```
+
 3. Install the required packages:
+
     ```bash
     pip install -r requirements.txt
     ```
+
 4. Run the Django migrations:
+
     ```bash
     python manage.py migrate
     ```
+
 5. Start the development server:
+
     ```bash
     python manage.py runserver
     ```
