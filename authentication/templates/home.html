@@ -1,16 +1,18 @@
 {% extends "authentication_base_template.html" %}
+{% load static %}
 
-{% block title %}
-Inventory Database
-{% endblock %}
+{% block stylesheet %}
+    <link rel="stylesheet" href="{% static "home.css" %}" />
+{% endblock stylesheet %}
+
+{% block title %}Inventory Database{% endblock %}
 
 
 
 {% block content %}
-<h1>Hello!</h1>
-    {% if request.user.is_authenticated %}
-        <p>You're logged in, {{user.username}}!</p>        
-        <p><a href="{% url "inventory:items" %}">Browse the database.</a></p>        
+    {% if request.user.is_authenticated %}     
+        <p><a href="{% url "inventory:items" %}">Browse available items.</a></p>
+
         <form action="{% url 'logout' %}" method="post"> {% csrf_token %}
             <button type="submit">Log out</button>
         </form>        
