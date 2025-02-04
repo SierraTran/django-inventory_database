@@ -20,6 +20,12 @@ div.page-title {
     padding-bottom: 1em;
 }
 
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 table, .buttons {
     margin: 0 auto;
     width: 75%;
@@ -29,6 +35,8 @@ table, .buttons {
 table {
     background-color: rgb(238, 238, 238);
     border-collapse: collapse;
+    width: 75%;
+    max-width: 900px;
 }
 
 td {
@@ -40,13 +48,17 @@ tr.description {
     border-bottom: 3px solid rgb(225, 225, 225);
 }
 
-input {
+textarea {
+    min-width: 170px;
+}
+
+.buttons {
     display: flex;
     justify-content: space-around;
     padding: 10px 0;
 }
 
-input {
+.buttons > button, input[type="submit"] {
     width: 40%;
     height: 2em;
 }

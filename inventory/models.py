@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.urls import reverse
 
 
 # Create your models here.
@@ -19,6 +20,10 @@ class Item(models.Model):
         decimal_places=2,
         validators=[MinValueValidator(0.00)],
     )
+    
+    def get_absolute_url(self):
+        return reverse("inventory:item_detail", kwargs={"pk": self.pk})
+    
 
     def __str__(self):
         """

@@ -47,7 +47,7 @@ tr.description {
     padding: 10px 0;
 }
 
-.buttons > button {
+.buttons > button, input {
     width: 40%;
     height: 2em;
 }

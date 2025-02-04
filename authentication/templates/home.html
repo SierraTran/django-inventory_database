@@ -12,6 +12,9 @@
 {% block content %}
     {% if request.user.is_authenticated %}     
         <p><a href="{% url "inventory:items" %}">Browse available items.</a></p>
+        {% if user_group.name == 'Superuser' %}
+        <p>Add Item (Coming Soon)</p>
+        {% endif %}
 
         <form action="{% url 'logout' %}" method="post"> {% csrf_token %}
             <button type="submit">Log out</button>
