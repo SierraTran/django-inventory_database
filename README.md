@@ -22,6 +22,7 @@ This project was made to simplify the process of keeping inventory. It stores in
 
 - User Authentication
 - Search
+- Editing Item Information
 
 ## Technologies Used
 
@@ -41,7 +42,7 @@ More info about [Django](https://www.djangoproject.com/)
 
 - Python 3.13.1
 - Django 5.1.5
-- SQL Anywhere
+- SQL Anywhere 12
 
 ## Required Packages
 

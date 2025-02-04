@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="{% static "item-details.css" %}" />
 {% endblock stylesheet %}
 
-{% block title %}Inventory Database | {{ item }} {% endblock title %}
+{% block title %} {{ item }} | Inventory Database {% endblock title %}
 
 {% block page-title %} {{ item }} {% endblock page-title %}
 
@@ -52,13 +52,17 @@
     the page automatically.
 {% endcomment %}
  <div class="buttons set1">
-    <button type="button" id="back" onclick="window.location.href='{% url 'inventory:items' %}';">
+    <button type="button" id="back" onclick="window.history.back();">
         Back
     </button>
     {% if user_group.name != None and user_group.name != 'Viewer' %}
-        <button type="button" id="update" onclick="window.location.href='{% url 'inventory:update-item' item.id %}';">
-            Update
-        </button>
+    {% if user_group.name == 'Superuser' %}
+    <button type="button" id="update" onclick="window.location.href='{% url 'inventory:item_update_form' item.id %}';">
+    {% else %}
+    <button type="button" id="update" onclick="window.location.href='{% url 'inventory:item_quantity_update_form' item.id %}';">
+    {% endif %}    
+        Update
+    </button>
     {% endif %}
 </div>
 {% if user_group.name != None and user_group.name != 'Viewer' and user_group.name != 'Regular User' %}
