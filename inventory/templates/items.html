@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="{% static "items.css" %}" />
 {% endblock stylesheet %}
 
-{% block title %}Inventory Database | Available Items{% endblock title %}
+{% block title %}Available Items | Inventory Database{% endblock title %}
 
 {% block page-title %}Available Items{% endblock page-title %}
 
@@ -28,7 +28,7 @@
     <div class="field-name">Quantity</div>
     {% for item in items_list %}
     {% if forloop.counter|divisibleby:2 %}
-    <a href="{% url 'inventory:item_details' item.id %}">
+    <a href="{% url 'inventory:item_detail' item.id %}">
         <div class="even">{{ item.manufacturer }}</div>
         <div class="even">{{ item.model }}</div>
         <div class="even">{{ item.part_or_unit }}</div>
@@ -37,7 +37,7 @@
         <div class="even">{{ item.quantity }}</div>
     </a>
     {% else %}
-    <a href="{% url 'inventory:item_details' item.id %}">
+    <a href="{% url 'inventory:item_detail' item.id %}">
         <div class="odd">{{ item.manufacturer }}</div>
         <div class="odd">{{ item.model }}</div>
         <div class="odd">{{ item.part_or_unit }}</div>

@@ -1,15 +1,10 @@
-from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
-# from django.http import HttpResponse
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required, permission_required
-from django.views.generic import TemplateView, ListView
-
-# from django.db.models import Q, CharField
+from django.views.generic.list import ListView
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import UpdateView
 
 from .models import Item
-from .forms import ItemForm
 
 
 # Create your views here.
@@ -37,46 +32,96 @@ class ItemView(LoginRequiredMixin, ListView):
         Returns:
             QuerySet: A queryset containing all items.
         """
-        return Item.objects.all().order_by("model").order_by("manufacturer")
+        return Item.objects.all().order_by("manufacturer", "model", "part_number")
 
 
-class ItemDetailsView(LoginRequiredMixin, TemplateView):
+# class ItemDetailsView(LoginRequiredMixin, TemplateView):
+#     model = Item
+#     template_name = "item-details.html"
+#     context_object_name = "item"
+
+#     def get_context_data(self, **kwargs):
+#         return super().get_context_data(**kwargs)
+
+
+class ItemDetailView(LoginRequiredMixin, DetailView):
     model = Item
-    template_name = "item-details.html"
-    context_object_name = "item"
+    template_name = "item_detail.html"
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
+        context["user_group"] = self.request.user.groups.first()
+        return context
 
 
-@login_required
-def getItemDetails(request, pk):
-    item = get_object_or_404(Item, pk=pk)
-    current_user = request.user
-    user_group = current_user.groups.first()  # Get the first group the user belongs to
-    context = {
-        "item": item,
-        "user_group": user_group,
-    }
-    return render(request, "item-details.html", context)
+# @login_required
+# def getItemDetails(request, pk):
+#     item = get_object_or_404(Item, pk=pk)
+#     current_user = request.user
+#     user_group = current_user.groups.first()  # Get the first group the user belongs to
+#     context = {
+#         "item": item,
+#         "user_group": user_group,
+#     }
+#     return render(request, "item-details.html", context)
 
 
-@permission_required("inventory.change_item", raise_exception=True)
-def updateItem(request, pk):
-    item = get_object_or_404(Item, pk=pk)
-    user = request.user
-    form = ItemForm(request.POST or None, instance=item)
+# @permission_required("inventory.change_item", raise_exception=True)
+# def updateItemAsSuperuser(request, pk):
+#     item = get_object_or_404(Item, pk=pk)
+#     user = request.user
+#     user_group = user.groups.first()
+#     form = ItemForm(request.POST or None, instance=item)
+
+#     if form.is_valid():
+#         form.save()
+#         return HttpResponseRedirect("../" + str(pk))
+
+#     context = {
+#         "item": item,
+#         "user": user,
+#         "user_group": user_group,
+#         "form": form,
+#     }
+#     return render(request, "update-item-superuser.html", context)
+
+
+class ItemUpdateView(UserPassesTestMixin, UpdateView):
+    model = Item
+    fields = [
+        "manufacturer", 
+        "model", 
+        "part_or_unit", 
+        "part_number", 
+        "description",
+        "location",
+        "quantity",
+        "price",
+    ] 
+    template_name = "item_update_form.html"
     
-    if form.is_valid():
-        form.save()
-        return HttpResponseRedirect("/" + pk)
+    def test_func(self):
+        """
+        Checks if the user is in the 'Superuser' group
 
-    context = {
-        "item": item,
-        "user": user,
-        "form": form,
-    }
-    return render(request, "update-item.html", context)
+        Returns:
+            Boolean: True if the user is in the 'Superuser' group. False if otherwise.
+        """
+        return self.request.user.groups.first().name == 'Superuser'
+    
+    # def handle_no_permission(self):
+    #     return super().handle_no_permission()
+    
+class ItemQuantityUpdateView(UserPassesTestMixin, UpdateView):    
+    model = Item
+    fields = ["quantity"]
+    template_name = "item_update_form.html"
+    
+    def test_func(self):
+        return self.request.user.groups.first().name == 'Regular User'
+    
+    # def handle_no_permission(self):
+    #     return super().handle_no_permission()
 
 
 # @login_required

@@ -11,7 +11,11 @@ def home(request):
     """
     Renders the "home.html" template when the user accesses the home page
     """   
-    return render(request, "home.html")
+    user_group = request.user.groups.first()
+    context = {
+        'user_group': user_group
+    }
+    return render(request, "home.html", context)
 
 def login_page(request):
     """
