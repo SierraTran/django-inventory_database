@@ -25,4 +25,5 @@ urlpatterns = [
     path("inventory_database/", include("inventory.urls")),
     path("admin/", admin.site.urls),
     path("inventory_database/accounts/", include("django.contrib.auth.urls")),
+    path("search/", include("haystack.urls")),
 ]

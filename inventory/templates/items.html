@@ -12,13 +12,13 @@
 {% block content %}
 
 <div class="queries">
-    <form action="{% url "inventory:items" %}" method="get">
+    <form action="{% url "inventory:search_items" %}" method="get">
         <input name="q" type="Text" placeholder="Search..." />
+        <button type="submit">Search</button>
     </form>
 </div>
 
 {% if items_list %}
-
 <div class="grid">
     <div class="field-name">Manufacturer</div>
     <div class="field-name">Model</div>
