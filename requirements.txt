@@ -1,4 +1,6 @@
 Django==5.1.5
-PyYAML
-sqlanydb
-sqlany-django
+django-haystack==3.3.0
+PyYAML==6.0.2
+sqlanydb==1.0.14
+sqlany-django==1.13
+Whoosh==2.7.4
