@@ -1,0 +1,67 @@
+{% extends "inventory_base_template.html" %}
+{% load static %}
+
+{% block stylesheet %}
+<link rel="stylesheet" href="{% static "items.css" %}" />
+{% endblock stylesheet %}
+
+{% block title %}Search Results{% endblock title %}
+
+{% block content %}
+<h1>Search Results</h1>
+<form method="get" action=".">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search...">
+    <input type="submit" value="Search">
+</form>
+
+{% comment %} 
+{% if results %}
+    <ul>
+    {% for result in results %}
+        <li>
+            <a href="{% url 'inventory:item_detail' pk=result.pk %}">
+                {{ result.object.manufacturer }} - {{ result.object.model }}, {{ result.object.part_number}}
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No results found.</p>
+{% endif %} 
+{% endcomment %}
+
+{% if results %}
+    <div class="grid">
+        <div class="field-name">Manufacturer</div>
+        <div class="field-name">Model</div>
+        <div class="field-name">Part or Unit?</div>
+        <div class="field-name">Part Number</div>
+        <div class="field-name">Description</div>
+        <div class="field-name">Quantity</div>
+        {% for result in results %}
+        {% if forloop.counter|divisibleby:2 %}
+        <a href="{% url 'inventory:item_detail' pk=result.pk %}">
+            <div class="even">{{ result.object.manufacturer }}</div>
+            <div class="even">{{ result.object.model }}</div>
+            <div class="even">{{ result.object.part_or_unit }}</div>
+            <div class="even">{{ result.object.part_number }}</div>
+            <div class="even">{{ result.object.description }}</div>
+            <div class="even">{{ result.object.quantity }}</div>
+        </a>
+        {% else %}
+        <a href="{% url 'inventory:item_detail' pk=result.pk %}">
+            <div class="odd">{{ result.object.manufacturer }}</div>
+            <div class="odd">{{ result.object.model }}</div>
+            <div class="odd">{{ result.object.part_or_unit }}</div>
+            <div class="odd">{{ result.object.part_number }}</div>
+            <div class="odd">{{ result.object.description }}</div>
+            <div class="odd">{{ result.object.quantity }}</div>
+        </a>
+        {% endif %}
+        {% endfor %}
+    </div>
+{% else %}
+    <p>No results found.</p>
+{% endif %}
+
+{% endblock content %}
