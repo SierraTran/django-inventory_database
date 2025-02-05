@@ -1,0 +1,8 @@
+{{ object.manufacturer }}
+{{ object.model }}
+{{ object.part_or_unit }}
+{{ object.part_number }}
+{{ object.description }}
+{{ object.location }}
+{{ object.quantity }}
+{{ object.price }}
