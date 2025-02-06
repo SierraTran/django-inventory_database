@@ -23,6 +23,7 @@ class ItemView(LoginRequiredMixin, ListView):
     Methods:
         get_queryset(): Retrieves the list of items to be displayed.
     """
+
     paginate_by = 20
     model = Item
     template_name = "items.html"
@@ -49,7 +50,6 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-
 class ItemCreateView(UserPassesTestMixin, CreateView):
     model = Item
     fields = [
@@ -63,7 +63,7 @@ class ItemCreateView(UserPassesTestMixin, CreateView):
         "price",
     ]
     template_name = "item_create_form.html"
-    
+
     def test_func(self):
         """
         Checks if the user is in the 'Superuser' group
@@ -107,33 +107,37 @@ class ItemQuantityUpdateView(UserPassesTestMixin, UpdateView):
         return self.request.user.groups.first().name == "Regular User"
 
 
-def search_items(request):
-    query = request.GET.get("q")
-    results = (
-        SearchQuerySet()
-        .filter(content=query)
-        .order_by("manufacturer", "model", "part_number")
-        if query
-        else []
-    )
-    context = {
-        "results": results,
-        "query": query,
-    }
-    return render(request, "search/search.html", context)
+# def search_items(request):
+#     query = request.GET.get("q")
+#     results = (
+#         SearchQuerySet()
+#         .filter(content=query)
+#         .order_by("manufacturer", "model", "part_number")
+#         if query
+#         else []
+#     )
+#     context = {
+#         "results": results,
+#         "query": query,
+#     }
+#     return render(request, "search/search.html", context)
+
 
 class SearchItemsView(ListView):
     paginate_by = 20
     model = Item
     template_name = "search/search.html"
     context_object_name = "results_list"
-    
+
     def get_queryset(self):
-        query = self.request.GET.get('q')
-        results = SearchQuerySet() \
-                    .filter(content=query) \
-                    .order_by("manufacturer", "model", "part_number") \
-                    if query else []           
+        query = self.request.GET.get("q")
+        results = (
+            SearchQuerySet()
+            .filter(content=query)
+            .order_by("manufacturer", "model", "part_number")
+            if query
+            else []
+        )
         return results
 
 
