@@ -16,6 +16,7 @@
         <input name="q" type="Text" placeholder="Search..." />
         <button type="submit">Search</button>
     </form>
+    
 </div>
 
 {% if items_list %}
@@ -25,8 +26,10 @@
     <div class="field-name">Part or Unit?</div>
     <div class="field-name">Part Number</div>
     <div class="field-name">Description</div>
+    <div class="field-name">Location</div>
     <div class="field-name">Quantity</div>
-    {% for item in items_list %}
+    <div class="field-name">Price</div>
+    {% for item in page_obj %}
     {% if forloop.counter|divisibleby:2 %}
     <a href="{% url 'inventory:item_detail' item.id %}">
         <div class="even">{{ item.manufacturer }}</div>
@@ -34,7 +37,9 @@
         <div class="even">{{ item.part_or_unit }}</div>
         <div class="even">{{ item.part_number }}</div>
         <div class="even">{{ item.description }}</div>
+        <div class="even">{{ item.location }}</div>
         <div class="even">{{ item.quantity }}</div>
+        <div class="even">{{ item.price }}</div>
     </a>
     {% else %}
     <a href="{% url 'inventory:item_detail' item.id %}">
@@ -43,10 +48,44 @@
         <div class="odd">{{ item.part_or_unit }}</div>
         <div class="odd">{{ item.part_number }}</div>
         <div class="odd">{{ item.description }}</div>
+        <div class="odd">{{ item.location }}</div>
         <div class="odd">{{ item.quantity }}</div>
+        <div class="odd">{{ item.price }}</div>
     </a>
     {% endif %}
     {% endfor %}
+</div>
+<div class="pagination">
+    <span class="step-links">
+        {# Previous Page #}
+        <span class="previous">
+        {% if page_obj.has_previous %}        
+            <a  href="?page=1">
+                &laquo; first
+            </a>
+            <a href="?page={{ page_obj.previous_page_number }}">
+                previous
+            </a>        
+        {% endif %}
+        </span>
+
+        {# Current Page #}
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {# Next Page #}
+        <span class="next">
+        {% if page_obj.has_next %}        
+            <a href="?page={{ page_obj.next_page_number }}">
+                next
+            </a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">
+                last &raquo;
+            </a>        
+        {% endif %}
+        </span>
+    </span>
 </div>
 {% else %}
 <p>No items are available.</p>

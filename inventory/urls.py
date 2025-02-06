@@ -14,5 +14,5 @@ urlpatterns = [
     #path("items/<int:pk>/update", views.updateItemAsSuperuser, name="update-item-superuser"), [OLD]
     path("<int:pk>/update", views.ItemUpdateView.as_view(), name="item_update_form"),
     path("<int:pk>/quantity_update", views.ItemQuantityUpdateView.as_view(), name="item_quantity_update_form"),
-    path('search/', views.search_items, name='search_items'),
+    path('search/', views.SearchItemsView.as_view(), name='search_items'),
 ]
