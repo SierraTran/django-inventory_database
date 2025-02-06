@@ -17,13 +17,6 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIR = {BASE_DIR / 'static'}
-STATICFILES_DIRS = [ 
-    BASE_DIR / "authentication/static",
-    BASE_DIR / "inventory/static"
-    ]
-
 MEDIA_ROOT = os.path.join(BASE_DIR, "public/static")
 MEDIA_URL = "/media/"
 
@@ -53,6 +46,7 @@ INSTALLED_APPS = [
     "inventory",
     "authentication",
 ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -87,9 +81,9 @@ WSGI_APPLICATION = "inventory_database.wsgi.application"
 # Haystack Configuration
 
 HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
-        'PATH': os.path.join(BASE_DIR, 'whoosh_index'),
+    "default": {
+        "ENGINE": "haystack.backends.whoosh_backend.WhooshEngine",
+        "PATH": os.path.join(BASE_DIR, "whoosh_index"),
     },
 }
 
@@ -104,7 +98,7 @@ DATABASES = {
     }
 }
 
-# For sqlany-django, 
+# For sqlany-django,
 # DATABASES = {
 #   'default' : {
 #       'ENGINE': 'sqlany_django',
@@ -156,6 +150,18 @@ USE_TZ = True
 STATIC_URL = "/static/"
 
 
+# Absolute path for collected static files
+
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+
+# Additional locations for the static app to traverse to for static files
+
+STATICFILES_DIRS = [
+    BASE_DIR / "authentication/static",
+    BASE_DIR / "inventory/static",
+]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -169,6 +175,6 @@ LOGIN_REDIRECT_URL = "../../"
 # will bring the user back to the login page ("/inventory_database/accounts/login/")
 LOGOUT_REDIRECT_URL = "../login"
 
-# If the user closes the browser, the session will expire and the user will 
+# If the user closes the browser, the session will expire and the user will
 # have to log in again.
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
