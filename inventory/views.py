@@ -2,7 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import CreateView, UpdateView
 
 from django.shortcuts import render
 
@@ -49,6 +49,31 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
+
+class ItemCreateView(UserPassesTestMixin, CreateView):
+    model = Item
+    fields = [
+        "manufacturer",
+        "model",
+        "part_or_unit",
+        "part_number",
+        "description",
+        "location",
+        "quantity",
+        "price",
+    ]
+    template_name = "item_create_form.html"
+    
+    def test_func(self):
+        """
+        Checks if the user is in the 'Superuser' group
+
+        Returns:
+            Boolean: True if the user is in the 'Superuser' group. False if otherwise.
+        """
+        return self.request.user.groups.first().name == "Superuser"
+
+
 class ItemUpdateView(UserPassesTestMixin, UpdateView):
     model = Item
     fields = [
@@ -83,11 +108,14 @@ class ItemQuantityUpdateView(UserPassesTestMixin, UpdateView):
 
 
 def search_items(request):
-    query = request.GET.get('q')
-    results = SearchQuerySet() \
-                .filter(content=query) \
-                .order_by("manufacturer", "model", "part_number") \
-                if query else []
+    query = request.GET.get("q")
+    results = (
+        SearchQuerySet()
+        .filter(content=query)
+        .order_by("manufacturer", "model", "part_number")
+        if query
+        else []
+    )
     context = {
         "results": results,
         "query": query,

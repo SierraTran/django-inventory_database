@@ -10,6 +10,7 @@ urlpatterns = [
     # example: /inventory_database/items/9
     #path("items/<int:pk>/", views.getItemDetails, name="item_details"), [OLD]
     path("<int:pk>/", views.ItemDetailView.as_view(), name="item_detail"),
+    path("new_item_form/", views.ItemCreateView.as_view(), name="item_create_form"),
     #path("items/<int:pk>/update", views.updateItemAsSuperuser, name="update-item-superuser"), [OLD]
     path("<int:pk>/update", views.ItemUpdateView.as_view(), name="item_update_form"),
     path("<int:pk>/quantity_update", views.ItemQuantityUpdateView.as_view(), name="item_quantity_update_form"),
