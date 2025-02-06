@@ -6,9 +6,16 @@ div.header {
     display: flex;
     margin-bottom: 2em;
     justify-content: space-between;
-    align-items: center;    
+    align-items: center;
 }
 
 div.user {
     background-color: pink;
+}
+
+div.page-title {
+    font-size: 110%;
+    font-weight: bold;
+    text-align: center;
+    padding-bottom: 1em;
 }

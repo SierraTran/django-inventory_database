@@ -1,9 +1,9 @@
 {% extends "inventory_base_template.html" %}
 {% load static %}
 
-{% block stylesheet %}
+{% block other_stylesheets %}
 <link rel="stylesheet" href="{% static "item_form.css" %}" />
-{% endblock stylesheet %}
+{% endblock other_stylesheets %}
 
 {% block title %} Update {{ item }} | Inventory Database {% endblock title %}
 
@@ -27,7 +27,5 @@
         <button type="button" onclick="window.history.back();">Cancel</button>
         <input type="submit" value="Update">
     </div>
-    
-
 </form>
 {% endblock content %}

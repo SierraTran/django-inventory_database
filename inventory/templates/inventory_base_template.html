@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 
+{% load static %}
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="shortcut icon" href="https://hayesinstruments.com/HayesLogo.ico">
-    {% block stylesheet %}{% endblock stylesheet %}
+    <link rel="shortcut icon" href="https://hayesinstruments.com/HayesLogo.ico" />
+    <link rel="stylesheet" href="{% static "inventory_base.css" %}" />
+    {% block other_stylesheets %}{% endblock other_stylesheets %}
     <title>{% block title %}{% endblock title %}</title>
 </head>
 

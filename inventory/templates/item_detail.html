@@ -1,9 +1,9 @@
 {% extends "inventory_base_template.html" %}
 {% load static %}
 
-{% block stylesheet %}
-    <link rel="stylesheet" href="{% static "item-details.css" %}" />
-{% endblock stylesheet %}
+{% block other_stylesheets %}
+    <link rel="stylesheet" href="{% static "item_detail.css" %}" />
+{% endblock other_stylesheets %}
 
 {% block title %} {{ item }} | Inventory Database {% endblock title %}
 
@@ -56,9 +56,9 @@
         Back
     </button>
     {% if user_group.name != None and user_group.name != 'Viewer' %}
-    {% if user_group.name == 'Superuser' %}
+    {% if user_group.name == 'Superuser' %} {# The current user is a Superuser #}
     <button type="button" id="update" onclick="window.location.href='{% url 'inventory:item_update_form' item.id %}';">
-    {% else %}
+    {% else %} {# The current user is a Regular User #}
     <button type="button" id="update" onclick="window.location.href='{% url 'inventory:item_quantity_update_form' item.id %}';">
     {% endif %}    
         Update
