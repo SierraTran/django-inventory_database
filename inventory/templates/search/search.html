@@ -15,22 +15,6 @@
     <input type="submit" value="Search">
 </form>
 
-{% comment %} 
-{% if results %}
-    <ul>
-    {% for result in results %}
-        <li>
-            <a href="{% url 'inventory:item_detail' pk=result.pk %}">
-                {{ result.object.manufacturer }} - {{ result.object.model }}, {{ result.object.part_number}}
-            </a>
-        </li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No results found.</p>
-{% endif %} 
-{% endcomment %}
-
 {% if results_list %}
     <div class="grid">
         <div class="field-name">Manufacturer</div>
