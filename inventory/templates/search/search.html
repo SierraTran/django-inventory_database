@@ -50,7 +50,9 @@
             <div class="even">{{ result.object.part_number }}</div>
             <div class="even">{{ result.object.description }}</div>
             <div class="even">{{ result.object.location }}</div>
-            <div class="even">{{ result.object.quantity }}</div>
+            <div class="even" {% if result.object.low_stock %} style="color: red;" {% endif %} >
+                {{ item.quantity }}
+            </div>
             <div class="even">{{ result.object.price }}</div>
         </a>
         {% else %}
@@ -61,7 +63,9 @@
             <div class="odd">{{ result.object.part_number }}</div>
             <div class="odd">{{ result.object.description }}</div>
             <div class="odd">{{ result.object.location }}</div>
-            <div class="odd">{{ result.object.quantity }}</div>
+            <div class="odd" {% if result.object.low_stock %} style="color: red;" {% endif %} >
+                {{ item.quantity }}
+            </div>
             <div class="odd">{{ result.object.price }}</div>
         </a>
         {% endif %}
