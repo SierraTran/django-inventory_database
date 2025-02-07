@@ -31,7 +31,7 @@
         <tr>
             <th>Location</th><td>{{ item.location }}</td>
         </tr>
-        <tr>
+        <tr {% if item.low_stock %} style="color: red;" title="This item is low in stock."{% endif %}>
             <th>Quantity</th><td>{{ item.quantity }}</td>
         </tr>
         <tr>
@@ -41,7 +41,6 @@
 {% else %}
     No details are available.
 {% endif %}
-
 
 {% comment %} 
     The user group "viewer" is the lowest group in the hierarchy. 
