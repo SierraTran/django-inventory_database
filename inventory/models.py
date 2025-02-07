@@ -55,4 +55,7 @@ class Item(models.Model):
         Example:
             "HP, 87 Case"
         """
-        return self.manufacturer + ", " + self.model + " " + self.part_number
+        itemString = self.manufacturer + ", " + self.model
+        if self.part_or_unit == self.PART:
+            itemString += " " + self.part_number
+        return itemString
