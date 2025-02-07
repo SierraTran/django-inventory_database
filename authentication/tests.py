@@ -8,6 +8,9 @@ from .models import User
 # Create your tests here.
 class UserCreationTests(TestCase):
     def test_user_creation(self):
+        """
+        Test if a user can be created and added directly to the database
+        """
         user = User.objects.create_user(username="testuser", password="password")
         self.assertIsNotNone(user.id)
 
@@ -49,7 +52,7 @@ class LogoutFlowTests(TestCase):
         """
         User.objects.create_user(username="testuser", password="password")
         self.client.login(username="testuser", password="password")
-        response = self.client.get(reverse("logout"))
+        response = self.client.post(reverse("logout"))
         self.assertEqual(response.status_code, 302)  # Assuming redirect on success
 
 
