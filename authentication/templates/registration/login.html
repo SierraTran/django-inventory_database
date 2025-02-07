@@ -16,15 +16,23 @@ Login | Inventory Database
 <div class="page-title">Inventory Database</div>
 <p>Please log in to see the database.</p>
 <form method="post"> {% csrf_token %} 
-
     <fieldset>
         {% if messages %}
-        <p style="text-align: center; font-weight: bold;">
+        <p style="display: block; text-align: center; font-weight: bold;">
             {% for message in messages %}
                 {{ message }}
             {% endfor %}
         </p>
         {% endif %}
+
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
         <label for="username">
         Username <input type="text" id="username" name="username" placeholder="username" required />
         </label>
@@ -33,10 +41,7 @@ Login | Inventory Database
         </label>
     </fieldset>
     <input type="submit" value="Log In">
-
-    
-
 </form>
 
-<p>Forgot password? (Coming Soon)</p>
+<p>Forgot your password? (Coming Soon)</p>
 {% endblock %}

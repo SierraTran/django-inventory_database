@@ -24,7 +24,7 @@
         {% endfor %}
     </table>
     <div class="buttons">
-        <button type="button" onclick="window.history.back();">Cancel</button>
+        <button type="button" onclick="window.location.href='{% url "inventory:item_detail" pk=item.pk %}'">Cancel</button>
         <input type="submit" value="Update">
     </div>
 </form>

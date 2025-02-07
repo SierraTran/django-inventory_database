@@ -5,6 +5,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 
 from django.shortcuts import render
+from django.core.paginator import Paginator
 
 from haystack.query import SearchQuerySet
 
@@ -107,22 +108,6 @@ class ItemQuantityUpdateView(UserPassesTestMixin, UpdateView):
         return self.request.user.groups.first().name == "Regular User"
 
 
-# def search_items(request):
-#     query = request.GET.get("q")
-#     results = (
-#         SearchQuerySet()
-#         .filter(content=query)
-#         .order_by("manufacturer", "model", "part_number")
-#         if query
-#         else []
-#     )
-#     context = {
-#         "results": results,
-#         "query": query,
-#     }
-#     return render(request, "search/search.html", context)
-
-
 class SearchItemsView(ListView):
     paginate_by = 20
     model = Item
@@ -139,23 +124,3 @@ class SearchItemsView(ListView):
             else []
         )
         return results
-
-
-# @login_required
-# def filterItems(request):
-#     query = request.GET.get('q')
-#     part_or_unit = request.GET.get('part_or_unit')
-#     items_list = Item.objects.all()
-
-#     if query:
-#         items_list = items_list.filter(
-#             Q(manufacturer__icontains=query) |
-#             Q(model__icontains=query) |
-#             Q(part_number__icontains=query) |
-#             Q(description__icontains=query)
-#         )
-
-#     if part_or_unit:
-#         items_list = items_list.filter(part_or_unit=part_or_unit)
-
-#     return render(request, 'items.html', {'items_list': items_list})

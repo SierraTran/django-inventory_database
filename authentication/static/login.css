@@ -1,12 +1,7 @@
 /* This is the stylesheet for the Log In page */
 
-/* Variables */
-
-
-/* Element styles */
-
 body {
-    font-family: arial, sans-serif;     
+    font-family: arial, sans-serif;
 }
 
 p {
@@ -15,6 +10,7 @@ p {
 
 fieldset {
     border: 0;
+    padding-block: 10px;
 }
 
 label {
@@ -26,12 +22,12 @@ label {
 }
 
 form {
-    background-color: rgb(200, 200, 200);    
+    background-color: rgb(200, 200, 200);
     width: 60vw;
     max-width: 600px;
     min-width: 350px;
     margin: 0 auto;
-    padding-bottom: 2em;
+    padding-bottom: 1.5em;
     padding-top: 1em;
 }
 
@@ -51,12 +47,9 @@ input[type="submit"] {
     height: 2em;
 }
 
-
-/* Class styles */
-
 .page-title {
     font-size: 110%;
-	font-weight: bold;
-	text-align: center;
-	padding-bottom: 1em;
+    font-weight: bold;
+    text-align: center;
+    padding-bottom: 1em;
 }
