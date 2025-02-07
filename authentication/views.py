@@ -1,9 +1,15 @@
 from django.shortcuts import render, redirect
+
 from django.contrib import messages
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+
 from django.urls import reverse
+
+from django.views.generic import CreateView
+
 from .models import *
 
 
@@ -18,7 +24,7 @@ def home(request):
 
 
 def login_page(request):
-    """ 
+    """
     Renders the "login.html" template and handles login logic
     """
     # Check if the HTTP request method is POST (form submission)
@@ -48,6 +54,16 @@ def login_page(request):
     return render(request, "login.html")
 
 
+class CreateAccountView(CreateView):
+    model = User
+    fields = ["username", "first_name", "last_name", "email", "password"]
+    template_name = "user_create_form.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user'] = self.request.user
+        
+        return context
 # @login_required
 # def logout_view(request):
 #     logout(request)

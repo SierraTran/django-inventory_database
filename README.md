@@ -10,11 +10,13 @@ This project was made to simplify the process of keeping inventory. It stores in
   - [Technologies Used](#technologies-used)
     - [Python](#python)
     - [Django](#django)
+      - [Haystack and Whoosh](#haystack-and-whoosh)
   - [Required Software](#required-software)
   - [Required Packages](#required-packages)
   - [Setup Instructions](#setup-instructions)
   - [Installation](#installation)
   - [Usage](#usage)
+  - [Running Tests](#running-tests)
   - [Contributing](#contributing)
   - [Author](#author)
 
@@ -37,6 +39,10 @@ More info about [Python](https://www.python.org/)
 This is the web framework used to build the application.
 
 More info about [Django](https://www.djangoproject.com/)
+
+#### Haystack and Whoosh
+
+
 
 ## Required Software
 
@@ -81,7 +87,13 @@ The list of required software below will also be included in the `requirements.t
     python manage.py migrate
     ```
 
-5. Start the development server:
+5. Create a superuser:
+
+    ```bash
+    python manage.py createsuperuser
+    ```
+
+6. Start the development server:
 
     ```bash
     python manage.py runserver
@@ -96,6 +108,14 @@ Follow the setup instructions to install the project.
 1. Open your web browser and go to `http://127.0.0.1:8000/inventory_database`.
 2. Log in with your credentials.
 3. Use the search feature to find parts and units.
+
+## Running Tests
+
+To run the tests, use the following command:
+
+```bash
+python manage.py test
+```
 
 ## Contributing
 

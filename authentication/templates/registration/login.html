@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block stylesheet %}
-<link rel="stylesheet"  type="text/css" href="{% static 'login.css' %}" />
+<link rel="stylesheet"  type="text/css" href="{% static 'user_create_form.css' %}" />
 {% endblock stylesheet %}
 
 {% block title %}
@@ -44,4 +44,5 @@ Login | Inventory Database
 </form>
 
 <p>Forgot your password? (Coming Soon)</p>
+<p>Don't have an account? <a href="{% url "authentication:user_create_form" %}">Make one here</a> (Coming Soon)</p>
 {% endblock %}
