@@ -1,58 +1,11 @@
 from django.test import TestCase
-
-from .models import User
-
-# Create your tests here.
-
-
-# Unit Tests
-
-
-# User Creation
-
-
-# Password Hashing
-# User Authentication
-
-
-# Integration Tests
-
-# Registration Flow
-# Login Flow
-# Logout Flow
-
-
-# Security Tests
-
-# Rate Limiting
-# SQL Injection
-# Cross-Site Scripting (XSS)
-
-
-# Edge Case Tests
-
-# Empty Fields
-# Invalid Inputs
-# Account Lockout
-
-
-# Performance Tests
-
-# Load Testing
-
-
-# Regression Tests
-
-# Previous Issues
-
-from django.test import TestCase
 from django.urls import reverse
 from django.test import Client
 
 # filepath: /c:/Users/jimmyd/Documents/GitHub/django-inventory_database/authentication/tests.py
 from .models import User
 
-
+# Create your tests here.
 class UserCreationTests(TestCase):
     def test_user_creation(self):
         user = User.objects.create_user(username="testuser", password="password")
