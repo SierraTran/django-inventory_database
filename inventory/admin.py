@@ -14,7 +14,7 @@ class ItemAdmin(admin.ModelAdmin):
     # Items can be filtered for being a part or unit
     list_filter = ["part_or_unit"]
 
-    # Items are alphabetically ordered by manufacturer and then model
+    # Items are alphabetically ordered by manufacturer, model, and then part_number
     ordering = ["manufacturer", "model", "part_number"]
 
 

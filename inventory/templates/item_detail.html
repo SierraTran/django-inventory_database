@@ -51,7 +51,7 @@
     the page automatically.
 {% endcomment %}
  <div class="buttons set1">
-    <button type="button" id="back" onclick="window.history.back();">
+    <button type="button" id="back" onclick="window.location.href='{% url "inventory:items" %}';">
         Back
     </button>
     {% if user_group.name != None and user_group.name != 'Viewer' %}
