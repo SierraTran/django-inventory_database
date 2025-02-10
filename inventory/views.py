@@ -26,8 +26,6 @@ class ItemView(LoginRequiredMixin, ListView):
     Methods:
         get_queryset(): Retrieves the list of items to be displayed.
     """
-
-    paginate_by = 20
     model = Item
     template_name = "items.html"
     context_object_name = "items_list"
@@ -175,7 +173,6 @@ class SearchItemsView(ListView):
     Methods:
         get_queryset(): Retrieves the search results based on the query.
     """
-    paginate_by = 20
     model = Item
     template_name = "search/search.html"
     context_object_name = "results_list"
@@ -189,10 +186,6 @@ class SearchItemsView(ListView):
         """
         query = self.request.GET.get("q")
         results = (
-            SearchQuerySet()
-            .filter(content=query)
-            .order_by("manufacturer", "model", "part_number")
-            if query
-            else []
+            SearchQuerySet().filter(content=query).order_by("manufacturer", "model", "part_number") if query else []
         )
         return results
