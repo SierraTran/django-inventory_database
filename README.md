@@ -25,6 +25,7 @@ This project was made to simplify the process of keeping inventory. It stores in
 - User Authentication
 - Search
 - Editing Item Information
+- Creating New Items
 
 ## Technologies Used
 
