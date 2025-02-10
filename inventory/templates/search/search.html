@@ -2,9 +2,9 @@
 {% load static %}
 {% load inventory_tags %}
 
-{% block stylesheet %}
+{% block other_stylesheets %}
 <link rel="stylesheet" href="{% static "items.css" %}" />
-{% endblock stylesheet %}
+{% endblock other_stylesheets %}
 
 {% block title %}Search Results{% endblock title %}
 
@@ -15,7 +15,7 @@
     <input type="submit" value="Search">
 </form>
 
-{% if results_list %}
+{% if items_list %}
     <div class="grid">
         <div class="field-name">Manufacturer</div>
         <div class="field-name">Model</div>
@@ -25,67 +25,35 @@
         <div class="field-name">Location</div>
         <div class="field-name">Quantity</div>
         <div class="field-name">Price</div>
-        {% for result in page_obj %}
+        {% for item in items_list %}
         {% if forloop.counter|divisibleby:2 %}
         <a href="{% url 'inventory:item_detail' pk=result.pk %}">
-            <div class="even">{{ result.object.manufacturer }}</div>
-            <div class="even">{{ result.object.model }}</div>
-            <div class="even">{{ result.object.part_or_unit }}</div>
-            <div class="even">{{ result.object.part_number }}</div>
-            <div class="even">{{ result.object.description }}</div>
-            <div class="even">{{ result.object.location }}</div>
-            <div class="even" {% if result.object.low_stock %} style="color: red;" {% endif %} >
+            <div class="even">{{ item.manufacturer }}</div>
+            <div class="even">{{ item.model }}</div>
+            <div class="even">{{ item.part_or_unit }}</div>
+            <div class="even">{{ item.part_number }}</div>
+            <div class="even">{{ item.description }}</div>
+            <div class="even">{{ item.location }}</div>
+            <div class="even" {% if item.low_stock %} style="color: red;" {% endif %} >
                 {{ item.quantity }}
             </div>
-            <div class="even">{{ result.object.price }}</div>
+            <div class="even">{{ item.price }}</div>
         </a>
         {% else %}
         <a href="{% url 'inventory:item_detail' pk=result.pk %}">
-            <div class="odd">{{ result.object.manufacturer }}</div>
-            <div class="odd">{{ result.object.model }}</div>
-            <div class="odd">{{ result.object.part_or_unit }}</div>
-            <div class="odd">{{ result.object.part_number }}</div>
-            <div class="odd">{{ result.object.description }}</div>
-            <div class="odd">{{ result.object.location }}</div>
-            <div class="odd" {% if result.object.low_stock %} style="color: red;" {% endif %} >
+            <div class="odd">{{ item.manufacturer }}</div>
+            <div class="odd">{{ item.model }}</div>
+            <div class="odd">{{ item.part_or_unit }}</div>
+            <div class="odd">{{ item.part_number }}</div>
+            <div class="odd">{{ item.description }}</div>
+            <div class="odd">{{ item.location }}</div>
+            <div class="odd" {% if item.low_stock %} style="color: red;" {% endif %} >
                 {{ item.quantity }}
             </div>
-            <div class="odd">{{ result.object.price }}</div>
+            <div class="odd">{{ item.price }}</div>
         </a>
         {% endif %}
         {% endfor %}
-    </div>
-    <div class="pagination">
-        <span class="step-links">
-            {# Previous Page #}
-            <span class="previous">
-            {% if page_obj.has_previous %}        
-                <a  href="?{% query_transform page=1 %}">
-                    &laquo; first
-                </a>
-                <a href="?{% query_transform page=page_obj.previous_page_number %}">
-                    previous
-                </a>        
-            {% endif %}
-            </span>
-    
-            {# Current Page #}
-            <span class="current">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-            </span>
-    
-            {# Next Page #}
-            <span class="next">
-            {% if page_obj.has_next %}        
-                <a href="?{% query_transform page=page_obj.next_page_number %}">
-                    next
-                </a>
-                <a href="?{% query_transform page=page_obj.paginator.num_pages %}">
-                    last &raquo;
-                </a>        
-            {% endif %}
-            </span>
-        </span>
     </div>
 {% else %}
     <p>No results found.</p>
