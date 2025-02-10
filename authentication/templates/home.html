@@ -1,13 +1,11 @@
 {% extends "authentication_base_template.html" %}
 {% load static %}
 
-{% block stylesheet %}
+{% block other_stylesheets %}
     <link rel="stylesheet" href="{% static "home.css" %}" />
-{% endblock stylesheet %}
+{% endblock other_stylesheets %}
 
 {% block title %}Inventory Database{% endblock %}
-
-
 
 {% block content %}
     {% if request.user.is_authenticated %}     

@@ -6,7 +6,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="shortcut icon" href="https://hayesinstruments.com/HayesLogo.ico">
-    {% block stylesheet %}{% endblock stylesheet %}
+    <link rel="stylesheet" href={% static "authentication_base.css" %} />
+    {% block other_stylesheets %}{% endblock other_stylesheets %}
     <title>{% block title %}{% endblock %}</title>
 </head>
 
@@ -17,15 +18,16 @@
                 alt="Hayes Instrument Service">
         </a>
         {% if request.user.is_authenticated %}
-        <div class="user">Hello, {{ request.user.username }}</div>
+            <div class="user">        
+                Hello, {{ request.user.username }}
+            </div>
         {% endif %}
     </div>
-<div class="content">
-    {% block content %}
-    {% endblock %}
-</div>
-
-
+    <div class="page-title">{% block page-title %}{% endblock page-title %}</div>
+    <div class="content">
+        {% block content %}
+        {% endblock %}
+    </div>
 </body>
 
 </html>
