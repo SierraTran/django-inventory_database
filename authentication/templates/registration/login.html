@@ -2,9 +2,9 @@
 
 {% load static %}
 
-{% block stylesheet %}
-<link rel="stylesheet"  type="text/css" href="{% static 'user_create_form.css' %}" />
-{% endblock stylesheet %}
+{% block other_stylesheets %}
+<link rel="stylesheet"  type="text/css" href="{% static 'login.css' %}" />
+{% endblock other_stylesheets %}
 
 {% block title %}
 Login | Inventory Database
@@ -13,8 +13,7 @@ Login | Inventory Database
 
 
 {% block content %}
-<div class="page-title">Inventory Database</div>
-<p>Please log in to see the database.</p>
+<div class="page-title">Log In</div>
 <form method="post"> {% csrf_token %} 
     <fieldset>
         {% if messages %}
