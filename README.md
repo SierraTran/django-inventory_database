@@ -55,7 +55,7 @@ More info about [Django](https://www.djangoproject.com/)
 The list of required software below will also be included in the `requirements.txt` file.
 
 - Django
-- dajngo-haystack
+- django-haystack
 - PyYAML
 - sqlany-django
 - sqlanydb
