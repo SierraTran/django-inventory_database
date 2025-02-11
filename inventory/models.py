@@ -2,6 +2,8 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from django.urls import reverse
 
+from authentication.models import User
+
 
 # Create your models here.
 class Item(models.Model):
@@ -59,3 +61,19 @@ class Item(models.Model):
         if self.part_or_unit == self.PART:
             item_string += " " + self.part_number
         return item_string
+
+class ItemRequest(models.Model):
+    ACCEPTED = "Accepted"
+    PENDING = "Pending"
+    REJECTED = "Rejected"
+    
+    STATUS_CHOICES = {
+        ACCEPTED: "Accepted",
+        PENDING: "Pending",
+        REJECTED: "Rejected"
+    }
+    
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quantity_requested = models.IntegerField()
+    requested_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    status = models.CharField(choices=STATUS_CHOICES, default=PENDING, max_length=9)

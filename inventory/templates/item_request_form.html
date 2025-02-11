@@ -1,0 +1,100 @@
+{% extends "inventory_base_template.html" %}
+{% load static %}
+
+{% block other_stylesheets %}
+{% comment %} <link rel="stylesheet" href="{% static "item_form.css" %}" /> {% endcomment %}
+<link rel="stylesheet" href="{% static "item_request_form.css" %}" />
+{% endblock other_stylesheets %}
+
+{% block title %}{% endblock title %}
+
+{% block page-title %}Item Request Form{% endblock page-title %}
+
+{% block content %}
+<form>
+    {% comment %} <fieldset class="fieldset-1">
+
+        <label for="model">
+            Model: 
+            <input type="text" id="model" />
+        </label>
+        <label for="manufacturer">
+            Manufacturer: 
+            <input type="text" id="manufacturer" />
+        </label>
+        <label for="serial-number">
+            Serial Number: <input type="text" id="serial-number" />
+        </label>
+    </fieldset> {% endcomment %}
+    <table class="first">
+        <tr>
+            <th><label for="customer">Customer:</label></th>
+            <td><input type="text" id="customer" /></td>
+            <th></th>
+            <td></td>
+            <th><label for="work-order-number">Work Order #:</label></th>
+            <td><input type="number" id="work-order-number" /></td>
+        </tr>
+        <tr>
+            <th><label for="date1">Date:</label></th>
+            <td><input type="date" id="date1" /></td>
+            <th></th>
+            <td></td>
+            <th><label for="technician">Technician:</label></th>
+            <td><input type="text" id="technician" value="{{ request.user.first_name }}"/></td>
+        </tr>
+        <tr>
+            <th><label for="model">Model:</label></th>
+            <td><input type="text" id="model" value="{{ item.model }}" /></td>
+            <th><label for="manufacturer">Manufacturer:</label></th>
+            <td><input type="text" id="manufacturer" value="{{ item.manufacturer }}" /></td>
+            <th><label for="serial-number">S/N #:</label></th>
+            <td><input type="text" id="serial-number" /></td>
+        </tr>
+    </table>
+
+    <table class="second">
+        <tr class="row-header">
+            <th>STK</th>
+            <th>W.O.</th>
+            <th>Part Number & Description</th>
+            <th>Sug. Source</th>
+            <th>Sub</th>
+        </tr>
+        <tr>
+            <td>brbrbrbrb</td>
+            <td>this is a work order number</td>
+            <td>rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr</td>
+            <td>fefefefefefefeffee</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>uuuuuuuuuuuuuuuuuuu</td>
+            <td>anchor link to work order number?</td>
+            <td>anchor link to item?</td>
+            <td>........</td>
+            <td>huh</td>
+        </tr>
+    </table>
+
+    <table class="third">
+        <tr>
+            <th><label for="ordered-from">Ordered From:</label></th>
+            <td><input type="text" id="ordered-from" /></td>
+            <th><label for="po-number">PO #:</label></th>
+            <td><input type="text" id="po-number" /></td>
+        </tr>
+        <tr>
+            <th><label for="date2">Date:</label></th>
+            <td><input type="date" id="date2" /></td>
+            <th><label for="scheduled">Scheduled</label></th>
+            <td><input type="text" id="scheduled" /></td>
+        </tr>
+    </table>
+    <input type="submit" value="Request Item" />
+    <p>
+        The button above should add the item(s) to a 'request' table
+        and have an email sent to the admin(s)
+    </p>
+</form>
+{% endblock content %}

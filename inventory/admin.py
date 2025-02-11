@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Item
+from .models import Item, ItemRequest
 
 
 class ItemAdmin(admin.ModelAdmin):
@@ -17,6 +17,10 @@ class ItemAdmin(admin.ModelAdmin):
     # Items are alphabetically ordered by manufacturer, model, and then part_number
     ordering = ["manufacturer", "model", "part_number"]
 
+class ItemRequestAdmin(admin.ModelAdmin):
+    # Items can be filtered based on status
+    list_filter = ["status"]
 
 # Register your models here.
 admin.site.register(Item, ItemAdmin)
+admin.site.register(ItemRequest, ItemRequestAdmin)
