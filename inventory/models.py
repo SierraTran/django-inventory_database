@@ -41,7 +41,7 @@ class Item(models.Model):
 
     def get_absolute_url(self):
         return reverse("inventory:item_detail", kwargs={"pk": self.pk})
-
+    
     def __str__(self):
         """
         The string representation of the `Item` object
@@ -55,7 +55,7 @@ class Item(models.Model):
         Example:
             "HP, 87 Case"
         """
-        itemString = self.manufacturer + ", " + self.model
+        item_string = self.manufacturer + ", " + self.model
         if self.part_or_unit == self.PART:
-            itemString += " " + self.part_number
-        return itemString
+            item_string += " " + self.part_number
+        return item_string

@@ -10,8 +10,11 @@
 {% block content %}
     {% if request.user.is_authenticated %}     
         <p><a href="{% url "inventory:items" %}">Browse available items.</a></p>
-        {% if user_group.name == 'Superuser' %}
+        {% if user_group.name == 'Technician' or user_group.name == 'Superuser' %}
         <p><a href="{% url "inventory:item_create_form" %}">Create New Item</a></p>
+            {% if user_group.name != 'Technician' %}
+            <p><a>Create New User</a></p>
+            {% endif %}
         {% endif %}
 
         <form action="{% url 'logout' %}" method="post"> {% csrf_token %}
