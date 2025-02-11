@@ -9,6 +9,7 @@ urlpatterns = [
     path("", views.ItemView.as_view(), name="items"),
     # example: /inventory_database/items/9
     path("<int:pk>/", views.ItemDetailView.as_view(), name="item_detail"),
+    #path("<int:pk>/request", views.ItemRequestView.as_view(), name="item_request_form"),
     path("new_item_form/", views.ItemCreateView.as_view(), name="item_create_form"),
     path("<int:pk>/update", views.ItemUpdateView.as_view(), name="item_update_form"),
     path("<int:pk>/quantity_update", views.ItemQuantityUpdateView.as_view(), name="item_quantity_update_form"),

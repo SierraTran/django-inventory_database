@@ -1,0 +1,80 @@
+/* Variables */
+:root {
+    --light-gray: rgb(220, 220, 220);
+    --gray: rgb(200, 200, 200);
+    --dark-gray: rgb(150, 150, 150);
+    --fieldset-border: 4em solid var(--gray);
+}
+
+/* Styles */
+form {    
+    width: 80%;
+    min-width: 1000px;
+    margin: 0 auto;
+}
+table {
+    background-color: var(--gray);
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table.first {
+    border-bottom: var(--fieldset-border);
+}
+
+table.first tr th, tr td {
+    padding-left: 0.25em;
+    padding-right: 0.25em;    
+}
+
+table.first tr th {
+    width: 10%;
+    max-width: 125px;
+}
+
+table.first tr td {
+    width: 23%;
+}
+
+table.second tr:nth-child(2) {
+    background-color: var(--light-gray);
+}
+
+table.second tr th, tr td {
+    padding: 0.5em;
+    padding-left: 0.75em;
+    padding-right: 0.75em;
+    width: 20%;
+}
+
+table.third {
+    border-top: var(--fieldset-border);
+}
+
+table.third tr th {
+    width: 10%;
+    max-width: 125px;
+}
+table.third tr td {
+    width: 40%;
+}
+
+label {
+    max-width: 125px;
+    padding: 5px;
+    font-weight: bold;
+}
+
+input {
+    width: 85%;
+}
+
+input[type="submit"] {
+    width: 40%;
+    height: 2em;
+    display: block;
+    margin: 1em auto;    
+}
+
+
+

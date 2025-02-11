@@ -74,7 +74,7 @@
     {% if user_group.name == 'Superuser' %}
     <button type="button" id="order-more">Order More (Coming Soon)</button>
     {% else %}
-    <button type="button" id="order-more">Request More (Coming Soon)</button>
+    <button type="button" id="order-more" onclick="window.location.href='{% url "inventory:item_request_form" item.id %}'">Request More (Coming Soon)</button>
     {% endif %}
 </div>
 {% endif %} 
