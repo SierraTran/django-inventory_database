@@ -9,7 +9,7 @@ from django.core.paginator import Paginator
 
 from haystack.query import SearchQuerySet
 
-from .models import Item
+from .models import Item, ItemRequest
 
 
 # Create your views here.
@@ -26,6 +26,7 @@ class ItemView(LoginRequiredMixin, ListView):
     Methods:
         get_queryset(): Retrieves the list of items to be displayed.
     """
+
     model = Item
     template_name = "items.html"
     context_object_name = "items_list"
@@ -50,10 +51,11 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
     Attributes:
         model (Item): The model that this view will operate on.
         template_name (str): The template used to render the detail view.
-        
+
     Methods:
         get_context_data(**kwargs): Adds the user's group to the context data.
     """
+
     model = Item
     template_name = "item_detail.html"
 
@@ -79,6 +81,7 @@ class ItemCreateView(UserPassesTestMixin, CreateView):
         fields (list): The fields to be displayed in the form.
         template_name (str): The template used to render the form.
     """
+
     model = Item
     fields = [
         "manufacturer",
@@ -102,16 +105,49 @@ class ItemCreateView(UserPassesTestMixin, CreateView):
         return self.request.user.groups.first().name == "Superuser"
 
 
+# class ItemRequestView(UserPassesTestMixin, CreateView):
+#     model = ItemRequest
+#     fields = [
+#         "item",
+#         "quantity_requested",
+#         "requested_by",
+#         "status",
+#     ]
+#     template_name = "item_request_form.html"
+    
+#     def test_func(self):
+#         """
+#         Checks if the user is in the "Technician" group.
+
+#         Returns:
+#             bool: True if the user is in the "Technician" group, False otherwise.
+#         """
+#         return self.request.user.groups.first().name == "Technician"
+    
+#     def get_context_data(self, **kwargs):
+#         """
+#         Adds the specific item to the context data.
+
+#         Returns:
+#             dict: The context data with the specific item added.
+#         """
+#         context = super().get_context_data(**kwargs)
+#         item_id = self.kwargs.get('pk')
+#         context["item"] = Item.objects.get(pk=item_id)
+#         return context
+
+
 class ItemUpdateView(UserPassesTestMixin, UpdateView):
     """
     Class-based view for updating an existing item.
-    This view requires the user to be in the 'Superuser' group.
+    This view requires the user to be in the "Superuser" or "Technician" group.
 
     Attributes:
         model (Item): The model that this view will operate on.
         fields (list): The fields to be displayed in the form.
         template_name (str): The template used to render the form.
     """
+
     model = Item
     fields = [
         "manufacturer",
@@ -127,12 +163,13 @@ class ItemUpdateView(UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         """
-        Checks if the user is in the 'Superuser' group.
+        Checks if the user is in the "Superuser" or "Technician" group.
 
         Returns:
-            bool: True if the user is in the 'Superuser' group, False otherwise.
+            bool: True if the user is in the "Superuser" or "Technician" group, False otherwise.
         """
-        return self.request.user.groups.first().name == "Superuser"
+        user_group_name = self.request.user.groups.first().name
+        return user_group_name == "Superuser" or user_group_name == "Technician"
 
 
 class ItemQuantityUpdateView(UserPassesTestMixin, UpdateView):
@@ -145,6 +182,7 @@ class ItemQuantityUpdateView(UserPassesTestMixin, UpdateView):
         fields (list): The fields to be displayed in the form.
         template_name (str): The template used to render the form.
     """
+
     model = Item
     fields = ["quantity"]
     template_name = "item_update_form.html"
@@ -157,6 +195,7 @@ class ItemQuantityUpdateView(UserPassesTestMixin, UpdateView):
             bool: True if the user is in the 'Intern' group, False otherwise.
         """
         return self.request.user.groups.first().name == "Intern"
+
 
 
 class SearchItemsView(ListView):
@@ -173,6 +212,7 @@ class SearchItemsView(ListView):
     Methods:
         get_queryset(): Retrieves the search results based on the query.
     """
+
     model = Item
     template_name = "search/search.html"
     context_object_name = "results_list"
@@ -186,6 +226,10 @@ class SearchItemsView(ListView):
         """
         query = self.request.GET.get("q")
         results = (
-            SearchQuerySet().filter(content=query).order_by("manufacturer", "model", "part_number") if query else []
+            SearchQuerySet()
+            .filter(content=query)
+            .order_by("manufacturer", "model", "part_number")
+            if query
+            else []
         )
         return results

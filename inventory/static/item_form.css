@@ -1,3 +1,7 @@
+:root {
+    --border: 3px solid rgb(225, 225, 225)
+}
+
 form {
     display: flex;
     flex-direction: column;
@@ -22,8 +26,8 @@ td {
 }
 
 tr.description {
-    border-top: 3px solid rgb(225, 225, 225);
-    border-bottom: 3px solid rgb(225, 225, 225);
+    border-top: var(--border);
+    border-bottom: var(--border);
 }
 
 textarea {
