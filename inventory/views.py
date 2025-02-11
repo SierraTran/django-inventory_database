@@ -72,7 +72,7 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
 class ItemCreateView(UserPassesTestMixin, CreateView):
     """
     Class-based view for creating a new item.
-    This view requires the user to be in the 'Superuser' group.
+    This view requires the user to be in the 'Technician' group.
 
     Attributes:
         model (Item): The model that this view will operate on.
@@ -138,7 +138,7 @@ class ItemUpdateView(UserPassesTestMixin, UpdateView):
 class ItemQuantityUpdateView(UserPassesTestMixin, UpdateView):
     """
     Class-based view for updating the quantity of an existing item.
-    This view requires the user to be in the 'Regular User' group.
+    This view requires the user to be in the 'Intern' group.
 
     Attributes:
         model (Item): The model that this view will operate on.
@@ -151,12 +151,12 @@ class ItemQuantityUpdateView(UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         """
-        Checks if the user is in the 'Regular User' group.
+        Checks if the user is in the 'Intern' group.
 
         Returns:
-            bool: True if the user is in the 'Regular User' group, False otherwise.
+            bool: True if the user is in the 'Intern' group, False otherwise.
         """
-        return self.request.user.groups.first().name == "Regular User"
+        return self.request.user.groups.first().name == "Intern"
 
 
 class SearchItemsView(ListView):

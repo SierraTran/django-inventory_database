@@ -55,19 +55,27 @@
         Back
     </button>
     {% if user_group.name != None and user_group.name != 'Viewer' %}
-    {% if user_group.name == 'Superuser' %} {# The current user is a Superuser #}
+    {% if user_group.name == 'Technician' %} {# The current user is a Technician #}
     <button type="button" id="update" onclick="window.location.href='{% url 'inventory:item_update_form' item.id %}';">
-    {% else %} {# The current user is a Regular User #}
+    {% else %} {# The current user is a Intern #}
     <button type="button" id="update" onclick="window.location.href='{% url 'inventory:item_quantity_update_form' item.id %}';">
     {% endif %}    
         Update
     </button>
     {% endif %}
 </div>
-{% if user_group.name != None and user_group.name != 'Viewer' and user_group.name != 'Regular User' %}
+{% comment %} {% if user_group.name != None and user_group.name != 'Viewer' and user_group.name != 'Intern' %} {% endcomment %}
+
+{# Technician / Superuser only buttons #}
+{% if user_group.name == 'Technician' or user_group.name == 'Superuser' %}
 <div class="buttons set2">
     <button type="button" id="use">Use (Coming Soon)</button>
+    {# Technicians REQUEST more. Superusers ORDER more. #}
+    {% if user_group.name == 'Superuser' %}
     <button type="button" id="order-more">Order More (Coming Soon)</button>
+    {% else %}
+    <button type="button" id="order-more">Request More (Coming Soon)</button>
+    {% endif %}
 </div>
 {% endif %} 
 
