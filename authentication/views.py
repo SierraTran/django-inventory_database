@@ -4,11 +4,14 @@ from django.contrib import messages
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.models import User, Group
 
-from django.urls import reverse
+from django.urls import reverse_lazy
 
-from django.views.generic import CreateView
+from django.views.generic.list import ListView
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView, DeleteView
 
 from .models import *
 
@@ -54,16 +57,73 @@ def login_page(request):
     return render(request, "login.html")
 
 
-class CreateAccountView(CreateView):
+class UsersView(UserPassesTestMixin, ListView):
+    model = User
+    template_name = "users.html"
+    context_object_name = "users_list"
+    
+    def test_func(self):
+        user_group_name = self.request.user.groups.first().name
+        return user_group_name == "Superuser"
+    
+    def get_queryset(self):
+        return User.objects.all().order_by("username", "last_name", "first_name")
+
+
+class UserDetailsView(UserPassesTestMixin, DetailView):
+    model = User
+    template_name = "user_detail.html"
+    
+    def test_func(self):
+        user_group_name = self.request.user.groups.first().name
+        return user_group_name == "Superuser"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        specific_user = self.get_object()
+        context['user_detail_group_name'] = specific_user.groups.first().name if specific_user.groups.exists() else "No Group"
+        return context
+    
+
+class CreateUserView(UserPassesTestMixin, CreateView):
     model = User
     fields = ["username", "first_name", "last_name", "email", "password"]
     template_name = "user_create_form.html"
     
+    def get_success_url(self):
+        return reverse_lazy("authentication:user_details", kwargs={"pk": self.object.pk})
+    
+    def test_func(self):
+        user_group_name = self.request.user.groups.first().name
+        return user_group_name == "Superuser"
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        group_name = self.request.POST.get("user_group")
+        group = Group.objects.get(name=group_name)
+        self.object.groups.add(group)
+        return response
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['user'] = self.request.user
-        
+        context["user"] = self.request.user
+        context["groups"] = Group.objects.all()
         return context
+    
+
+class DeleteUserView(UserPassesTestMixin, DeleteView):
+    model = User
+    success_url = reverse_lazy("authentication:users")
+    
+    def test_func(self):
+        user_group_name = self.request.user.groups.first().name
+        return user_group_name == "Superuser"
+    
+    def form_valid(self, form):
+        messages.success(self.request, "The user was deleted successfully.")
+        return super(DeleteUserView, self).form_valid(form)
+
+
 # @login_required
 # def logout_view(request):
 #     logout(request)

@@ -35,6 +35,9 @@
             <th>Quantity</th><td>{{ item.quantity }}</td>
         </tr>
         <tr>
+            <th>Min. Quantity</th><td>{{ item.min_quantity }}</td>
+        </tr>
+        <tr>
             <th>Price</th><td>{{ item.price }}</td>
         </tr>
     </table>
@@ -52,29 +55,36 @@
 {% endcomment %}
  <div class="buttons set1">
     <button type="button" id="back" onclick="window.location.href='{% url "inventory:items" %}';">
-        Back
+        Back to Items
     </button>
     {% if user_group.name != None and user_group.name != 'Viewer' %}
-    {% if user_group.name == 'Technician' %} {# The current user is a Technician #}
-    <button type="button" id="update" onclick="window.location.href='{% url 'inventory:item_update_form' item.id %}';">
+    {% if user_group.name == 'Superuser' %} {# The current user is a Superuser #}
+    <button type="button" id="update" onclick="window.location.href='{% url 'inventory:item_update_form_superuser' item.id %}';">
+    {% elif user_group.name == 'Technician' %}  {# The current user is a Technician #}
+    <button type="button" id="update" onclick="window.location.href='{% url 'inventory:item_update_form_technician' item.id %}';">
     {% else %} {# The current user is a Intern #}
-    <button type="button" id="update" onclick="window.location.href='{% url 'inventory:item_quantity_update_form' item.id %}';">
+    <button type="button" id="update" onclick="window.location.href='{% url 'inventory:item_update_form_intern' item.id %}';">
     {% endif %}    
         Update
     </button>
     {% endif %}
 </div>
-{% comment %} {% if user_group.name != None and user_group.name != 'Viewer' and user_group.name != 'Intern' %} {% endcomment %}
 
 {# Technician / Superuser only buttons #}
 {% if user_group.name == 'Technician' or user_group.name == 'Superuser' %}
 <div class="buttons set2">
-    <button type="button" id="use">Use (Coming Soon)</button>
+    <button type="button" id="use" {% if item.quantity == 0 %}disabled{% endif %}>
+        Use (Coming Soon)
+    </button>
     {# Technicians REQUEST more. Superusers ORDER more. #}
     {% if user_group.name == 'Superuser' %}
-    <button type="button" id="order-more">Order More (Coming Soon)</button>
+    <button type="button" id="order-more">
+        Order More (Coming Soon)
+    </button>
     {% else %}
-    <button type="button" id="order-more" onclick="window.location.href='{% url "inventory:item_request_form" item.id %}'">Request More (Coming Soon)</button>
+    <button type="button" id="order-more" onclick="window.location.href='{% url "inventory:item_request_form" item.id %}'">
+        Request More (Coming Soon)
+    </button>
     {% endif %}
 </div>
 {% endif %} 

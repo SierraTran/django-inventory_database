@@ -5,20 +5,28 @@
 <link rel="stylesheet" href="{% static "user_create_form.css" %}" />
 {% endblock other_stylesheets %}
 
-{% block title %} New Account Form | Inventory Database {% endblock title %}
+{% block title %} New User Form | Inventory Database {% endblock title %}
 
-{% block page-title %} Create Your New Account {% endblock page-title %}
+{% block page-title %} Create New User {% endblock page-title %}
 
 {% block content %}
 <form method="post"> {% csrf_token %}
-        <fieldset>
+    <fieldset>
         {% for field in form %}
         <div class="field {{ field.name }}">
             {{ field.label_tag }}
             {{ field }}
         </div>
         {% endfor %}
+        <div class="field user-group">
+            <label for="user_group">User Group:</label>
+            <select name="user_group" id="user_group">
+                {% for group in groups %}
+                <option value="{{ group.name }}">{{ group.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </fieldset>
-    <input type="submit" value="Create Account">
+    <input type="submit" value="Create User">
 </form>
 {% endblock content %}

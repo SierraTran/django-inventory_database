@@ -19,13 +19,17 @@ This project was made to simplify the process of keeping inventory. It stores in
   - [Running Tests](#running-tests)
   - [Contributing](#contributing)
   - [Author](#author)
+  - [License](#license)
 
 ## Features
 
 - User Authentication
-- Search
-- Editing Item Information
+  - User Creation
+  - User Editing/Updating
+  - User Deletion
 - Creating New Items
+- Editing Item Information
+- Search
 
 ## Technologies Used
 
@@ -129,3 +133,7 @@ python manage.py test
 ## Author
 
 Sierra Tran
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

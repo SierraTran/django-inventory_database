@@ -1,0 +1,36 @@
+{% extends "authentication_base_template.html" %}
+{% load static %}
+
+{% block other_stylesheets %}
+<link rel="stylesheet" href="{% static "users.css" %}" />
+{% endblock other_stylesheets %}
+
+{% block title %}Users | Inventory Database{% endblock title %}
+
+{% block page-title %}Users{% endblock page-title %}
+
+{% block content %}
+{% if users_list %}
+<div class="grid">
+    <div class="field-name">Username</div>
+    <div class="field-name">Last Name</div>
+    <div class="field-name">First Name</div>
+    <div class="field-name">Email</div>
+    {% for user in users_list %}
+    <a href="{% url "authentication:user_details" user.id %}">
+        {% if forloop.counter|divisibleby:2 %}
+        <div class="even">{{ user.username }}</div>
+        <div class="even">{{ user.first_name }}</div>
+        <div class="even">{{ user.last_name }}</div>        
+        <div class="even">{{ user.email }}</div>
+        {% else %}
+        <div class="odd">{{ user.username }}</div>
+        <div class="odd">{{ user.first_name }}</div>
+        <div class="odd">{{ user.last_name }}</div>        
+        <div class="odd">{{ user.email }}</div>
+        {% endif %}
+    </a>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock content %}

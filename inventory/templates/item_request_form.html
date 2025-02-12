@@ -12,20 +12,6 @@
 
 {% block content %}
 <form>
-    {% comment %} <fieldset class="fieldset-1">
-
-        <label for="model">
-            Model: 
-            <input type="text" id="model" />
-        </label>
-        <label for="manufacturer">
-            Manufacturer: 
-            <input type="text" id="manufacturer" />
-        </label>
-        <label for="serial-number">
-            Serial Number: <input type="text" id="serial-number" />
-        </label>
-    </fieldset> {% endcomment %}
     <table class="first">
         <tr>
             <th><label for="customer">Customer:</label></th>
@@ -77,6 +63,7 @@
         </tr>
     </table>
 
+    {# This may be only for the Superusers. It confirms that the request has been accepted and ordered. #}
     <table class="third">
         <tr>
             <th><label for="ordered-from">Ordered From:</label></th>
@@ -91,7 +78,10 @@
             <td><input type="text" id="scheduled" /></td>
         </tr>
     </table>
-    <input type="submit" value="Request Item" />
+    <div class="buttons">
+        <button type="button" onclick="window.location.href='{% url "inventory:item_detail" pk=item.pk %}'">Cancel</button>
+        <input type="submit" value="Request Item">
+    </div>
     <p>
         The button above should add the item(s) to a 'request' table
         and have an email sent to the admin(s)
