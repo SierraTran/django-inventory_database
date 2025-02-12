@@ -1,0 +1,55 @@
+/* This is the stylesheet for the Log In page */
+
+body {
+    font-family: arial, sans-serif;
+}
+
+p {
+    text-align: center;
+}
+
+fieldset {
+    border: 0;
+    padding-block: 10px;
+}
+
+label {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    line-height: 26px;
+    margin-bottom: 10px;
+}
+
+form {
+    background-color: rgb(200, 200, 200);
+    width: 60vw;
+    max-width: 600px;
+    min-width: 350px;
+    margin: 0 auto;
+    padding-bottom: 1.5em;
+    padding-top: 1em;
+}
+
+input {
+    height: 20px;
+    flex: 0 0 200px;
+    margin-left: 10px;
+}
+
+#password {
+    margin-left: 13px;
+}
+
+input[type="submit"] {
+    display: block;
+    margin: 0 auto;
+    height: 2em;
+}
+
+.page-title {
+    font-size: 110%;
+    font-weight: bold;
+    text-align: center;
+    padding-bottom: 1em;
+}

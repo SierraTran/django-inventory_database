@@ -4,3 +4,4 @@ superuser.txt
 /authentication/__pycache__
 /inventory_database/static/admin
 *.pyc
+/staticfiles/admin

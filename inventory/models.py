@@ -27,7 +27,7 @@ class Item(models.Model):
     description = models.TextField()
     location = models.CharField(default="N/A", max_length=50)
     quantity = models.IntegerField(default=0, validators=[MinValueValidator(0)])
-    quantity_min_stock = models.IntegerField(
+    min_quantity = models.IntegerField(
         default=0, validators=[MinValueValidator(0)]
     )
     price = models.DecimalField(
@@ -39,7 +39,7 @@ class Item(models.Model):
 
     @property
     def low_stock(self):
-        return self.quantity <= self.quantity_min_stock
+        return self.quantity <= self.min_quantity
 
     def get_absolute_url(self):
         return reverse("inventory:item_detail", kwargs={"pk": self.pk})
