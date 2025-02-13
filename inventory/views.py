@@ -1,13 +1,16 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, UpdateView
-
+from django.views.generic.edit import CreateView, UpdateView, FormView
 from django.shortcuts import render
 from django.core.paginator import Paginator
-
 from haystack.query import SearchQuerySet
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+
+import openpyxl
+
+from .forms import ImportFileForm
 
 from .models import Item, ItemRequest
 
@@ -15,7 +18,9 @@ from .models import Item, ItemRequest
 # Create your views here.
 
 
+##########################
 # Views for the Item Model
+##########################
 class ItemView(LoginRequiredMixin, ListView):
     """
     View to list all items.
@@ -275,7 +280,55 @@ class SearchItemsView(ListView):
         return results
 
 
+class ImportItemDataView(LoginRequiredMixin, UserPassesTestMixin, FormView):
+    """
+    Renders a view to allow users to import items from an .xls file to the database.
+    """
+    form_class = ImportFileForm
+    template_name = "import_item_data.html"
+
+    def test_func(self):
+        """
+        Checks if the user is in the 'Superuser' or 'Technician' group.
+
+        Returns:
+            bool: True if the user is in the 'Superuser' or 'Technician' group, False otherwise.
+        """
+        user_group_name = self.request.user.groups.first().name
+        return user_group_name in ["Superuser", "Technician"]
+
+    def form_valid(self, form):
+        file = form.cleaned_data['file']
+        workbook = openpyxl.load_workbook(file)
+        sheet = workbook.active
+        for row in sheet.iter_rows(min_row=2, values_only=True):
+            manufacturer = row[0] if row[0] is not None else "N/A"
+            model = row[1] if row[1] is not None else "N/A"
+            part_or_unit = row[2] if row[2] is not None else "Part"
+            part_number = row[3] if row[3] is not None else ""
+            description = row[4] if row[4] is not None else str(model) + " " + str(part_number)
+            location = row[5] if row[5] is not None else "N/A"
+            quantity = row[6] if row[6] is not None else 0
+            min_quantity = row[7] if row[7] is not None else 0
+            unit_price = row[8] if row[8] is not None else 0.01
+
+            Item.objects.create(
+                manufacturer=manufacturer,
+                model=model,
+                part_or_unit=part_or_unit,
+                part_number=part_number,
+                description=description,
+                location=location,
+                quantity=quantity,
+                min_quantity=min_quantity,
+                unit_price=unit_price,
+            )
+        return HttpResponseRedirect(reverse("inventory:items"))
+
+
+#################################
 # Views for the ItemRequest Model
+#################################
 class ItemRequestView(UserPassesTestMixin, ListView):
     model = ItemRequest
     template_name = "item_requests.html"

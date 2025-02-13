@@ -8,11 +8,13 @@
 {% block title %}Inventory Database{% endblock %}
 
 {% block content %}
-    {% if request.user.is_authenticated %}     
+    {% if request.user.is_authenticated %}
+    <h1>Items</h1>
         <p><a href="{% url "inventory:items" %}">Browse available items.</a></p>
 
         {# Technician / Superuser only links #}
         {% if user_group.name == 'Technician' or user_group.name == 'Superuser' %}
+
         <p>
             {% if user_group.name == 'Superuser' %}
             <a href="{% url "inventory:item_create_form_superuser" %}">
@@ -21,10 +23,13 @@
             {% endif %}
             Create New Item
         </a></p>
+        <a href="{% url "inventory:import_item_data" %}">Import Item Data</a>
+    <h1>Item Requests</h1>
         <p><a href="{% url "inventory:item_requests" %}">Browse Item Requests</a></p>
 
             {# Superuser only links #}
             {% if user_group.name != 'Technician' %} 
+    <h1>Users</h1>
             <p><a href="{% url "authentication:user_create_form" %}">Create New User</a></p>
             <p><a href="{% url "authentication:users" %}">See All Users</a></p>
             {% endif %}
