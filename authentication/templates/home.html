@@ -10,10 +10,21 @@
 {% block content %}
     {% if request.user.is_authenticated %}     
         <p><a href="{% url "inventory:items" %}">Browse available items.</a></p>
+
+        {# Technician / Superuser only links #}
         {% if user_group.name == 'Technician' or user_group.name == 'Superuser' %}
-        <p><a href="{% url "inventory:item_create_form" %}">Create New Item</a></p>
+        <p>
+            {% if user_group.name == 'Superuser' %}
+            <a href="{% url "inventory:item_create_form_superuser" %}">
+            {% else %}
+            <a href="{% url "inventory:item_create_form_technician" %}">
+            {% endif %}
+            Create New Item
+        </a></p>
         <p><a href="{% url "inventory:item_requests" %}">Browse Item Requests</a></p>
-            {% if user_group.name != 'Technician' %}
+
+            {# Superuser only links #}
+            {% if user_group.name != 'Technician' %} 
             <p><a href="{% url "authentication:user_create_form" %}">Create New User</a></p>
             <p><a href="{% url "authentication:users" %}">See All Users</a></p>
             {% endif %}
