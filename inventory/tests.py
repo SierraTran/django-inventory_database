@@ -60,7 +60,7 @@ class ItemModelTests(TestCase):
 
     def test_item_price(self):
         """
-        Test that the item price is correct.
+        Test that the item unit_price is correct.
         """
-        item = Item.objects.create(price=200.0)
-        self.assertEqual(item.price, 200.0)
+        item = Item.objects.create(unit_price=200.0)
+        self.assertEqual(item.unit_price, 200.0)
