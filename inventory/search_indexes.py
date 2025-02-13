@@ -10,7 +10,7 @@ class ItemIndex(indexes.SearchIndex, indexes.Indexable):
     description = indexes.CharField(model_attr='description')
     location = indexes.CharField(model_attr='location')
     quantity = indexes.IntegerField(model_attr='quantity')
-    price = indexes.DecimalField(model_attr='price')
+    unit_price = indexes.DecimalField(model_attr='unit_price')
 
     def get_model(self):
         return Item

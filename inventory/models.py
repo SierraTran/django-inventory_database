@@ -30,7 +30,7 @@ class Item(models.Model):
     min_quantity = models.IntegerField(
         default=0, validators=[MinValueValidator(0)]
     )
-    price = models.DecimalField(
+    unit_price = models.DecimalField(
         default=0.01,
         max_digits=16,
         decimal_places=2,

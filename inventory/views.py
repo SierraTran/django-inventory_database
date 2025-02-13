@@ -74,7 +74,41 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class ItemCreateView(UserPassesTestMixin, CreateView):
+class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
+    """
+    Class-based view for creating a new item.
+    This view requires the user to be in the 'Superuser' group.
+
+    Attributes:
+        model (Item): The model that this view will operate on.
+        fields (list): The fields to be displayed in the form.
+        template_name (str): The template used to render the form.
+    """
+    model = Item
+    fields = [
+        "manufacturer",
+        "model",
+        "part_or_unit",
+        "part_number",
+        "description",
+        "location",
+        "quantity",
+        "min_quantity",
+        "unit_price",
+    ]
+    template_name = "item_create_form.html"
+
+    def test_func(self):
+        """
+        Checks if the user is in the 'Superuser' group.
+
+        Returns:
+            bool: True if the user is in the 'Superuser' group, False otherwise.
+        """
+        return self.request.user.groups.first().name == "Superuser"
+
+
+class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
     """
     Class-based view for creating a new item.
     This view requires the user to be in the 'Technician' group.
@@ -94,18 +128,18 @@ class ItemCreateView(UserPassesTestMixin, CreateView):
         "description",
         "location",
         "quantity",
-        "price",
+        "unit_price",
     ]
     template_name = "item_create_form.html"
 
     def test_func(self):
         """
-        Checks if the user is in the 'Superuser' group.
+        Checks if the user is in the 'Technician' group.
 
         Returns:
-            bool: True if the user is in the 'Superuser' group, False otherwise.
+            bool: True if the user is in the 'Technician' group, False otherwise.
         """
-        return self.request.user.groups.first().name == "Superuser"
+        return self.request.user.groups.first().name == "Technician"
 
 
 class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
@@ -129,7 +163,7 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
         "location",
         "quantity",
         "min_quantity",
-        "price",
+        "unit_price",
     ]
     template_name = "item_update_form.html"
 
@@ -164,7 +198,7 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
         "description",
         "location",
         "quantity",
-        "price",
+        "unit_price",
     ]
     template_name = "item_update_form.html"
 
@@ -246,13 +280,14 @@ class ItemRequestView(UserPassesTestMixin, ListView):
     model = ItemRequest
     template_name = "item_requests.html"
     context_object_name = "item_requests_list"
-    
+
     def test_func(self):
         user_group_name = self.request.user.groups.first().name
         return user_group_name == "Technician" or user_group_name == "Superuser"
-    
+
     def get_queryset(self):
         return ItemRequest.objects.all()
+
 
 class ItemRequestCreateView(UserPassesTestMixin, CreateView):
     model = ItemRequest
