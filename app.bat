@@ -1,4 +1,4 @@
-start cmd /k "pip install -r requirements.txt && python manage.py migrate && python manage.py runserver"
+start cmd /k "pip install -r requirements.txt && python manage.py makemigrations && python manage.py migrate && python manage.py runserver"
 @ECHO OFF
 ECHO Hello! The server for the Inventory Database application has been started up for you in another command window.
 ECHO You can close this window when you're ready.

@@ -1,12 +1,13 @@
 # Inventory Database
 
-This project was made to simplify the process of keeping inventory. It stores information about parts and units in the company.
+This is a Django-based web application for managing an inventory database. The application allows users to browse, search, and manage items in the inventory. It also includes user authentication and authorization features.
 
 ## Table of Contents
 
 - [Inventory Database](#inventory-database)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
+  - [User Roles](#user-roles)
   - [Technologies Used](#technologies-used)
     - [Python](#python)
     - [Django](#django)
@@ -16,6 +17,7 @@ This project was made to simplify the process of keeping inventory. It stores in
   - [Setup Instructions](#setup-instructions)
   - [Installation](#installation)
   - [Usage](#usage)
+  - [Running the Application](#running-the-application)
   - [Running Tests](#running-tests)
   - [Contributing](#contributing)
   - [Author](#author)
@@ -23,13 +25,20 @@ This project was made to simplify the process of keeping inventory. It stores in
 
 ## Features
 
-- User Authentication
-  - User Creation
-  - User Editing/Updating
-  - User Deletion
-- Creating New Items
-- Editing Item Information
-- Search
+- User authentication and authorization
+- Browse available items
+- Search items
+- View item details
+- Create, update, and delete items (based on user permissions)
+- Import item data
+- Manage item requests
+
+## User Roles
+
+- **Superuser**: Full access to all features, including user management and item creation.
+- **Technician**: Can create and update items, and request more items.
+- **Intern**: Limited access to update items.
+- **Viewer**: Can only view items and their details.
 
 ## Technologies Used
 
@@ -47,13 +56,11 @@ More info about [Django](https://www.djangoproject.com/)
 
 #### Haystack and Whoosh
 
-
+For searching through the database, Haystack has been implemented with the Whoosh backend.
 
 ## Required Software
 
 - Python 3.13.1
-- Django 5.1.5
-- SQL Anywhere 12
 
 ## Required Packages
 
@@ -61,58 +68,61 @@ The list of required software below will also be included in the `requirements.t
 
 - Django
 - django-haystack
-- PyYAML
-- sqlany-django
-- sqlanydb
+- openpyxl
 - Whoosh
 
 ## Setup Instructions
 
+1. Download the zip file.
+2. Extract the files into another folder with a name that appropriately matches the application.
+3. Click the `app.bat` file.
+
+## Installation
+
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/SierraTran/django-inventory_database.git
-    ```
-
-2. Navigate to the project directory:
-
-    ```bash
+    git clone https://github.com/jimmyd/django-inventory_database.git
     cd django-inventory_database
     ```
 
-3. Install the required packages:
+2. Install the required packages:
 
     ```bash
     pip install -r requirements.txt
     ```
 
-4. Run the Django migrations:
+3. Apply the migrations:
 
     ```bash
+    python manage.py makemigrations
     python manage.py migrate
     ```
 
-5. Create a superuser:
+4. Create a superuser:
 
     ```bash
     python manage.py createsuperuser
     ```
 
-6. Start the development server:
+5. Run the development server:
 
     ```bash
     python manage.py runserver
     ```
 
-## Installation
-
-Follow the setup instructions to install the project.
+6. Open your web browser and go to `http://127.0.0.1:8000/`.
 
 ## Usage
 
-1. Open your web browser and go to `http://127.0.0.1:8000/inventory_database`.
-2. Log in with your credentials.
-3. Use the search feature to find parts and units.
+- **Home Page**: Displays links to browse items, create new items, import item data, and manage users (based on user permissions).
+- **Items Page**: Lists all available items with search functionality.
+- **Item Detail Page**: Shows detailed information about a specific item.
+- **User Management**: Superusers can create, view, and delete users.
+
+## Running the Application
+
+You can use the provided `app.bat` file to start the application easily. Just double-click the file, and it will handle the setup and start the server for you.
 
 ## Running Tests
 
@@ -124,15 +134,15 @@ python manage.py test
 
 ## Contributing
 
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-branch`).
-3. Commit your changes (`git commit -am 'Add new feature'`).
-4. Push to the branch (`git push origin feature-branch`).
-5. Create a new Pull Request.
+Feel free to fork the repository and submit pull requests. For major changes, please open an issue first to discuss what you would like to change.
 
 ## Author
 
 Sierra Tran
+
+### Contact Info
+
+Email: <sierra.tran@mail.com>
 
 ## License
 
