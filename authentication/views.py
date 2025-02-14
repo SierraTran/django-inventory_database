@@ -9,6 +9,7 @@ from django.contrib.auth.models import User, Group
 
 from django.urls import reverse_lazy
 
+from django.views.generic import View
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView
@@ -58,11 +59,28 @@ def login_page(request):
 
 
 class UsersView(UserPassesTestMixin, ListView):
+    """
+    _summary_
+
+    Args:
+        UserPassesTestMixin (_type_): _description_
+        ListView (_type_): _description_
+
+    Methods:
+        test_func(): _description_
+        get_queryset(): 
+    """
     model = User
     template_name = "users.html"
     context_object_name = "users_list"
     
-    def test_func(self):
+    def test_func(self) -> bool:
+        """
+        _summary_
+
+        Returns:
+            _description_
+        """
         user_group_name = self.request.user.groups.first().name
         return user_group_name == "Superuser"
     
@@ -74,7 +92,7 @@ class UserDetailsView(UserPassesTestMixin, DetailView):
     model = User
     template_name = "user_detail.html"
     
-    def test_func(self):
+    def test_func(self) -> bool:
         user_group_name = self.request.user.groups.first().name
         return user_group_name == "Superuser"
     
@@ -93,7 +111,7 @@ class CreateUserView(UserPassesTestMixin, CreateView):
     def get_success_url(self):
         return reverse_lazy("authentication:user_details", kwargs={"pk": self.object.pk})
     
-    def test_func(self):
+    def test_func(self) -> bool:
         user_group_name = self.request.user.groups.first().name
         return user_group_name == "Superuser"
 
@@ -112,16 +130,55 @@ class CreateUserView(UserPassesTestMixin, CreateView):
     
 
 class DeleteUserView(UserPassesTestMixin, DeleteView):
+    """
+    _summary_
+
+    Returns:
+        _description_
+    """
     model = User
     success_url = reverse_lazy("authentication:users")
     
-    def test_func(self):
+    def get_fail_url(self):
+        """
+        _summary_
+
+        Returns:
+            _type_: _description_
+        """
+        return reverse_lazy("authentication:user_details", kwargs={"pk": self.get_object().pk})
+
+    fail_url = property(get_fail_url)
+    
+    def test_func(self) -> bool:
+        """
+        _summary_
+
+        Returns:
+            _description_
+        """
         user_group_name = self.request.user.groups.first().name
         return user_group_name == "Superuser"
     
-    def form_valid(self, form):
-        messages.success(self.request, "The user was deleted successfully.")
-        return super(DeleteUserView, self).form_valid(form)
+    def post(self, request, *args, **kwargs):
+        """
+        _summary_
+
+        Arguments:
+            request -- _description_
+
+        Returns:
+            _description_
+        """
+        if "Cancel" in request.POST:
+            url = self.fail_url
+            return redirect(url)
+        else: 
+            return super(DeleteUserView, self).post(request, *args, **kwargs)
+    
+    # def form_valid(self, form):
+    #     messages.success(self.request, "The user was deleted successfully.")
+    #     return super(DeleteUserView, self).form_valid(form)
 
 
 # @login_required

@@ -5,5 +5,5 @@
     {{ form }}
     <input type="submit" name="Confirm" value="Confirm" />
     <input type="submit" name="Cancel" value="Cancel" />
-    {% comment %} <button onclick="window.location.href='{% url "authentication:users" %}'">Cancel</button> {% endcomment %}
+    {% comment %} <button onclick="window.location.href='{% url "inventory:item_detail" object.id %}'">Cancel</button> {% endcomment %}
 </form>

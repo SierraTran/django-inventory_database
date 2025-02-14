@@ -13,9 +13,11 @@ urlpatterns = [
     
     path("<int:pk>/request", views.ItemRequestView.as_view(), name="item_request_form"),
     
-    path("<int:pk>/update", views.ItemUpdateSuperuserView.as_view(), name="item_update_form_superuser"),
-    path("<int:pk>/update", views.ItemUpdateTechnicianView.as_view(), name="item_update_form_technician"),
-    path("<int:pk>/update", views.ItemUpdateInternView.as_view(), name="item_update_form_intern"),
+    path("<int:pk>/update/", views.ItemUpdateSuperuserView.as_view(), name="item_update_form_superuser"),
+    path("<int:pk>/update/", views.ItemUpdateTechnicianView.as_view(), name="item_update_form_technician"),
+    path("<int:pk>/update/", views.ItemUpdateInternView.as_view(), name="item_update_form_intern"),
+    
+    path("<int:pk>/delete/", views.ItemDeleteView.as_view(), name="item_confirm_delete"),
     # /inventory_database/items/new_item_form
     path("new_item_form/", views.ItemCreateSuperuserView.as_view(), name="item_create_form_superuser"),
     path("new_item_form/", views.ItemCreateTechnicianView.as_view(), name="item_create_form_technician"),

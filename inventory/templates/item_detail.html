@@ -87,6 +87,9 @@
     </button>
     {% endif %}
 </div>
+<div class="buttons danger-zone">
+    <button type="button" onclick="window.location.href='{% url "inventory:item_confirm_delete" item.id %}'">Delete</button>
+</div>
 {% endif %} 
 
 {% endblock content %}
