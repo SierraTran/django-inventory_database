@@ -28,3 +28,8 @@ tr.description {
     width: 40%;
     height: 2em;
 }
+
+.buttons.danger-zone > button {
+    border-color: red;
+    background-color: rgba(255, 100, 100, 0.5);
+}
