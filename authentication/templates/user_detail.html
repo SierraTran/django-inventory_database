@@ -1,7 +1,8 @@
 {% extends "authentication_base_template.html" %}
+{% load static %}
 
 {% block other_stylesheets %}
-
+<link rel="stylesheet" href="{% static "user_detail.css" %}" />
 {% endblock other_stylesheets %}
 
 {% block title %}
@@ -9,21 +10,23 @@
 | Inventory Database
 {% endblock title %}
 
+{% block page-title %}{{ user.last_name }}, {{ user.first_name }}{% endblock page-title %}
+
 {% block content %}
 <table>
-    <tr>
+    <tr class="username">
         <th>Username</th><td>{{ user.username }}</td>
     </tr>
-    <tr>
+    <tr class="first-name">
         <th>First Name</th><td>{{ user.first_name }}</td>
     </tr>
-    <tr>
+    <tr class="last-name">
         <th>Last Name</th><td>{{ user.last_name }}</td>
     </tr>
-    <tr>
+    <tr class="email">
         <th>Email</th><td>{{ user.email }}</td>
     </tr>
-    <tr>
+    <tr class="user-group">
         <th>User Group</th><td>{{ user_detail_group_name }}</td>
     </tr>
 </table>
