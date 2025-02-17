@@ -337,7 +337,7 @@ class SearchItemsView(ListView):
 
 class ImportItemDataView(LoginRequiredMixin, UserPassesTestMixin, FormView):
     """
-    Renders a view to allow users to import items from an .xls file to the database.
+    Renders a view to allow users to import items from an .xlsx file to the database.
 
     Attributes:
         form_class:
