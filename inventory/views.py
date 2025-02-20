@@ -12,7 +12,7 @@ import openpyxl
 
 from .forms import ImportFileForm
 
-from .models import Item, ItemRequest
+from .models import Item, ItemRequest, UsedItem
 
 
 # Create your views here.
@@ -91,17 +91,7 @@ class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
     """
 
     model = Item
-    fields = [
-        "manufacturer",
-        "model",
-        "part_or_unit",
-        "part_number",
-        "description",
-        "location",
-        "quantity",
-        "min_quantity",
-        "unit_price",
-    ]
+    fields = "__all__"
     template_name = "item_create_form.html"
 
     def test_func(self) -> bool:
@@ -314,7 +304,7 @@ class SearchItemsView(ListView):
     """
 
     model = Item
-    template_name = "search/search.html"
+    template_name = "search/item_search.html"
     context_object_name = "results_list"
 
     def get_queryset(self):
@@ -490,3 +480,125 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
         item_id = self.kwargs.get("pk")
         context["item"] = Item.objects.get(pk=item_id)
         return context
+
+
+##############################
+# Views for the UsedItem Model
+##############################
+class UsedItemView(ListView):
+    model = UsedItem
+    template_name = "used_items.html"
+    context_object_name = "used_items_list"
+
+    def get_queryset(self):
+        return UsedItem.objects.all().order_by("work_order", "item")
+
+
+class UsedItemDetailView(DetailView):
+    model = UsedItem
+    template_name = "used_item_detail.html"
+
+    def get_context_data(self, **kwargs):
+        """
+        Adds the specific used item to the context data.
+        
+        Args:
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            dict: The context data with the specific item that will be used by the template
+        """
+        context = super().get_context_data(**kwargs)
+        context["used_item"] = self.object
+        return context
+
+
+class UsedItemCreateView(UserPassesTestMixin, CreateView):
+    model = UsedItem
+    template_name = "item_use_form.html"
+    fields = "__all__"
+
+    def test_func(self) -> bool:
+        """
+        Checks if the user belongs to the "Superuser" or "Technician" group.
+
+        Returns:
+            bool: True if the user is in the "Superuser" or "Technician" group, False otherwise.
+        """
+        user_group_name = self.request.user.groups.first().name
+        return user_group_name in ["Superuser", "Technician"]
+
+    def get_context_data(self, **kwargs):
+        """
+        Adds the specific item to the context data.
+
+        Args:
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            dict: The context data with the specific item added.
+        """
+        context = super().get_context_data(**kwargs)
+        item_id = self.kwargs.get("pk")
+        context["item"] = Item.objects.get(pk=item_id)
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        """
+        Checks if the item's quantity is greater than 0 before allowing access to the view.
+
+        Args:
+            request: The HTTP request object.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            HttpResponse: The HTTP response object.
+        """
+        item_id = self.kwargs.get("pk")
+        item = Item.objects.get(pk=item_id)
+        if item.quantity <= 0:
+            messages.error(request, "Cannot use item with quantity 0.")
+            return redirect("inventory:item_detail", pk=item_id)
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        """
+        Override form_valid to decrement the quantity of the associated Item when a new UsedItem is created.
+        
+        Args:
+            form: The form that handles the data for creating a new UsedItem object.
+        
+        Returns:
+            HttpResponse: The HTTP response object 
+        """
+        response = super().form_valid(form)
+        used_item = form.instance
+        item = used_item.item
+        item.quantity -= 1
+        item.save()
+        return response
+
+
+class SearchUsedItemsView(ListView):
+    model = UsedItem
+    template_name = "search/used_item_search.html"
+    context_object_name = "results_list"
+
+    def get_queryset(self):
+        """
+        Retrieves the search results based on the query.
+
+        Returns:
+            list: A list of search results.
+        """
+        query = self.request.GET.get("q")
+        results = (
+            SearchQuerySet()
+            .models(UsedItem)
+            .filter(content=query)
+            .order_by("work_order", "item")
+            if query
+            else []
+        )
+        return results

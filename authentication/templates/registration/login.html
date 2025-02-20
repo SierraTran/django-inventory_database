@@ -12,16 +12,17 @@ Login | Inventory Database
 
 {% block content %}
 <div class="page-title">Log In</div>
+
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
 <form method="post"> {% csrf_token %} 
     <fieldset>
-        {% if messages %}
-        <p style="display: block; text-align: center; font-weight: bold;">
-            {% for message in messages %}
-                {{ message }}
-            {% endfor %}
-        </p>
-        {% endif %}
-
         <label for="username">
         Username <input type="text" id="username" name="username" placeholder="username" required />
         </label>
@@ -32,4 +33,4 @@ Login | Inventory Database
     <input type="submit" value="Log In">
 </form>
 <p>Forgot your password? (Coming Soon)</p>
-{% endblock %}
+{% endblock content %}

@@ -5,25 +5,31 @@ from . import views
 app_name = "inventory"
 
 urlpatterns = [
-    # /inventory_database/items
-    path("", views.ItemView.as_view(), name="items"),
+    # urls for the Item model
+    path("items/", views.ItemView.as_view(), name="items"),
+    path("items/<int:pk>/", views.ItemDetailView.as_view(), name="item_detail"),
+    
+    # This url will create an ItemRequest object. It needs the id of the current Item object
+    path("items/<int:pk>/request", views.ItemRequestCreateView.as_view(), name="item_request_form"),
+    
+    # This url will create a UsedItem object. It need the id of the current Item object
+    path("items/<int:pk>/use", views.UsedItemCreateView.as_view(), name="item_use_form"),
+    
+    path("items/<int:pk>/update/", views.ItemUpdateSuperuserView.as_view(), name="item_update_form_superuser"),
+    path("items/<int:pk>/update/", views.ItemUpdateTechnicianView.as_view(), name="item_update_form_technician"),
+    path("items/<int:pk>/update/", views.ItemUpdateInternView.as_view(), name="item_update_form_intern"),
+    path("items/<int:pk>/delete/", views.ItemDeleteView.as_view(), name="item_confirm_delete"),
+    path("items/new_item_form/", views.ItemCreateSuperuserView.as_view(), name="item_create_form_superuser"),
+    path("items/new_item_form/", views.ItemCreateTechnicianView.as_view(), name="item_create_form_technician"),
+    path("items/search/", views.SearchItemsView.as_view(), name="search_items"),   
+    path("items/import_item_data/", views.ImportItemDataView.as_view(), name="import_item_data"),
+    
+    # urls for the ItemRequest model
+    path("item_requests/", views.ItemRequestView.as_view(), name="item_requests"),
 
-    # example: /inventory_database/items/9
-    path("<int:pk>/", views.ItemDetailView.as_view(), name="item_detail"),
     
-    path("<int:pk>/request", views.ItemRequestView.as_view(), name="item_request_form"),
-    
-    path("<int:pk>/update/", views.ItemUpdateSuperuserView.as_view(), name="item_update_form_superuser"),
-    path("<int:pk>/update/", views.ItemUpdateTechnicianView.as_view(), name="item_update_form_technician"),
-    path("<int:pk>/update/", views.ItemUpdateInternView.as_view(), name="item_update_form_intern"),
-    
-    path("<int:pk>/delete/", views.ItemDeleteView.as_view(), name="item_confirm_delete"),
-    # /inventory_database/items/new_item_form
-    path("new_item_form/", views.ItemCreateSuperuserView.as_view(), name="item_create_form_superuser"),
-    path("new_item_form/", views.ItemCreateTechnicianView.as_view(), name="item_create_form_technician"),
-    # /inventory_database/items/search
-    path("search/", views.SearchItemsView.as_view(), name="search_items"),
-    # /inventory_database/items/requests
-    path("requests/", views.ItemRequestView.as_view(), name="item_requests"),
-    path("import_item_data/", views.ImportItemDataView.as_view(), name="import_item_data"),
+    # urls for the UseItem model
+    path("used_items/", views.UsedItemView.as_view(), name="used_items"),
+    path("used_items/<int:pk>/", views.UsedItemDetailView.as_view(), name="used_item_detail"),
+    path("used_items/search/", views.SearchUsedItemsView.as_view(), name="search_used_items"),
 ]
