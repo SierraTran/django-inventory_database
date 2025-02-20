@@ -1,5 +1,5 @@
 from haystack import indexes
-from .models import Item
+from .models import Item, UsedItem
 
 class ItemIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
@@ -15,5 +15,16 @@ class ItemIndex(indexes.SearchIndex, indexes.Indexable):
     def get_model(self):
         return Item
 
+    def index_queryset(self, using=None):
+        return self.get_model().objects.all()
+    
+class UsedItemIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.CharField(document=True, use_template=True)
+    item = indexes.CharField(model_attr='item')
+    work_order = indexes.IntegerField(model_attr="work_order")
+    
+    def get_model(self):
+        return UsedItem
+    
     def index_queryset(self, using=None):
         return self.get_model().objects.all()

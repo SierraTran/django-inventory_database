@@ -77,3 +77,13 @@ class ItemRequest(models.Model):
     quantity_requested = models.IntegerField()
     requested_by = models.ForeignKey(User, on_delete=models.CASCADE)
     status = models.CharField(choices=STATUS_CHOICES, default=PENDING, max_length=9)
+    
+class UsedItem(models.Model):
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    work_order = models.IntegerField()
+    
+    def get_absolute_url(self):
+        return reverse("inventory:used_item_detail", kwargs={"pk": self.pk})
+    
+    def __str__(self):
+        return "Work Order: " + str(self.work_order) + " | Item: " + str(self.item)

@@ -22,7 +22,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path("inventory_database/", include("authentication.urls")),
-    path("inventory_database/items/", include("inventory.urls")),
+    path("inventory_database/", include("inventory.urls")),
     path("admin/", admin.site.urls),
     path("inventory_database/accounts/", include("django.contrib.auth.urls")),
     path("search/", include("haystack.urls")),

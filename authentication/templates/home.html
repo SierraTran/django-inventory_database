@@ -11,6 +11,7 @@
     {% if request.user.is_authenticated %}
     <h1>Items</h1>
         <p><a href="{% url "inventory:items" %}">Browse available items.</a></p>
+        <p><a href="{% url "inventory:used_items" %}">Browse used items.</a></p>
 
         {# Technician / Superuser only links #}
         {% if user_group.name == 'Technician' or user_group.name == 'Superuser' %}

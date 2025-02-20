@@ -11,6 +11,14 @@
 
 {% block content %}
 
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
 {% if item %}
     <table>
         <tr>
@@ -73,7 +81,7 @@
 {# Technician / Superuser only buttons #}
 {% if user_group.name == 'Technician' or user_group.name == 'Superuser' %}
 <div class="buttons set2">
-    <button type="button" id="use" {% if item.quantity == 0 %}disabled{% endif %}>
+    <button type="button" id="use" onclick="window.location.href='{% url "inventory:item_use_form" item.id %}'" {% if item.quantity == 0 %}disabled{% endif %}>
         Use (Coming Soon)
     </button>
     {# Technicians REQUEST more. Superusers ORDER more. #}

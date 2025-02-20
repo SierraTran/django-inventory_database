@@ -1,0 +1,23 @@
+{% extends "inventory_base_template.html" %}
+{% load static %}
+
+{% block title %}Used Item Detail{% endblock title %}
+
+{% block page-title %}{{ used_item }}{% endblock page-title %}
+
+{% block content %}
+{% if used_item %}
+    <table>
+        <tr>
+            <th>Work Order:</th>
+            <td>{{ used_item.work_order }}</td>
+        </tr>
+        <tr>
+            <th>Item:</th>
+            <td><a href="{% url "inventory:item_detail" used_item.item.id %}">{{ used_item.item }}</a></td>
+        </tr>
+    </table>
+{% else %}
+    <p>There's no information available.</p>
+{% endif %}
+{% endblock content %}
