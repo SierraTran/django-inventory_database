@@ -1,0 +1,46 @@
+{% extends "inventory_base_template.html" %}
+{% load static %}
+
+{% block other_stylesheets %}
+<link rel="stylesheet" href="{% static "items.css" %}" />
+{% endblock other_stylesheets %}
+
+{% block title %}Search Results | Inventory Database{% endblock title %}
+
+{% block page-title %}
+    <a href="{% url "inventory:used_items" %}" title="Click here to see all used items.">
+        Used Items
+    </a>
+     - Search Results for "{{ request.GET.q }}"
+{% endblock page-title %}
+
+{% block content %}
+<div class="queries">
+    <form action="{% url "inventory:search_used_items" %}" method="get">
+        <input name="q" type="Text" placeholder="Search..." value="{{ request.GET.q }}" />
+        <button type="submit">Search</button>
+    </form>    
+</div>
+
+{% if results_list %}
+<div class="grid">
+    <div class="field-name">Work Order</div>
+    <div class="field-name">Item</div>
+    {% for result in results_list %}
+        {% if forloop.counter|divisibleby:2 %}
+        <a href="{% url 'inventory:used_item_detail' result.object.id %}">
+            <div class="even">{{ result.object.work_order }}</div>
+            <div class="even">{{ result.object.item }}</div>
+        </a>
+        {% else %}
+        <a href="{% url 'inventory:used_item_detail' result.object.id %}">
+            <div class="odd">{{ result.object.work_order }}</div>
+            <div class="odd">{{ result.object.item }}</div>
+        </a>
+        {% endif %}
+    {% endfor %}
+</div>
+{% else %}
+<p>No items found.</p>
+{% endif %}
+{% endblock content %}

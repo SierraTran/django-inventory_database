@@ -1,0 +1,43 @@
+{% extends "inventory_base_template.html" %}
+{% load static %}
+
+{% block other_stylesheets %}
+<link rel="stylesheet" href="{% static "used_items.css" %}" />
+{% endblock other_stylesheets %}
+
+{% block title %}Used Items | Inventory Database{% endblock title %}
+
+{% block page-title %}Used Items{% endblock page-title %}
+
+{% block content %}
+
+<div class="queries">
+    <form action="{% url "inventory:search_used_items" %}" method="get">
+        <input name="q" type="Text" placeholder="Search..." />
+        <button type="submit">Search</button>
+    </form>    
+</div>
+
+{% if used_items_list %}
+<div class="grid">
+    <div class="field-name">Work Order</div>
+    <div class="field-name">Item</div>
+    {% for used_item in used_items_list %}
+        {% if forloop.counter|divisibleby:2 %}
+        <a href="{% url 'inventory:used_item_detail' used_item.id %}">
+            <div class="even">{{ used_item.work_order }}</div>
+            <div class="even">{{ used_item.item }}</div>
+        </a>
+        {% else %}
+        <a href="{% url 'inventory:used_item_detail' used_item.id %}">
+            <div class="odd">{{ used_item.work_order }}</div>
+            <div class="odd">{{ used_item.item }}</div>
+        </a>
+        {% endif %}
+    {% endfor %}
+</div>
+{% else %}
+<p>No used items are available.</p>
+{% endif %}
+
+{% endblock content %}

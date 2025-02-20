@@ -1,25 +1,17 @@
 {% extends "inventory_base_template.html" %}
 {% load static %}
 
-{% block other_stylesheets %}
-<link rel="stylesheet" href="{% static "item_form.css" %}" />
-{% endblock other_stylesheets %}
+{% block title %}{% endblock title %}
 
-{% block title %} Create New Item | Inventory Database {% endblock title %}
-
-{% block page-title %} Create New Item {% endblock page-title %}
+{% block page-title %}Using {{ item }}{% endblock page-title %}
 
 {% block content %}
 <form method="post"> {% csrf_token %}
     <table>
         {% for field in form %}
-        {% if field.name == 'description' %}
-        <tr class="description">
-        {% else %}
         <tr>
-        {% endif %}         
             <th>{{ field.label_tag }}</th>
-            <td>{{ field }}</td>        
+            <td>{{ field }}</td>
         </tr>
         {% endfor %}
     </table>
