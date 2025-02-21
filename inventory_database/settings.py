@@ -18,6 +18,7 @@ from django.core.management.commands.runserver import Command as runserver
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Media files (Uploaded by users)
 MEDIA_ROOT = os.path.join(BASE_DIR, "public/static")
 MEDIA_URL = "/media/"
 
@@ -90,6 +91,9 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
+#This setting will update search indexes
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -152,9 +156,7 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
-
 # Absolute path for collected static files
-
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 
@@ -174,7 +176,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # will bring the user back to "/inventory_database/"
 LOGIN_REDIRECT_URL = "../../"
 
-# The logout redurect url "../login"
+# The logout redirect url "../login"
 # will bring the user back to the login page ("/inventory_database/accounts/login/")
 LOGOUT_REDIRECT_URL = "../login"
 
