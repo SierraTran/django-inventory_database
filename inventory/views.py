@@ -340,6 +340,7 @@ class ImportItemDataView(LoginRequiredMixin, UserPassesTestMixin, FormView):
 
     form_class = ImportFileForm
     template_name = "import_item_data.html"
+    success_url = reverse_lazy("inventory:items")
 
     def test_func(self) -> bool:
         """
@@ -368,13 +369,18 @@ class ImportItemDataView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         sheet = workbook.active
         # For each record in the excel file ...
         for row in sheet.iter_rows(min_row=2, values_only=True):
+            # If the row is completely blank, stop the for loop
+            if all(cell is None for cell in row):
+                break
+            
+            # If not...
             # Get its data. Set to default value if None
             manufacturer = row[0] if row[0] is not None else "N/A"
             model = row[1] if row[1] is not None else "N/A"
             part_or_unit = row[2] if row[2] is not None else "Part"
             part_number = row[3] if row[3] is not None else ""
             description = (
-                row[4] if row[4] is not None else str(model) + " " + str(part_number)
+                row[4] if row[4] is not None else "" #str(model) + " " + str(part_number)
             )
             location = row[5] if row[5] is not None else "N/A"
             quantity = row[6] if row[6] is not None else 0
@@ -393,7 +399,7 @@ class ImportItemDataView(LoginRequiredMixin, UserPassesTestMixin, FormView):
                 min_quantity=min_quantity,
                 unit_price=unit_price,
             )
-        # Go to items page
+        # Go to items page after finishing
         return HttpResponseRedirect(reverse("inventory:items"))
 
 
