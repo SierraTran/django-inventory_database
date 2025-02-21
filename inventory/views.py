@@ -12,7 +12,7 @@ import openpyxl
 
 from .forms import ImportFileForm
 
-from .models import Item, ItemRequest, UsedItem
+from .models import Item, ItemHistory, ItemRequest, UsedItem
 
 
 # Create your views here.
@@ -77,6 +77,17 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context["user_group"] = self.request.user.groups.first()
         return context
+    
+    
+class ItemHistoryView(LoginRequiredMixin, ListView):
+    model = ItemHistory
+    template_name = "item_history.html"
+    context_object_name = "item_history_list"
+    
+    def get_queryset(self):
+        item_id = self.kwargs['pk']
+        history = ItemHistory.objects.filter(item_id=item_id).order_by('-timestamp')
+        return history
 
 
 class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
@@ -91,7 +102,17 @@ class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
     """
 
     model = Item
-    fields = "__all__"
+    fields = [
+        "manufacturer",
+        "model",
+        "part_or_unit",
+        "part_number",
+        "description",
+        "location",
+        "quantity",
+        "min_quantity",
+        "unit_price",
+    ]
     template_name = "item_create_form.html"
 
     def test_func(self) -> bool:
