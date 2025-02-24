@@ -4,9 +4,10 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, FormView, DeleteView
 from django.shortcuts import redirect
-from haystack.query import SearchQuerySet
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
+
+from haystack.query import SearchQuerySet
 
 import openpyxl
 
@@ -77,17 +78,23 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context["user_group"] = self.request.user.groups.first()
         return context
-    
-    
+
+
 class ItemHistoryView(LoginRequiredMixin, ListView):
     model = ItemHistory
     template_name = "item_history.html"
     context_object_name = "item_history_list"
-    
+
     def get_queryset(self):
-        item_id = self.kwargs['pk']
-        history = ItemHistory.objects.filter(item_id=item_id).order_by('-timestamp')
+        item_id = self.kwargs["pk"]
+        history = ItemHistory.objects.filter(item_id=item_id).order_by("-timestamp")
         return history
+
+    def get_context_data(self, **kwargs):
+        item_id = self.kwargs["pk"]
+        context = super().get_context_data(**kwargs)
+        context["item"] = Item.objects.filter(id=item_id)[0]
+        return context
 
 
 class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
@@ -124,6 +131,11 @@ class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
         """
         return self.request.user.groups.first().name == "Superuser"
 
+    # TODO: Pass the Current User to the `save` method
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        return super().form_valid(form)
+
 
 class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
     """
@@ -158,11 +170,16 @@ class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
         """
         return self.request.user.groups.first().name == "Technician"
 
+    # TODO: Pass the Current User to the `save` method
+    def form_valid(self, form):
+        form
+        return super().form_valid(form)
+
 
 class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
     """
     Class-based view for updating an existing item.
-    This view requires the user to be in the "Superuser" or "Technician" group.
+    This view requires the user to be in the "Superuser" group.
 
     Attributes:
         model (Item): The model that this view will operate on.
@@ -193,6 +210,23 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
         """
         user_group_name = self.request.user.groups.first().name
         return user_group_name == "Superuser"
+
+    def form_valid(self, form):
+        """
+        Override form_valid to pass the current user to the save method.
+
+        Args:
+            form: The form that handles the data for updating the Item object.
+
+        Returns:
+            HttpResponse: The HTTP response object.
+        """
+        form.instance.last_modified_by = self.request.user
+        return super().form_valid(form)
+
+    def save(self, *args, **kwargs):
+        kwargs["user"] = self.request.user
+        return super().save(*args, **kwargs)
 
 
 class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
@@ -229,6 +263,23 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
         user_group_name = self.request.user.groups.first().name
         return user_group_name == "Technician"
 
+    def form_valid(self, form):
+        """
+        Override form_valid to pass the current user to the save method.
+
+        Args:
+            form: The form that handles the data for updating the Item object.
+
+        Returns:
+            HttpResponse: The HTTP response object.
+        """
+        form.instance.updated_by = self.request.user
+        return super().form_valid(form)
+
+    def save(self, *args, **kwargs):
+        kwargs["user"] = self.request.user
+        return super().save(*args, **kwargs)
+
 
 class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
     """
@@ -253,6 +304,23 @@ class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
             bool: True if the user is in the "Intern" group, False otherwise.
         """
         return self.request.user.groups.first().name == "Intern"
+
+    def form_valid(self, form):
+        """
+        Override form_valid to pass the current user to the save method.
+
+        Args:
+            form: The form that handles the data for updating the Item object.
+
+        Returns:
+            HttpResponse: The HTTP response object.
+        """
+        form.instance.updated_by = self.request.user
+        return super().form_valid(form)
+
+    def save(self, *args, **kwargs):
+        kwargs["user"] = self.request.user
+        return super().save(*args, **kwargs)
 
 
 class ItemDeleteView(UserPassesTestMixin, DeleteView):
@@ -393,7 +461,7 @@ class ImportItemDataView(LoginRequiredMixin, UserPassesTestMixin, FormView):
             # If the row is completely blank, stop the for loop
             if all(cell is None for cell in row):
                 break
-            
+
             # If not...
             # Get its data. Set to default value if None
             manufacturer = row[0] if row[0] is not None else "N/A"
@@ -401,7 +469,9 @@ class ImportItemDataView(LoginRequiredMixin, UserPassesTestMixin, FormView):
             part_or_unit = row[2] if row[2] is not None else "Part"
             part_number = row[3] if row[3] is not None else ""
             description = (
-                row[4] if row[4] is not None else "" #str(model) + " " + str(part_number)
+                row[4]
+                if row[4] is not None
+                else ""  # str(model) + " " + str(part_number)
             )
             location = row[5] if row[5] is not None else "N/A"
             quantity = row[6] if row[6] is not None else 0
@@ -518,6 +588,7 @@ class UsedItemView(ListView):
     context_object_name = "used_items_list"
 
     def get_queryset(self):
+        # TODO: Doc comment for `get_queryset`
         return UsedItem.objects.all().order_by("work_order", "item")
 
 
@@ -528,7 +599,7 @@ class UsedItemDetailView(DetailView):
     def get_context_data(self, **kwargs):
         """
         Adds the specific used item to the context data.
-        
+
         Args:
             **kwargs: Additional keyword arguments.
 
@@ -592,12 +663,12 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
     def form_valid(self, form):
         """
         Override form_valid to decrement the quantity of the associated Item when a new UsedItem is created.
-        
+
         Args:
             form: The form that handles the data for creating a new UsedItem object.
-        
+
         Returns:
-            HttpResponse: The HTTP response object 
+            HttpResponse: The HTTP response object
         """
         response = super().form_valid(form)
         used_item = form.instance
@@ -608,6 +679,7 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
 
 
 class SearchUsedItemsView(ListView):
+    # TODO: Doc comment for `SearchUsedItemsView`
     model = UsedItem
     template_name = "search/used_item_search.html"
     context_object_name = "results_list"

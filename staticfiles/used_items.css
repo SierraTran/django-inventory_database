@@ -1,0 +1,23 @@
+div.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(1em, auto));
+    min-width: 950px;
+    margin: 2em auto;
+}
+
+div.field-name {
+    font-weight: bold;
+}
+
+div.odd {
+    background-color: rgb(238, 238, 238);
+}
+
+a {
+    display: contents;
+    color: black;
+}
+
+a:hover {
+    color: red;
+}

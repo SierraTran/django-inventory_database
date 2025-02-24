@@ -2,6 +2,9 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from django.urls import reverse
 
+from model_utils.fields import StatusField, MonitorField
+from model_utils import Choices, FieldTracker
+
 from authentication.models import User
 
 
@@ -35,7 +38,14 @@ class Item(models.Model):
         validators=[MinValueValidator(0.00)],
     )
 
-    modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    last_modified_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    
+    tracker = FieldTracker(fields=[
+        'manufacturer', 'model', 'part_or_unit', 'part_number', 'description',
+        'location', 'quantity', 'min_quantity', 'unit_price'
+    ])
 
     @property
     def low_stock(self):
@@ -43,15 +53,14 @@ class Item(models.Model):
 
     def get_absolute_url(self):
         return reverse("inventory:item_detail", kwargs={"pk": self.pk})
-    
+
     def save(self, *args, **kwargs):
         """
-        _summary_
-        
         Overrides the save method in the Item model to set the modified_by field.
         """
-        if 'user' in kwargs:
-            self.modified_by = kwargs.pop('user')
+        user = kwargs.pop('user', None)
+        if user:
+            self.modified_by = user
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -63,9 +72,6 @@ class Item(models.Model):
 
         Returns:
             str: The `manufacturer`, a comma, `model`, and `part_number` if applicable.
-
-        Example:
-            "HP, 87 Case"
         """
         item_string = self.manufacturer + ", " + self.model
         if self.part_or_unit == self.PART:
@@ -77,29 +83,27 @@ class ItemHistory(models.Model):
     ACTION_CHOICES = [
         ("create", "Create"),
         ("update", "Update"),
+        ("delete", "Delete"),
     ]
-    
+
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     action = models.CharField(max_length=6, choices=ACTION_CHOICES)
     timestamp = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     changes = models.TextField(null=True, blank=True)
-    
+
     def __str__(self):
         return f"{self.item} - {self.action} - {self.timestamp}"
 
 
 class ItemRequest(models.Model):
-    ACCEPTED = "Accepted"
-    PENDING = "Pending"
-    REJECTED = "Rejected"
-
-    STATUS_CHOICES = {ACCEPTED: "Accepted", PENDING: "Pending", REJECTED: "Rejected"}
+    STATUS = Choices("Pending", "Accepted", "Rejected")
 
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity_requested = models.IntegerField()
     requested_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    status = models.CharField(choices=STATUS_CHOICES, default=PENDING, max_length=9)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    status = StatusField(db_index=True)
 
 
 class UsedItem(models.Model):

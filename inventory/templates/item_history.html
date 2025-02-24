@@ -1,10 +1,33 @@
 {% extends "inventory_base_template.html" %}
 {% load static %}
 
+{% block other_stylesheets %}
+<link rel="stylesheet" href="{% static "item_history.css" %}" />
+{% endblock other_stylesheets %}
+
 {% block title %}Item History{% endblock title %}
 
-{% block page-title %}Item History{% endblock page-title %}
+{% block page-title %}{{ item }} - Item History{% endblock page-title %}
 
 {% block content %}
-This is the Item History Page
+<table>
+    <thead>
+        <tr>
+            <th>Action</th>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Changes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for history in item_history_list %}
+        <tr>
+            <td class="col action">{{ history.get_action_display }}</td>
+            <td class="col timestamp">{{ history.timestamp }}</td>
+            <td class="col user">{{ history.user }}</td>
+            <td class="col changes">{{ history.changes }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock content %}
