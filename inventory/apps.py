@@ -6,4 +6,5 @@ class InventoryConfig(AppConfig):
     name = 'inventory'
     
     def ready(self):
-        import inventory.signals
+        # This ensures the signals are connected.
+        from .signals import handlers
