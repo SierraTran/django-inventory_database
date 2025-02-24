@@ -61,7 +61,12 @@
     at least have viewer permissions and allow the "back" button to be shown on 
     the page automatically.
 {% endcomment %}
- <div class="buttons set1">
+<div class="buttons">
+    <button type="buttons" id="history" onclick="window.location.href='{% url "inventory:item_history" item.id %}'">
+        History
+    </button>
+</div>
+<div class="buttons">
     <button type="button" id="back" onclick="window.location.href='{% url "inventory:items" %}';">
         Back to Items
     </button>
@@ -80,7 +85,7 @@
 
 {# Technician / Superuser only buttons #}
 {% if user_group.name == 'Technician' or user_group.name == 'Superuser' %}
-<div class="buttons set2">
+<div class="buttons">
     <button type="button" id="use" onclick="window.location.href='{% url "inventory:item_use_form" item.id %}'" {% if item.quantity == 0 %}disabled{% endif %}>
         Use (Coming Soon)
     </button>

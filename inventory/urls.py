@@ -8,6 +8,8 @@ urlpatterns = [
     # urls for the Item model
     path("items/", views.ItemView.as_view(), name="items"),
     path("items/<int:pk>/", views.ItemDetailView.as_view(), name="item_detail"),
+    
+    # This url leads to the Item's history (ItemHistory). It needs the id of the current Item object.
     path("items/<int:pk>/history", views.ItemHistoryView.as_view(), name="item_history"),
     
     # This url will create an ItemRequest object. It needs the id of the current Item object

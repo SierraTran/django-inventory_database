@@ -1,0 +1,21 @@
+table {
+    margin: 0 auto;
+    width: 75%;
+    max-width: 900px;
+}
+
+tr th {
+    text-align: left;
+}
+
+tr td {
+    border-top: 1px solid black;
+}
+
+col.timestamp {
+    width: 25%;
+}
+
+tr:nth-child(even) {
+    background-color: hotpink;
+}

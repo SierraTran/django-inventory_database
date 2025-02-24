@@ -1,0 +1,24 @@
+table {
+    margin: 0 auto;
+    width: 85%;
+    border-spacing: 10px;
+}
+
+tr th {
+    text-align: left;
+}
+
+tr td {
+    border-top: 1px solid black;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.action {
+    width: 7%;
+}
+
+.timestamp {
+    width: 20%;
+}
+
