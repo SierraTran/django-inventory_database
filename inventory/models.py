@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from django.urls import reverse
 
-from model_utils.fields import StatusField, MonitorField
+from model_utils.fields import StatusField
 from model_utils import Choices, FieldTracker
 
 from authentication.models import User
@@ -80,6 +80,9 @@ class Item(models.Model):
 
 
 class ItemHistory(models.Model):
+    class Meta:
+        verbose_name = "Item History"
+        
     ACTION_CHOICES = [
         ("create", "Create"),
         ("update", "Update"),
@@ -97,6 +100,10 @@ class ItemHistory(models.Model):
 
 
 class ItemRequest(models.Model):
+    class Meta:
+        verbose_name = "Item Request"
+        verbose_name_plural = "Item Requests"
+    
     STATUS = Choices("Pending", "Accepted", "Rejected")
 
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
@@ -107,6 +114,10 @@ class ItemRequest(models.Model):
 
 
 class UsedItem(models.Model):
+    class Meta:
+        verbose_name = "Used Item"
+        verbose_name_plural = "Used Items"
+    
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     work_order = models.IntegerField()
 
@@ -114,4 +125,34 @@ class UsedItem(models.Model):
         return reverse("inventory:used_item_detail", kwargs={"pk": self.pk})
 
     def __str__(self):
+        # TODO: Redo to use string format
         return "Work Order: " + str(self.work_order) + " | Item: " + str(self.item)
+
+
+class PurchaseOrderItem(models.Model):
+    class Meta:
+        verbose_name = "Purchase Order Item"
+        verbose_name_plural = "Purchase Order Items"
+    
+    # item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    manufacturer = models.CharField(max_length=100)
+    model_part_num = models.CharField(max_length=100)
+    quantity_ordered = models.IntegerField()
+    description = models.TextField()
+    serial_num = models.CharField(max_length=100)
+    property_num = models.CharField(max_length=100)
+    unit_price = models.DecimalField(decimal_places=2, max_digits=14, validators=[MinValueValidator(0.00)])
+    
+    # @property
+    # def manufacturer(self):
+    #     return self.item.manufacturer
+    
+    # @property
+    # def model_part_num(self):
+    #     return f
+
+
+
+    def __str__(self):
+        return f"Purchase Order for {self.item} - Quantity: {self.quantity_ordered}"
+
