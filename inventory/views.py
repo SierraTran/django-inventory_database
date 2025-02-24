@@ -11,7 +11,7 @@ from haystack.query import SearchQuerySet
 
 import openpyxl
 
-from .forms import ImportFileForm
+from .forms import ImportFileForm, PurchaseOrderItemForm
 
 from .models import Item, ItemHistory, ItemRequest, UsedItem
 
@@ -701,3 +701,26 @@ class SearchUsedItemsView(ListView):
             else []
         )
         return results
+
+
+#######################################
+# Views for the PurchaseOrderItem model
+#######################################
+class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
+    form_class = PurchaseOrderItemForm
+    template_name = "purchase_order_form.html"
+    # success_url = ""
+    
+    def test_func(self) -> bool:
+        """
+        Checks if the user is in the 'Superuser' group.
+
+        Returns:
+            bool: True if the user is in the 'Superuser' group, False otherwise.
+        """
+        return self.request.user.groups.first().name == "Superuser"
+    
+    def form_valid(self, form):
+        form
+        return super().form_valid(form)
+    

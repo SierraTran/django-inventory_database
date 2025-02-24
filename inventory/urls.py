@@ -35,4 +35,7 @@ urlpatterns = [
     path("used_items/", views.UsedItemView.as_view(), name="used_items"),
     path("used_items/<int:pk>/", views.UsedItemDetailView.as_view(), name="used_item_detail"),
     path("used_items/search/", views.SearchUsedItemsView.as_view(), name="search_used_items"),
+    
+    # 
+    path("purchase_order_form/", views.PurchaseOrderItemsFormView.as_view(), name="purchase_order_form")
 ]

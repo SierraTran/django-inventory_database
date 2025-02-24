@@ -1,0 +1,15 @@
+{% extends "inventory_base_template.html" %}
+{% load static %}
+
+{% block other_stylesheets %}
+
+{% endblock other_stylesheets %}
+
+{% block title %}{% endblock title %}
+
+{% block page-title %}{% endblock page-title %}
+
+{% block content %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit" />
+{% endblock content %}
