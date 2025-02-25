@@ -19,6 +19,7 @@ from .models import *
 
 # Create your views here.
 def home(request):
+    # TODO: New doc comment
     """
     Renders the "home.html" template when the user accesses the home page
     """
@@ -28,6 +29,7 @@ def home(request):
 
 
 def login_page(request):
+    # TODO: New doc comment
     """
     Renders the "login.html" template and handles login logic
     """
@@ -59,6 +61,7 @@ def login_page(request):
 
 
 class UsersView(UserPassesTestMixin, ListView):
+    # TODO: Doc comment
     """
     _summary_
 
@@ -75,6 +78,7 @@ class UsersView(UserPassesTestMixin, ListView):
     context_object_name = "users_list"
     
     def test_func(self) -> bool:
+        # TODO: Doc comment
         """
         _summary_
 
@@ -85,18 +89,22 @@ class UsersView(UserPassesTestMixin, ListView):
         return user_group_name == "Superuser"
     
     def get_queryset(self):
+        # TODO: Doc comment
         return User.objects.all().order_by("username", "last_name", "first_name")
 
 
 class UserDetailsView(UserPassesTestMixin, DetailView):
+    # TODO: Doc comment
     model = User
     template_name = "user_detail.html"
     
     def test_func(self) -> bool:
+        # TODO: Doc comment
         user_group_name = self.request.user.groups.first().name
         return user_group_name == "Superuser"
     
     def get_context_data(self, **kwargs):
+        # TODO: Doc comment
         context = super().get_context_data(**kwargs)
         specific_user = self.get_object()
         context['user_detail_group_name'] = specific_user.groups.first().name if specific_user.groups.exists() else "No Group"
@@ -104,18 +112,22 @@ class UserDetailsView(UserPassesTestMixin, DetailView):
     
 
 class CreateUserView(UserPassesTestMixin, CreateView):
+    # TODO: Doc comment
     model = User
     fields = ["username", "first_name", "last_name", "email", "password"]
     template_name = "user_create_form.html"
     
     def get_success_url(self):
+        # TODO: Doc comment
         return reverse_lazy("authentication:user_details", kwargs={"pk": self.object.pk})
     
     def test_func(self) -> bool:
+        # TODO: Doc comment
         user_group_name = self.request.user.groups.first().name
         return user_group_name == "Superuser"
 
     def form_valid(self, form):
+        # TODO: Doc comment
         response = super().form_valid(form)
         group_name = self.request.POST.get("user_group")
         group = Group.objects.get(name=group_name)
@@ -123,6 +135,7 @@ class CreateUserView(UserPassesTestMixin, CreateView):
         return response
 
     def get_context_data(self, **kwargs):
+        # TODO: Doc comment
         context = super().get_context_data(**kwargs)
         context["user"] = self.request.user
         context["groups"] = Group.objects.all()
@@ -130,6 +143,7 @@ class CreateUserView(UserPassesTestMixin, CreateView):
     
 
 class DeleteUserView(UserPassesTestMixin, DeleteView):
+    # TODO: Doc comment
     """
     _summary_
 
@@ -140,6 +154,7 @@ class DeleteUserView(UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy("authentication:users")
     
     def get_fail_url(self):
+        # TODO: Doc comment
         """
         _summary_
 
@@ -151,6 +166,7 @@ class DeleteUserView(UserPassesTestMixin, DeleteView):
     fail_url = property(get_fail_url)
     
     def test_func(self) -> bool:
+        # TODO: Doc comment
         """
         _summary_
 
@@ -161,6 +177,7 @@ class DeleteUserView(UserPassesTestMixin, DeleteView):
         return user_group_name == "Superuser"
     
     def post(self, request, *args, **kwargs):
+        # TODO: Doc comment
         """
         _summary_
 

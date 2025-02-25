@@ -67,9 +67,6 @@ class Item(models.Model):
         """
         The string representation of the `Item` object
 
-        Parameters:
-            self (Item): The current `Item` object
-
         Returns:
             str: The `manufacturer`, a comma, `model`, and `part_number` if applicable.
         """
@@ -135,12 +132,12 @@ class PurchaseOrderItem(models.Model):
         verbose_name_plural = "Purchase Order Items"
     
     # item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    manufacturer = models.CharField(max_length=100)
-    model_part_num = models.CharField(max_length=100)
+    manufacturer = models.CharField(max_length=100, blank=True)
+    model_part_num = models.CharField(max_length=100, blank=True)
     quantity_ordered = models.IntegerField()
     description = models.TextField()
-    serial_num = models.CharField(max_length=100)
-    property_num = models.CharField(max_length=100)
+    serial_num = models.CharField(max_length=100, blank=True)
+    property_num = models.CharField(max_length=100, blank=True)
     unit_price = models.DecimalField(decimal_places=2, max_digits=14, validators=[MinValueValidator(0.00)])
     
     # @property
