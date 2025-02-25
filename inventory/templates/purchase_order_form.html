@@ -2,14 +2,127 @@
 {% load static %}
 
 {% block other_stylesheets %}
-
+<link rel="stylesheet" href="{% static "purchase_order_form.css" %}" />
 {% endblock other_stylesheets %}
 
-{% block title %}{% endblock title %}
+{% block title %}Purchase Order Items Form{% endblock title %}
 
-{% block page-title %}{% endblock page-title %}
+{% block page-title %}Purchase Order Items Form{% endblock page-title %}
 
 {% block content %}
-    {{ form.as_p }}
+<form id="form-container" method="post"> {% csrf_token %}
+    {{ formset.management_form }}
+    {% for form in formset %}
+    <fieldset class="item-form">
+        {% if form.non_field_errors %}
+        <div class="form-errors">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+        <div class="field manufacturer">
+            <label for="{{ form.manufacturer.id_for_label }}">{{ form.manufacturer.label }}</label>            
+            {{ form.manufacturer }}
+            {% if form.manufacturer.errors %}
+            <div class="field-errors">
+                {{ form.manufacturer.errors }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="field model_part_num">
+            <label for="{{ form.model_part_num.id_for_label }}">{{ form.model_part_num.label }}</label>            
+            {{ form.model_part_num }}
+            {% if form.model_part_num.errors %}
+            <div class="field-errors">
+                {{ form.model_part_num.errors }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="field quantity_ordered">
+            <label for="{{ form.quantity_ordered.id_for_label }}">{{ form.quantity_ordered.label }}</label>            
+            {{ form.quantity_ordered }}
+            {% if form.quantity_ordered.errors %}
+            <div class="field-errors">
+                {{ form.quantity_ordered.errors }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="field description">
+            <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>            
+            {{ form.description }}
+            {% if form.description.errors %}
+            <div class="field-errors">
+                {{ form.description.errors }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="field serial_num">
+            <label for="{{ form.serial_num.id_for_label }}">{{ form.serial_num.label }}</label>            
+            {{ form.serial_num }}
+            {% if form.serial_num.errors %}
+            <div class="field-errors">
+                {{ form.serial_num.errors }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="field property_num">
+            <label for="{{ form.property_num.id_for_label }}">{{ form.property_num.label }}</label>            
+            {{ form.property_num }}
+            {% if form.property_num.errors %}
+            <div class="field-errors">
+                {{ form.property_num.errors }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="field unit_price">
+            <label for="{{ form.unit_price.id_for_label }}">{{ form.unit_price.label }}</label>            
+            {{ form.unit_price }}
+            {% if form.unit_price.errors %}
+            <div class="field-errors">
+                {{ form.unit_price.errors }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="field delete">
+            <label for="{{ form.DELETE.id_for_label }}">{{ form.DELETE.label }}</label>
+            {{ form.DELETE }}
+        </div>
+    </fieldset>
+    {% endfor %}
+    <button type="button" id="add-item-button" onclick="addItem()">Add Item</button>
     <input type="submit" value="Submit" />
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const formsets = document.querySelectorAll('form fieldset');
+
+    formsets.forEach(function (fieldset) {
+        const deleteCheckbox = fieldset.querySelector('.field.delete input[type="checkbox"]');
+
+        deleteCheckbox.addEventListener('change', function () {
+            const inputs = fieldset.querySelectorAll('input, select, textarea');
+
+            inputs.forEach(function (input) {
+                if (input !== deleteCheckbox) {
+                    input.disabled = deleteCheckbox.checked;
+                }
+            });
+        });
+    });
+});
+
+function addItem() {
+    const formContainer = document.querySelector("#form-container");
+    const itemForms = document.querySelectorAll(".item-form");
+    const totalForms = document.querySelector("#id_form-TOTAL_FORMS");
+    const formNum = itemForms.length;
+    const newForm = itemForms[0].cloneNode(true);
+    const formRegex = RegExp(`form-(\\d){1}-`, 'g');
+
+    newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`);
+    formContainer.insertBefore(newForm, document.querySelector("#add-item-button"));
+
+    totalForms.setAttribute('value', `${formNum + 1}`);
+}
+</script>
 {% endblock content %}
