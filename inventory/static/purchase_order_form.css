@@ -1,0 +1,29 @@
+form {
+    margin: 0 auto;
+    background-color: rgb(200, 200, 200);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 1000px;
+}
+
+
+fieldset {
+    width: 95%;
+    border: 0;
+}  
+
+.field {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 4px;
+}
+
+.field:last-child {
+    padding-bottom: 0;
+}
+
+input[type="submit"] {
+    width: 40%;
+    margin: 10px;
+}

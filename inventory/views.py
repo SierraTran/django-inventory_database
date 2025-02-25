@@ -4,16 +4,18 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, FormView, DeleteView
 from django.shortcuts import redirect
-from django.http import HttpResponseRedirect
+
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 
 from haystack.query import SearchQuerySet
 
 import openpyxl
 
-from .forms import ImportFileForm, PurchaseOrderItemForm
+from .forms import ImportFileForm, PurchaseOrderItemFormSet
 
-from .models import Item, ItemHistory, ItemRequest, UsedItem
+from .models import Item, ItemHistory, ItemRequest, PurchaseOrderItem, UsedItem
+
 
 
 # Create your views here.
@@ -129,10 +131,11 @@ class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
         Returns:
             bool: True if the user is in the 'Superuser' group, False otherwise.
         """
-        return self.request.user.groups.first().name == "Superuser"
+        first_group = self.request.user.groups.first()
+        return first_group is not None and first_group.name == "Superuser"
 
-    # TODO: Pass the Current User to the `save` method
     def form_valid(self, form):
+        # TODO: Doc comment
         form.instance.created_by = self.request.user
         return super().form_valid(form)
 
@@ -170,15 +173,23 @@ class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
         """
         return self.request.user.groups.first().name == "Technician"
 
-    # TODO: Pass the Current User to the `save` method
     def form_valid(self, form):
-        form
+        """
+        Override form_valid to pass the current user to the save method.
+
+        Args:
+            form: The form that handles the data for updating the Item object.
+
+        Returns:
+            HttpResponse: The HTTP response object.
+        """
+        form.instance.created_by = self.request.user
         return super().form_valid(form)
 
 
 class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
     """
-    Class-based view for updating an existing item.
+    Class-based view for updating an existing item as a Superuser.
     This view requires the user to be in the "Superuser" group.
 
     Attributes:
@@ -225,13 +236,14 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
         return super().form_valid(form)
 
     def save(self, *args, **kwargs):
+        # TODO: Doc comment
         kwargs["user"] = self.request.user
         return super().save(*args, **kwargs)
 
 
 class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
     """
-    Class-based view for updating an existing item.
+    Class-based view for updating an existing item as a Technician.
     This view requires the user to be in the "Technician" group.
 
     Attributes:
@@ -283,7 +295,7 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
 
 class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
     """
-    Class-based view for updating the quantity of an existing item.
+    Class-based view for updating the quantity of an existing item as an Intern.
     This view requires the user to be in the "Intern" group.
 
     Attributes:
@@ -414,7 +426,7 @@ class SearchItemsView(ListView):
         return results
 
 
-class ImportItemDataView(LoginRequiredMixin, UserPassesTestMixin, FormView):
+class ImportItemDataView(UserPassesTestMixin, FormView):
     """
     Renders a view to allow users to import items from an .xlsx file to the database.
 
@@ -582,7 +594,7 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
 ##############################
 # Views for the UsedItem Model
 ##############################
-class UsedItemView(ListView):
+class UsedItemView(LoginRequiredMixin, ListView):
     model = UsedItem
     template_name = "used_items.html"
     context_object_name = "used_items_list"
@@ -592,7 +604,7 @@ class UsedItemView(ListView):
         return UsedItem.objects.all().order_by("work_order", "item")
 
 
-class UsedItemDetailView(DetailView):
+class UsedItemDetailView(LoginRequiredMixin, DetailView):
     model = UsedItem
     template_name = "used_item_detail.html"
 
@@ -678,7 +690,7 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
         return response
 
 
-class SearchUsedItemsView(ListView):
+class SearchUsedItemsView(LoginRequiredMixin, ListView):
     # TODO: Doc comment for `SearchUsedItemsView`
     model = UsedItem
     template_name = "search/used_item_search.html"
@@ -707,10 +719,11 @@ class SearchUsedItemsView(ListView):
 # Views for the PurchaseOrderItem model
 #######################################
 class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
-    form_class = PurchaseOrderItemForm
+
+    form_class = PurchaseOrderItemFormSet
     template_name = "purchase_order_form.html"
-    # success_url = ""
-    
+    success_url = reverse_lazy("inventory:items")
+
     def test_func(self) -> bool:
         """
         Checks if the user is in the 'Superuser' group.
@@ -720,7 +733,65 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
         """
         return self.request.user.groups.first().name == "Superuser"
     
-    def form_valid(self, form):
-        form
-        return super().form_valid(form)
-    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context["formset"] = PurchaseOrderItemFormSet(self.request.POST)
+        else:
+            context["formset"] = PurchaseOrderItemFormSet(queryset=PurchaseOrderItem.objects.none())
+        return context
+
+    def addNewItemRow(worksheet, row):
+        """
+        Helper function that adds new rows for `form_valid()`
+        """
+        worksheet.insert_rows(row)
+        
+
+    def form_valid(self, formset):
+        """
+        Process the form data and write it to an Excel file.
+
+        Args:
+            formset: The formset containing the purchase order data.
+
+        Returns:
+            HttpResponse: The HTTP response object to download the Excel file.
+        """
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = 'attachment; filename="new_purchase_order.xlsx"'
+        po_template_path = "PO_Template.xlsx"
+        workbook = openpyxl.load_workbook(po_template_path)
+        worksheet = workbook.active
+
+        # Write data to the worksheet
+        row = 16
+        for form in formset:
+            if form.cleaned_data.get("DELETE"):
+                continue
+            if row >= 24:
+                # Add another row
+                self.addNewItemRow(worksheet, row)
+            manufacturer = form.cleaned_data["manufacturer"]
+            model_part_num = form.cleaned_data["model_part_num"]
+            quantity_ordered = form.cleaned_data["quantity_ordered"]
+            description = form.cleaned_data["description"]
+            serial_num = form.cleaned_data["serial_num"]
+            property_num = form.cleaned_data["property_num"]
+            unit_price = form.cleaned_data["unit_price"]
+
+            worksheet[f"B{row}"] = manufacturer
+            worksheet[f"C{row}"] = model_part_num
+            worksheet[f"D{row}"] = quantity_ordered
+            worksheet[f"E{row}"] = description
+            worksheet[f"G{row}"] = serial_num
+            worksheet[f"H{row}"] = property_num
+            worksheet[f"I{row}"] = unit_price
+            row += 1
+
+        # Save the workbook content to the response object
+        workbook.save(response)
+
+        return response
