@@ -10,12 +10,14 @@ from django.urls import reverse, reverse_lazy
 
 from haystack.query import SearchQuerySet
 
-import openpyxl
+from openpyxl import load_workbook, worksheet
+from openpyxl.styles import Alignment, Border, Side, NamedStyle
 
 from .forms import ImportFileForm, PurchaseOrderItemFormSet
 
 from .models import Item, ItemHistory, ItemRequest, PurchaseOrderItem, UsedItem
 
+from .excel_functions import setup_worksheet
 
 
 # Create your views here.
@@ -136,6 +138,15 @@ class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
 
     def form_valid(self, form):
         # TODO: Doc comment
+        """
+        Overrides the form_valid function of the parent class (`CreateView`) to add the user to the form.
+
+        Arguments:
+            form -- _description_
+
+        Returns:
+            _description_
+        """
         form.instance.created_by = self.request.user
         return super().form_valid(form)
 
@@ -175,7 +186,7 @@ class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
 
     def form_valid(self, form):
         """
-        Override form_valid to pass the current user to the save method.
+        Overrides the form_valid function of the parent class (`CreateView`) to pass the current user to the save method.
 
         Args:
             form: The form that handles the data for updating the Item object.
@@ -219,12 +230,13 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
         Returns:
             bool: True if the user is in the "Superuser" group, False otherwise.
         """
-        user_group_name = self.request.user.groups.first().name
-        return user_group_name == "Superuser"
+        user_group = self.request.user.groups.first()
+        user_group_name = user_group.name
+        return user_group != None and user_group_name == "Superuser"
 
     def form_valid(self, form):
         """
-        Override form_valid to pass the current user to the save method.
+        Overrides the form_valid function of the parent class (`UpdateView`) to pass the current user to the save method.
 
         Args:
             form: The form that handles the data for updating the Item object.
@@ -369,8 +381,9 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
         Returns:
             bool: True if the user is in the "Superuser" or "Technician" group, False otherwise.
         """
-        user_group_name = self.request.user.groups.first().name
-        return user_group_name in ["Superuser", "Technician"]
+        user_group = self.request.user.groups.first()
+        user_group_name = user_group.name
+        return user_group != None and user_group_name in ["Superuser", "Technician"]
 
     def post(self, request, *args, **kwargs):
         """
@@ -466,7 +479,7 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
             HttpResponseRedirect: Redirects to the items list view after processing the file.
         """
         file = form.cleaned_data["file"]
-        workbook = openpyxl.load_workbook(file)
+        workbook = load_workbook(file)
         sheet = workbook.active
         # For each record in the excel file ...
         for row in sheet.iter_rows(min_row=2, values_only=True):
@@ -732,28 +745,28 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
             bool: True if the user is in the 'Superuser' group, False otherwise.
         """
         return self.request.user.groups.first().name == "Superuser"
-    
+
     def get_context_data(self, **kwargs):
+        # TODO: DOc comment
         context = super().get_context_data(**kwargs)
         if self.request.POST:
             context["formset"] = PurchaseOrderItemFormSet(self.request.POST)
         else:
-            context["formset"] = PurchaseOrderItemFormSet(queryset=PurchaseOrderItem.objects.none())
+            context["formset"] = PurchaseOrderItemFormSet(
+                queryset=PurchaseOrderItem.objects.none()
+            )
         return context
-
-    def addNewItemRow(worksheet, row):
-        """
-        Helper function that adds new rows for `form_valid()`
-        """
-        worksheet.insert_rows(row)
-        
 
     def form_valid(self, formset):
         """
-        Process the form data and write it to an Excel file.
+        Processes the formset data and writes it to an Excel file for download.
+
+        This method is called when valid form data has been POSTed. It writes the purchase order data
+        from the formset to an Excel file using a predefined template and returns an HTTP response
+        to download the generated Excel file.
 
         Args:
-            formset: The formset containing the purchase order data.
+            formset (FormSet): The formset containing the purchase order data.
 
         Returns:
             HttpResponse: The HTTP response object to download the Excel file.
@@ -761,19 +774,30 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
         response = HttpResponse(
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        response["Content-Disposition"] = 'attachment; filename="new_purchase_order.xlsx"'
+        response["Content-Disposition"] = (
+            'attachment; filename="new_purchase_order.xlsx"'
+        )
         po_template_path = "PO_Template.xlsx"
-        workbook = openpyxl.load_workbook(po_template_path)
+        workbook = load_workbook(po_template_path)
         worksheet = workbook.active
+
+        # Setup function if there are 8 or more items.
+        itemCount = 0
+
+        for form in formset:
+            itemCount += 1
+
+        if itemCount >= 8:
+            setup_worksheet(worksheet, itemCount)
+            
+        # workbook.save()
 
         # Write data to the worksheet
         row = 16
         for form in formset:
             if form.cleaned_data.get("DELETE"):
                 continue
-            if row >= 24:
-                # Add another row
-                self.addNewItemRow(worksheet, row)
+
             manufacturer = form.cleaned_data["manufacturer"]
             model_part_num = form.cleaned_data["model_part_num"]
             quantity_ordered = form.cleaned_data["quantity_ordered"]
@@ -790,6 +814,14 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
             worksheet[f"H{row}"] = property_num
             worksheet[f"I{row}"] = unit_price
             row += 1
+
+        # Apply custom number format to the last row
+        worksheet[f"I{row-1}"].number_format = (
+            "_($* #,##0.00_);_($* (#,##0.00);_($* -_0_0_);_(@"
+        )
+        worksheet[f"J{row-1}"].number_format = (
+            "_($* #,##0.00_);_($* (#,##0.00);_($* -_0_0_);_(@"
+        )
 
         # Save the workbook content to the response object
         workbook.save(response)

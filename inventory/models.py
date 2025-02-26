@@ -135,7 +135,7 @@ class PurchaseOrderItem(models.Model):
     manufacturer = models.CharField(max_length=100, blank=True)
     model_part_num = models.CharField(max_length=100, blank=True)
     quantity_ordered = models.IntegerField()
-    description = models.TextField()
+    description = models.TextField(blank=True)
     serial_num = models.CharField(max_length=100, blank=True)
     property_num = models.CharField(max_length=100, blank=True)
     unit_price = models.DecimalField(decimal_places=2, max_digits=14, validators=[MinValueValidator(0.00)])
