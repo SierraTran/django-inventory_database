@@ -37,14 +37,25 @@
             </div>
             {% endif %}
         </div>
-        <div class="field quantity_ordered">
-            <label for="{{ form.quantity_ordered.id_for_label }}">{{ form.quantity_ordered.label }}</label>            
-            {{ form.quantity_ordered }}
-            {% if form.quantity_ordered.errors %}
-            <div class="field-errors">
-                {{ form.quantity_ordered.errors }}
+        <div class="field-pair">
+            <div class="field quantity_ordered">
+                <label for="{{ form.quantity_ordered.id_for_label }}">{{ form.quantity_ordered.label }}</label>            
+                {{ form.quantity_ordered }}
+                {% if form.quantity_ordered.errors %}
+                <div class="field-errors">
+                    {{ form.quantity_ordered.errors }}
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
+            <div class="field unit_price">
+                <label for="{{ form.unit_price.id_for_label }}">{{ form.unit_price.label }}</label>            
+                {{ form.unit_price }}
+                {% if form.unit_price.errors %}
+                <div class="field-errors">
+                    {{ form.unit_price.errors }}
+                </div>
+                {% endif %}
+            </div>
         </div>
         <div class="field description">
             <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>            
@@ -55,44 +66,50 @@
             </div>
             {% endif %}
         </div>
-        <div class="field serial_num">
-            <label for="{{ form.serial_num.id_for_label }}">{{ form.serial_num.label }}</label>            
-            {{ form.serial_num }}
-            {% if form.serial_num.errors %}
-            <div class="field-errors">
-                {{ form.serial_num.errors }}
-            </div>
+        <div class="field-pair">
+            <div class="field serial_num">
+                <label for="{{ form.serial_num.id_for_label }}">{{ form.serial_num.label }}</label>            
+                {{ form.serial_num }}
+                {% if form.serial_num.errors %}
+                <div class="field-errors">
+                    {{ form.serial_num.errors }}
+                </div>
             {% endif %}
-        </div>
-        <div class="field property_num">
-            <label for="{{ form.property_num.id_for_label }}">{{ form.property_num.label }}</label>            
-            {{ form.property_num }}
-            {% if form.property_num.errors %}
-            <div class="field-errors">
-                {{ form.property_num.errors }}
             </div>
-            {% endif %}
-        </div>
-        <div class="field unit_price">
-            <label for="{{ form.unit_price.id_for_label }}">{{ form.unit_price.label }}</label>            
-            {{ form.unit_price }}
-            {% if form.unit_price.errors %}
-            <div class="field-errors">
-                {{ form.unit_price.errors }}
+            <div class="field property_num">
+                <label for="{{ form.property_num.id_for_label }}">{{ form.property_num.label }}</label>            
+                {{ form.property_num }}
+                {% if form.property_num.errors %}
+                <div class="field-errors">
+                    {{ form.property_num.errors }}
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
-        </div>
+        </div>        
         <div class="field delete">
             <label for="{{ form.DELETE.id_for_label }}">{{ form.DELETE.label }}</label>
             {{ form.DELETE }}
         </div>
     </fieldset>
     {% endfor %}
-    <button type="button" id="add-item-button" onclick="addItem()">Add Item</button>
-    <input type="submit" value="Submit" />
+    <div class="buttons">
+        <button type="button" id="back-to-home-page">Back to Home Page</button>
+        <button type="button" id="add-item-button" onclick="addItem()">Add Item</button>
+        <input type="submit" value="Submit" />
+    </div>
 </form>
 
 <script>
+function toggleFieldset(fieldset, deleteCheckbox) {
+    const inputs = fieldset.querySelectorAll('input, select, textarea');
+
+    inputs.forEach(function (input) {
+        if (input !== deleteCheckbox) {
+            input.disabled = deleteCheckbox.checked;
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     const formsets = document.querySelectorAll('form fieldset');
 
@@ -100,13 +117,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const deleteCheckbox = fieldset.querySelector('.field.delete input[type="checkbox"]');
 
         deleteCheckbox.addEventListener('change', function () {
-            const inputs = fieldset.querySelectorAll('input, select, textarea');
-
-            inputs.forEach(function (input) {
-                if (input !== deleteCheckbox) {
-                    input.disabled = deleteCheckbox.checked;
-                }
-            });
+            toggleFieldset(fieldset, deleteCheckbox);
         });
     });
 });
@@ -120,9 +131,12 @@ function addItem() {
     const formRegex = RegExp(`form-(\\d){1}-`, 'g');
 
     newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`);
-    formContainer.insertBefore(newForm, document.querySelector("#add-item-button"));
+    formContainer.insertBefore(newForm, document.querySelector(".buttons"));
+
+    const deleteCheckbox = newForm.querySelector('.field.delete input[type="checkbox"]');
+    deleteCheckbox.addEventListener('change', function () {toggleFieldset(newForm, deleteCheckbox)});
 
     totalForms.setAttribute('value', `${formNum + 1}`);
 }
 </script>
-{% endblock content %}
+{% endblock content %}  
