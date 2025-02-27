@@ -4,14 +4,12 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, FormView, DeleteView
 from django.shortcuts import redirect
-
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 
 from haystack.query import SearchQuerySet
 
-from openpyxl import load_workbook, worksheet
-from openpyxl.styles import Alignment, Border, Side, NamedStyle
+from openpyxl import load_workbook
 
 from .forms import ImportFileForm, PurchaseOrderItemFormSet
 
@@ -85,16 +83,44 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
 
 
 class ItemHistoryView(LoginRequiredMixin, ListView):
+    """
+    Class-based view for displaying the history of a specific item.
+    This view requires the user to be logged in.
+
+    Attributes:
+        model (ItemHistory): The model that this view will operate on.
+        template_name (str): The template used to render the history view.
+        context_object_name (str): The context variable name for the list of item history records.
+
+    Methods:
+        get_queryset(): Retrieves the history records for the specific item.
+        get_context_data(**kwargs): Adds the specific item to the context data.
+    """
     model = ItemHistory
     template_name = "item_history.html"
     context_object_name = "item_history_list"
 
     def get_queryset(self):
+        """
+        Retrieves the history records for the specific item.
+
+        Returns:
+            QuerySet: The queryset containing the history records for the item.
+        """
         item_id = self.kwargs["pk"]
         history = ItemHistory.objects.filter(item_id=item_id).order_by("-timestamp")
         return history
 
     def get_context_data(self, **kwargs):
+        """
+        Adds the specific item to the context data.
+
+        Args:
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            dict: The context data with the specific item added.
+        """
         item_id = self.kwargs["pk"]
         context = super().get_context_data(**kwargs)
         context["item"] = Item.objects.filter(id=item_id)[0]
@@ -133,19 +159,18 @@ class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
         Returns:
             bool: True if the user is in the 'Superuser' group, False otherwise.
         """
-        first_group = self.request.user.groups.first()
-        return first_group is not None and first_group.name == "Superuser"
+        user_group = self.request.user.groups.first()
+        return user_group is not None and user_group.name == "Superuser"
 
     def form_valid(self, form):
-        # TODO: Doc comment
         """
         Overrides the form_valid function of the parent class (`CreateView`) to add the user to the form.
 
-        Arguments:
-            form -- _description_
+        Args:
+            form (ModelForm): The form that handles info about the created item.
 
         Returns:
-            _description_
+            HttpResponse: The HTTP response object.
         """
         form.instance.created_by = self.request.user
         return super().form_valid(form)
@@ -160,6 +185,10 @@ class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
         model (Item): The model that this view will operate on.
         fields (list[str]): The fields to be displayed in the form.
         template_name (str): The template used to render the form.
+        
+    Methods:
+        test_func(): Checks if the user is in the 'Technician' group.
+        form_valid(form): Overrides form_valid to pass current user to save method
     """
 
     model = Item
@@ -182,14 +211,15 @@ class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
         Returns:
             bool: True if the user is in the 'Technician' group, False otherwise.
         """
-        return self.request.user.groups.first().name == "Technician"
+        user_group = self.request.user.group.first()
+        return user_group is not None and user_group.name == "Technician"
 
     def form_valid(self, form):
         """
         Overrides the form_valid function of the parent class (`CreateView`) to pass the current user to the save method.
 
         Args:
-            form: The form that handles the data for updating the Item object.
+            form (ModelForm): The form that handles the data for updating the Item object.
 
         Returns:
             HttpResponse: The HTTP response object.
@@ -239,7 +269,7 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
         Overrides the form_valid function of the parent class (`UpdateView`) to pass the current user to the save method.
 
         Args:
-            form: The form that handles the data for updating the Item object.
+            form (ModelForm): The form that handles the data for updating the Item object.
 
         Returns:
             HttpResponse: The HTTP response object.
@@ -248,7 +278,16 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
         return super().form_valid(form)
 
     def save(self, *args, **kwargs):
-        # TODO: Doc comment
+        """
+        Saves the updated item with additional keyword arguments.
+
+        Args:
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            HttpResponse: The HTTP response object.
+        """
         kwargs["user"] = self.request.user
         return super().save(*args, **kwargs)
 
@@ -289,10 +328,10 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
 
     def form_valid(self, form):
         """
-        Override form_valid to pass the current user to the save method.
+        Overrides form_valid function of the parent class (`UpdateView`) to pass the current user to the save method.
 
         Args:
-            form: The form that handles the data for updating the Item object.
+            form (ModelForm): The form that handles the data for updating the Item object.
 
         Returns:
             HttpResponse: The HTTP response object.
@@ -331,10 +370,10 @@ class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
 
     def form_valid(self, form):
         """
-        Override form_valid to pass the current user to the save method.
+        Overrides the form_valid function of the parent class (`UpdateView`) to pass the current user to the save method.
 
         Args:
-            form: The form that handles the data for updating the Item object.
+            form (ModelForm): The form that handles the data for updating the Item object.
 
         Returns:
             HttpResponse: The HTTP response object.
@@ -343,6 +382,16 @@ class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
         return super().form_valid(form)
 
     def save(self, *args, **kwargs):
+        """
+        Saves the updated item with additional keyword arguments.
+
+        Args:
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            HttpResponse: The HTTP response object.
+        """
         kwargs["user"] = self.request.user
         return super().save(*args, **kwargs)
 
@@ -360,7 +409,7 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
 
     Methods:
         test_func(): Checks if the user is in the "Superuser" or "Technician" group
-        post(request, *args, **kwargs): Handles POST requests to delete the item or cancel the deletion.
+        post(request): Handles POST requests to delete the item or cancel the deletion.
     """
 
     model = Item
@@ -368,6 +417,12 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy("inventory:items")
 
     def get_fail_url(self):
+        """
+        Returns the URL to redirect to if the deletion is canceled.
+
+        Returns:
+            str: The URL to redirect to.
+        """
         return reverse_lazy(
             "inventory:item_detail", kwargs={"pk": self.get_object().pk}
         )
@@ -390,10 +445,12 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
         Handles POST requests to delete the item or cancel the deletion.
 
         Args:
-            request (_type_): _description_
+            request (HttpRequest): The HTTP request object containing metadata about the request.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
 
         Returns:
-            _type_: _description_
+            HttpResponse: The HTTP response object.
         """
         if "Cancel" in request.POST:
             url = self.fail_url
@@ -440,11 +497,12 @@ class SearchItemsView(ListView):
 
 
 class ImportItemDataView(UserPassesTestMixin, FormView):
+    # TODO: Doc comment: form_class attribute
     """
     Renders a view to allow users to import items from an .xlsx file to the database.
 
     Attributes:
-        form_class:
+        form_class (): 
         template_name (str): The name of the template to be rendered by the class.
 
     Methods:
@@ -476,7 +534,7 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
             form (Form): The form containing the uploaded Excel file.
 
         Returns:
-            HttpResponseRedirect: Redirects to the items list view after processing the file.
+            HttpResponseRedirect: THe HTTP response to redirect to the items list view after processing the file.
         """
         file = form.cleaned_data["file"]
         workbook = load_workbook(file)
@@ -534,8 +592,8 @@ class ItemRequestView(UserPassesTestMixin, ListView):
         context_object_name (str): The context variable name for the list of item requests.
 
     Methods:
-        test_func: Checks if the user belongs to the "Technician" or "Superuser" group.
-        get_queryset: Returns the queryset of all item requests.
+        test_func(): Checks if the user belongs to the "Technician" or "Superuser" group.
+        get_queryset(): Returns the queryset of all item requests.
     """
 
     model = ItemRequest
@@ -554,10 +612,10 @@ class ItemRequestView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         """
-        Returns the queryset of all item requests.
+        Retrieves all Item Requests from the database.
 
         Returns:
-            _description_
+            QuerySet: The queryset containing all item requests.
         """
         return ItemRequest.objects.all()
 
@@ -594,6 +652,9 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
     def get_context_data(self, **kwargs):
         """
         Adds the specific item to the context data.
+        
+        Args:
+            **kwargs: Additional keyword arguments.
 
         Returns:
             dict: The context data with the specific item added.
@@ -613,11 +674,29 @@ class UsedItemView(LoginRequiredMixin, ListView):
     context_object_name = "used_items_list"
 
     def get_queryset(self):
-        # TODO: Doc comment for `get_queryset`
+        """
+        Retrieves all used items from the database.
+        
+        Used items are ordered by `work_order` and then `item`.
+
+        Returns:
+            QuerySet: A queryset containing all used items.
+        """
         return UsedItem.objects.all().order_by("work_order", "item")
 
 
 class UsedItemDetailView(LoginRequiredMixin, DetailView):
+    # TODO: Doc comment
+    """
+    _summary_
+
+    Arguments:
+        LoginRequiredMixin -- _description_
+        DetailView -- _description_
+
+    Returns:
+        _description_
+    """
     model = UsedItem
     template_name = "used_item_detail.html"
 
@@ -637,6 +716,7 @@ class UsedItemDetailView(LoginRequiredMixin, DetailView):
 
 
 class UsedItemCreateView(UserPassesTestMixin, CreateView):
+    # TODO: Doc comment
     model = UsedItem
     template_name = "item_use_form.html"
     fields = "__all__"
@@ -671,7 +751,7 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
         Checks if the item's quantity is greater than 0 before allowing access to the view.
 
         Args:
-            request: The HTTP request object.
+            request (HttpRequest): The HTTP request object.
             *args: Additional positional arguments.
             **kwargs: Additional keyword arguments.
 
@@ -686,11 +766,12 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
+        # TODO: form variable type
         """
         Override form_valid to decrement the quantity of the associated Item when a new UsedItem is created.
 
         Args:
-            form: The form that handles the data for creating a new UsedItem object.
+            form (): The form that handles the data for creating a new UsedItem object.
 
         Returns:
             HttpResponse: The HTTP response object
@@ -704,7 +785,18 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
 
 
 class SearchUsedItemsView(LoginRequiredMixin, ListView):
-    # TODO: Doc comment for `SearchUsedItemsView`
+    """
+    Class-based view for searching used items.
+    This view uses Haystack to perform the search.
+
+    Attributes:
+        model (UsedItem): The model that this view will operate on.
+        template_name (str): The template used to render the search results.
+        context_object_name (str): The name of the context variable to use for the search results.
+
+    Methods:
+        get_queryset(): Retrieves the search results based on the query.
+    """
     model = UsedItem
     template_name = "search/used_item_search.html"
     context_object_name = "results_list"
@@ -732,7 +824,19 @@ class SearchUsedItemsView(LoginRequiredMixin, ListView):
 # Views for the PurchaseOrderItem model
 #######################################
 class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
+    """
+    Renders a view to allow users to create purchase orders using a formset.
 
+    Attributes:
+        form_class (FormSet): The formset class to use for the purchase order items.
+        template_name (str): The template used to render the formset.
+        success_url (str): The URL to redirect to upon successful form submission.
+
+    Methods:
+        test_func(): Checks if the user is in the 'Superuser' group.
+        get_context_data(**kwargs): Adds the formset to the context data.
+        form_valid(formset): Processes the formset data and writes it to an Excel file for download.
+    """
     form_class = PurchaseOrderItemFormSet
     template_name = "purchase_order_form.html"
     success_url = reverse_lazy("inventory:items")
@@ -747,7 +851,15 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
         return self.request.user.groups.first().name == "Superuser"
 
     def get_context_data(self, **kwargs):
-        # TODO: DOc comment
+        """
+        Adds the formset to the context data.
+
+        Args:
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            dict: The context data with the formset added.
+        """
         context = super().get_context_data(**kwargs)
         if self.request.POST:
             context["formset"] = PurchaseOrderItemFormSet(self.request.POST)
