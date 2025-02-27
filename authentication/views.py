@@ -19,9 +19,14 @@ from .models import *
 
 # Create your views here.
 def home(request):
-    # TODO: New doc comment
     """
-    Renders the "home.html" template when the user accesses the home page
+    Renders the "home.html" template when the user accesses the home page.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        HttpResponse: The rendered "home.html" template.
     """
     user_group = request.user.groups.first()
     context = {"user_group": user_group}
@@ -29,9 +34,14 @@ def home(request):
 
 
 def login_page(request):
-    # TODO: New doc comment
     """
-    Renders the "login.html" template and handles login logic
+    Renders the "login.html" template and handles login logic.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        HttpResponse: The rendered "login.html" template or a redirect to the home page.
     """
     # Check if the HTTP request method is POST (form submission)
     if request.method == "POST":
@@ -61,73 +71,122 @@ def login_page(request):
 
 
 class UsersView(UserPassesTestMixin, ListView):
-    # TODO: Doc comment
     """
-    _summary_
+    Displays a list of users.
 
-    Args:
-        UserPassesTestMixin (_type_): _description_
-        ListView (_type_): _description_
-
-    Methods:
-        test_func(): _description_
-        get_queryset(): 
+    Attributes:
+        model (User): The model that the view will operate on.
+        template_name (str): The template that will be used to render the page.
+        context_object_name (str): The context variable name for the list of users.
     """
     model = User
     template_name = "users.html"
     context_object_name = "users_list"
-    
+
     def test_func(self) -> bool:
-        # TODO: Doc comment
         """
-        _summary_
+        Checks if the user is in the "Superuser" group.
 
         Returns:
-            _description_
+            bool: True if the user is in the "Superuser" group, False otherwise.
         """
-        user_group_name = self.request.user.groups.first().name
-        return user_group_name == "Superuser"
-    
+        user_group = self.request.user.groups.first()
+        return user_group is not None and user_group.name == "Superuser"
+
     def get_queryset(self):
-        # TODO: Doc comment
+        """
+        Retrieves all users from the database.
+
+        Returns:
+            QuerySet: The queryset containing all users in the database.
+        """
         return User.objects.all().order_by("username", "last_name", "first_name")
 
 
 class UserDetailsView(UserPassesTestMixin, DetailView):
-    # TODO: Doc comment
+    """
+    Displays the details of a specific user.
+
+    Attributes:
+        model (User): The model that the view will operate on.
+        template_name (str): The template that will be used to render the page.
+    """
     model = User
     template_name = "user_detail.html"
-    
+
     def test_func(self) -> bool:
-        # TODO: Doc comment
-        user_group_name = self.request.user.groups.first().name
-        return user_group_name == "Superuser"
-    
+        """
+        Checks if the user is in the "Superuser" group.
+
+        Returns:
+            bool: True if the user is in the "Superuser" group, False otherwise.
+        """
+        user_group = self.request.user.groups.first()
+        return user_group is not None and user_group.name == "Superuser"
+
     def get_context_data(self, **kwargs):
-        # TODO: Doc comment
+        """
+        Retrieves additional context data for the template.
+
+        Args:
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            dict: The context data for the template.
+        """
         context = super().get_context_data(**kwargs)
         specific_user = self.get_object()
-        context['user_detail_group_name'] = specific_user.groups.first().name if specific_user.groups.exists() else "No Group"
+        if specific_user.groups.exists():
+            context["user_detail_group_name"] = specific_user.groups.first().name
+        else:
+            context["user_detail_group_name"] = "No Group"
         return context
-    
+
 
 class CreateUserView(UserPassesTestMixin, CreateView):
-    # TODO: Doc comment
+    """
+    Handles the creation of a new user.
+
+    Attributes:
+        model (User): The model that the view will operate on.
+        fields (list[str]): The fields to be displayed in the form.
+        template_name (str): The template that will be used to render the page.
+    """
     model = User
     fields = ["username", "first_name", "last_name", "email", "password"]
     template_name = "user_create_form.html"
-    
+
     def get_success_url(self):
-        # TODO: Doc comment
-        return reverse_lazy("authentication:user_details", kwargs={"pk": self.object.pk})
-    
+        """
+        Returns the URL to redirect to after a successful form submission.
+
+        Returns:
+            str: The URL to redirect to.
+        """
+        return reverse_lazy(
+            "authentication:user_details", kwargs={"pk": self.object.pk}
+        )
+
     def test_func(self) -> bool:
-        # TODO: Doc comment
-        user_group_name = self.request.user.groups.first().name
-        return user_group_name == "Superuser"
+        """
+        Checks if the user is in the "Superuser" group.
+
+        Returns:
+            bool: True if the user is in the "Superuser" group, False otherwise.
+        """
+        user_group = self.request.user.groups.first()
+        return user_group is not None and user_group.name == "Superuser"
 
     def form_valid(self, form):
-        # TODO: Doc comment
+        """
+        Handles the form submission and adds the user to the specified group.
+
+        Args:
+            form (ModelForm): The submitted form.
+
+        Returns:
+            HttpResponse: The response after form submission.
+        """
         response = super().form_valid(form)
         group_name = self.request.POST.get("user_group")
         group = Group.objects.get(name=group_name)
@@ -135,70 +194,69 @@ class CreateUserView(UserPassesTestMixin, CreateView):
         return response
 
     def get_context_data(self, **kwargs):
-        # TODO: Doc comment
+        """
+        Retrieves additional context data for the template.
+
+        Args:
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            dict: The context data for the template.
+        """
         context = super().get_context_data(**kwargs)
         context["user"] = self.request.user
         context["groups"] = Group.objects.all()
         return context
-    
+
 
 class DeleteUserView(UserPassesTestMixin, DeleteView):
-    # TODO: Doc comment
     """
-    _summary_
+    Handles the deletion of a user.
 
-    Returns:
-        _description_
+    Attributes:
+        model (User): The model that the view will operate on.
+        success_url (str): The URL to redirect to after a successful deletion.
     """
     model = User
     success_url = reverse_lazy("authentication:users")
-    
+
     def get_fail_url(self):
-        # TODO: Doc comment
         """
-        _summary_
+        Returns the URL to redirect to if the deletion is canceled.
 
         Returns:
-            _type_: _description_
+            str: The URL to redirect to.
         """
-        return reverse_lazy("authentication:user_details", kwargs={"pk": self.get_object().pk})
+        return reverse_lazy(
+            "authentication:user_details", kwargs={"pk": self.get_object().pk}
+        )
 
     fail_url = property(get_fail_url)
-    
+
     def test_func(self) -> bool:
-        # TODO: Doc comment
         """
-        _summary_
+        Checks if the user is in the "Superuser" group.
 
         Returns:
-            _description_
+            bool: True if the user is in the "Superuser" group, False otherwise.
         """
-        user_group_name = self.request.user.groups.first().name
-        return user_group_name == "Superuser"
-    
+        user_group = self.request.user.groups.first()
+        return user_group is not None and user_group.name == "Superuser"
+
     def post(self, request, *args, **kwargs):
-        # TODO: Doc comment
         """
-        _summary_
+        Handles the POST request for deleting a user.
 
-        Arguments:
-            request -- _description_
+        Args:
+            request (HttpRequest): The HTTP request object.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
 
         Returns:
-            _description_
+            HttpResponse: The response after handling the POST request.
         """
         if "Cancel" in request.POST:
             url = self.fail_url
             return redirect(url)
-        else: 
+        else:
             return super(DeleteUserView, self).post(request, *args, **kwargs)
-    
-    # def form_valid(self, form):
-    #     messages.success(self.request, "The user was deleted successfully.")
-    #     return super(DeleteUserView, self).form_valid(form)
-
-
-# @login_required
-# def logout_view(request):
-#     logout(request)
-#     return redirect(reverse(home))
