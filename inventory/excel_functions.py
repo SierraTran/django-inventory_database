@@ -23,29 +23,18 @@ def is_cell_merged(worksheet, cell):
     return False
 
 
-# Example usage
-# worksheet = load_workbook("example.xlsx").active
-# cell = "B31"
-# if is_cell_merged(worksheet, cell):
-#     print(f"Cell {cell} is merged.")
-# else:
-#     print(f"Cell {cell} is not merged.")
-
-
 def format_row(worksheet, row):
-    # TODO: Doc comment
     """
-    Function that adds a new row to the worksheet with specific formatting and formulas.
+    Function that formats a new row in the worksheet.
 
     The function performs the following actions:
-    - Inserts a new row at the specified index.
     - Applies border formatting to specific cells in the new row.
     - Sets vertical and horizontal alignment for specific cells in the new row.
     - Adds a formula to calculate the total price in a specific cell.
 
     Args:
-        worksheet (openpyxl.worksheet.worksheet.Worksheet): The worksheet object where the row will be added.
-        row (int): The row index where the new row will be inserted.
+        worksheet (openpyxl.worksheet.worksheet.Worksheet): The worksheet object where the row is located.
+        row (int): The row index of the new row.
     """
     border_side = Side(style="thin")
     cell_border = Border(
@@ -97,15 +86,20 @@ def format_row(worksheet, row):
 
 
 def setup_worksheet(worksheet, itemCount):
+    """
+    Sets up and adjusts the worksheet to accomodate 8 or more items submitted in the Purchase Order Item Form. 
+
+    Arguments:
+        worksheet (openpyxl.worksheet.worksheet.Worksheet): The worksheet object that needs to be set up and adjusted.
+        itemCount (int): The total number of items that have been submitted.
+    """
     amount = itemCount - 7
 
     # Variables for initial row numbers
-    first_row = 16  # The first item row is 16
     initial_last_item_row = 24
     initial_row_before_notes = 26
 
-    # Variables for initial column numbers
-
+    # Variables for new row numbers
     new_last_row = initial_last_item_row + amount
     new_row_before_notes = initial_row_before_notes + amount
 
@@ -145,20 +139,22 @@ def setup_worksheet(worksheet, itemCount):
     worksheet.merge_cells(f"B{29+amount}:H{29+amount}")  # Shares row with tax
     worksheet.merge_cells(f"B{30+amount}:H{30+amount}")  # Shares row with total
     worksheet.merge_cells(f"B{31+amount}:H{31+amount}")  # Shares row with total
-    
+
     # Data validation object for new last Notes row
-    dv = DataValidation(type="list", formula1='"ANSI/NCSL Z540-1-1994,ISO/IEC 17025"', allow_blank=True)
+    dv = DataValidation(
+        type="list", formula1='"ANSI/NCSL Z540-1-1994,ISO/IEC 17025"', allow_blank=True
+    )
     new_last_notes_row = f"B{31+amount}"
     worksheet.add_data_validation(dv)
     dv.add(worksheet[new_last_notes_row])
-    
+
     # Merge new cells for Other accounting cells
     for row in range(27 + amount, 30 + amount):
         if not is_cell_merged(worksheet, f"J{row}"):
             worksheet.merge_cells(f"J{row}:K{row}")
-    
+
     # Merge new empty description cells
-    for row in range(initial_row_before_notes, new_row_before_notes+1):
+    for row in range(initial_row_before_notes, new_row_before_notes + 1):
         if not is_cell_merged(worksheet, f"E{row}"):
             worksheet.merge_cells(f"E{row}:F{row}")
         worksheet[f"J{row}"].value = None
@@ -170,8 +166,3 @@ def setup_worksheet(worksheet, itemCount):
     worksheet.merge_cells(
         start_row=start_row, start_column=10, end_row=end_row, end_column=11
     )
-
-    # worksheet.unmerge_cells(f"J{30+amount}:J{31+amount}")
-    # worksheet.unmerge_cells(f"K{30+amount}:K{31+amount}")
-
-    

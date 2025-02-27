@@ -1,6 +1,10 @@
 {% extends "inventory_base_template.html" %}
 {% load static %}
 
+{% block other_stylesheets %}
+{# TODO: Stylesheet #}
+{% endblock other_stylesheets %}
+
 {% block title %}Used Item Detail{% endblock title %}
 
 {% block page-title %}{{ used_item }}{% endblock page-title %}
@@ -20,4 +24,6 @@
 {% else %}
     <p>There's no information available.</p>
 {% endif %}
+{# TODO: Back button #}
+{# TODO: Delete button? #}
 {% endblock content %}

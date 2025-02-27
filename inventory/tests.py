@@ -21,7 +21,7 @@ class ItemModelTests(TestCase):
 
     def test_create_item_part_blankpartnumber(self):
         """
-        Test that an item (part) can be created.
+        Test that an item (part) can be created with a part number.
         """
         manufacturer = "Test MFG2"
         model = "Test Model2"
@@ -35,7 +35,7 @@ class ItemModelTests(TestCase):
 
     def test_create_item_part_nonblankpartnumber(self):
         """
-        Test that an item (part) can be created.
+        Test that an item (part) can be created without a part number.
         """
         manufacturer = "Test MFG2"
         model = "Test Model2"

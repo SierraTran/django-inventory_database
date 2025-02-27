@@ -22,6 +22,8 @@ class PurchaseOrderItemForm(forms.ModelForm):
         super(PurchaseOrderItemForm, self).__init__(*args, **kwargs)
         
         self.fields["model_part_num"].label = "Model / Part #"
+        self.fields["serial_num"].label = "Serial #"
+        self.fields["property_num"].label = "Property #"
 
 
 PurchaseOrderItemFormSet = modelformset_factory(
