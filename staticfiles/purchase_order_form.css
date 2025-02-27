@@ -7,11 +7,19 @@ form {
     max-width: 1000px;
 }
 
-
 fieldset {
     width: 95%;
     border: 0;
 }  
+
+.field-pair {
+    display:flex;
+    justify-content: space-between;
+}
+
+.field-pair div {
+    width: 45%;
+}
 
 .field {
     display: flex;
