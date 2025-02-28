@@ -91,8 +91,9 @@
     </button>
     {# Technicians REQUEST more. Superusers ORDER more. #}
     {% if user_group.name == 'Superuser' %}
-    <button type="button" id="order-more"> {# TODO: Connect and send item to Purchase Order Item Form #}
-        Order More (Coming Soon)
+    <button type="button" id="order-more" 
+    onclick="window.location.href='{% url "inventory:purchase_order_form" %}'">
+        Order More
     </button>
     {% else %}
     <button type="button" id="order-more" onclick="window.location.href='{% url "inventory:item_request_form" item.id %}'">

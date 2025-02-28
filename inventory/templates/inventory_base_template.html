@@ -10,17 +10,35 @@
     <link rel="stylesheet" href="{% static "inventory_base.css" %}" />
     {% block other_stylesheets %}{% endblock other_stylesheets %}
     <title>{% block title %}{% endblock title %}</title>
+    <script>
+        function openNav() {
+            document.getElementById("sidenav").style.width = "250px";
+        }
+        function closeNav() {
+            document.getElementById("sidenav").style.width = "0px";
+        }
+    </script>
 </head>
 
 <body>
     <div class="header">
-
         <a href="{% url 'authentication:home' %}">
             <img class="image" height="94" width="532" src="https://hayesinstruments.com/images/HayesLetterhead.gif"
                 alt="Hayes Instrument Service"
                 title="Click here to go to the Home page.">
         </a>
-        <div class="user">Hello, {{ request.user.username }}</div>
+        {# TODO: Sidenav bar #}
+        <div id="sidenav" class="sidenav">
+            <h1 class="username">{{ request.user.username }}</h1>
+            <a href="javascript:void(0)" class="close-button" onclick="closeNav()">&times;</a>
+            <a href="#">Notifications</a>
+            <form name="logout" action="{% url 'logout' %}" method="post"> {% csrf_token %}
+                <a onclick="logout.submit()">Log Out</a>
+            </form>   
+        </div>
+            <span class="user" onclick="openNav()">        
+                Hello, {{ request.user.username }}
+            </span>
         {% block header %}
         {% endblock header %}
     </div>

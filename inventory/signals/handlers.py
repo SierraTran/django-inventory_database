@@ -1,8 +1,8 @@
 from django.db import transaction
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
 from django.contrib.auth.models import User
-from inventory.models import Item, ItemHistory
+from inventory.models import Item, ItemHistory, ItemRequest, UsedItem
 
 
 # Regardless of being used or not, `**kwargs` needs to be included in the other parameters
@@ -20,7 +20,7 @@ def create_or_update_item_history(sender, instance, created, **kwargs):
         **kwargs: Additional keyword arguments sent by the signal.
     """
     action = "create" if created else "update"
-    changes = None
+    changes = "Created and added to the database."
     if not created:
         changes = []
         for field, change in instance.tracker.changed().items():
@@ -38,18 +38,10 @@ def create_or_update_item_history(sender, instance, created, **kwargs):
             changes=changes,
         )
 
+@receiver(pre_delete, sender=Item)
+def handle_related_records(sender, instance, **kwargs):
+    # Handle related records before deleting the item
+    ItemHistory.objects.filter(item=instance).delete()
+    ItemRequest.objects.filter(item=instance).delete()
+    UsedItem.objects.filter(item=instance).delete()
 
-@receiver(post_delete, sender=Item)
-def delete_item_history(sender, instance, **kwargs):
-    """
-    Creates an ItemHistory record when an item is deleted.
-
-    Arguments:
-        sender (Item): The model class that sent the signal.
-        instance (Item): The instance of the model that is being deleted.
-        **kwargs: Additional keyword arguments sent by the signal.
-    """
-    with transaction.atomic():  # Ensures atomicity
-        ItemHistory.objects.create(
-            item=instance, action="delete", user=instance.last_modified_by
-        )
