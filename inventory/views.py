@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db import IntegrityError
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, FormView, DeleteView
@@ -403,12 +404,12 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
 
     Attributes:
         model (Item): The model that this view will operate on.
-        tempalte_name (str): The name of the tempalte that the view will render
+        template_name (str): The name of the template that the view will render.
         success_url (str): The URL to redirect to upon successful deletion.
         fail_url (str): The URL to redirect to if the deletion is cancelled.
 
     Methods:
-        test_func(): Checks if the user is in the "Superuser" or "Technician" group
+        test_func(): Checks if the user is in the "Superuser" or "Technician" group.
         post(request): Handles POST requests to delete the item or cancel the deletion.
     """
 
@@ -456,8 +457,14 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
             url = self.fail_url
             return redirect(url)
         else:
-            # messages.success(self.request, "The item was deleted successfully.")
-            return super(ItemDeleteView, self).post(request, *args, **kwargs)
+            try:
+                return super(ItemDeleteView, self).post(request, *args, **kwargs)
+            except IntegrityError as e:
+                messages.error(
+                    request,
+                    f"Cannot delete this item because it is referenced by other records: {e}",
+                )
+                return redirect(self.fail_url)
 
 
 class SearchItemsView(ListView):
@@ -497,12 +504,11 @@ class SearchItemsView(ListView):
 
 
 class ImportItemDataView(UserPassesTestMixin, FormView):
-    # TODO: Doc comment: form_class attribute
     """
     Renders a view to allow users to import items from an .xlsx file to the database.
 
     Attributes:
-        form_class (): 
+        form_class (Form): THe form that the view operates on.
         template_name (str): The name of the template to be rendered by the class.
 
     Methods:
@@ -521,8 +527,8 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
         Returns:
             bool: True if the user is in the "Superuser" or "Technician" group, False otherwise.
         """
-        user_group_name = self.request.user.groups.first().name
-        return user_group_name in ["Superuser", "Technician"]
+        user_group = self.request.user.groups.first()
+        return user_group is not None and user_group.name in ["Superuser", "Technician"]
 
     def form_valid(self, form) -> HttpResponseRedirect:
         """
@@ -539,6 +545,8 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
         file = form.cleaned_data["file"]
         workbook = load_workbook(file)
         sheet = workbook.active
+        user = self.request.user
+        
         # For each record in the excel file ...
         for row in sheet.iter_rows(min_row=2, values_only=True):
             # If the row is completely blank, stop the for loop
@@ -562,7 +570,7 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
             unit_price = row[8] if row[8] is not None else 0.01
 
             # Create a new Item with the data
-            Item.objects.create(
+            item = Item.objects.create(
                 manufacturer=manufacturer,
                 model=model,
                 part_or_unit=part_or_unit,
@@ -572,9 +580,33 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
                 quantity=quantity,
                 min_quantity=min_quantity,
                 unit_price=unit_price,
+                last_modified_by=user,
             )
+            
+            # # Create an ItemHistory record for the new item
+            # ItemHistory.objects.create(
+            #     item=item,
+            #     action="create",
+            #     user=user,
+            #     changes=f"Item imported by {user.username}",
+            # )
+            
         # Go to items page after finishing
         return HttpResponseRedirect(reverse("inventory:items"))
+    
+    def save(self, *args, **kwargs):
+        """
+        Saves the item with additional keyword arguments.
+
+        Args:
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            HttpResponse: The HTTP response object.
+        """
+        kwargs["user"] = self.request.user
+        return super().save(*args, **kwargs)
 
 
 #################################
@@ -849,16 +881,31 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
             bool: True if the user is in the 'Superuser' group, False otherwise.
         """
         return self.request.user.groups.first().name == "Superuser"
+    
+    def get_initial(self):
+        """
+        Returns the initial data to use for forms on this view.
+
+        Returns:
+            dict: The initial data for the form.
+        """
+        initial = super().get_initial()
+        initial.update({
+            'manufacturer': self.request.GET.get('manufacturer', ''),
+            'model_part_num': self.request.GET.get('model_part_num', ''),
+            'description': self.request.GET.get('description', ''),
+        })
+        return initial 
 
     def get_context_data(self, **kwargs):
         """
-        Adds the formset to the context data.
+        Adds the formset and query parameters to the context data.
 
         Args:
             **kwargs: Additional keyword arguments.
 
         Returns:
-            dict: The context data with the formset added.
+            dict: The context data with the formset and query parameters added.
         """
         context = super().get_context_data(**kwargs)
         if self.request.POST:
@@ -867,6 +914,9 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
             context["formset"] = PurchaseOrderItemFormSet(
                 queryset=PurchaseOrderItem.objects.none()
             )
+        context["manufacturer"] = self.request.GET.get('manufacturer', '')
+        context["model_part_num"] = self.request.GET.get('model_part_num', '')
+        context["description"] = self.request.GET.get('description', '')
         return context
 
     def form_valid(self, formset):

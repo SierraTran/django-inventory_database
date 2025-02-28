@@ -1,9 +1,21 @@
 from django import forms
 from django.forms import modelformset_factory, formset_factory
-from .models import PurchaseOrderItem
+from .models import ItemRequest , PurchaseOrderItem
 
 class ImportFileForm(forms.Form):
     file = forms.FileField()
+    
+class ItemRequestForm(forms.ModelForm):
+    class Meta:
+        model = ItemRequest
+        fields = [
+            "item",
+            "quantity_requested", 
+            "requested_by", 
+            "status",
+        ]
+        
+
 
 class PurchaseOrderItemForm(forms.ModelForm):
     class Meta:
@@ -25,6 +37,12 @@ class PurchaseOrderItemForm(forms.ModelForm):
         self.fields["serial_num"].label = "Serial #"
         self.fields["property_num"].label = "Property #"
 
+ItemRequestFormSet = modelformset_factory(
+    ItemRequest,
+    form=ItemRequestForm,
+    extra=1,
+    can_delete=True,
+)
 
 PurchaseOrderItemFormSet = modelformset_factory(
     PurchaseOrderItem,
