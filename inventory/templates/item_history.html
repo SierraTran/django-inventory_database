@@ -5,12 +5,16 @@
 <link rel="stylesheet" href="{% static "item_history.css" %}" />
 {% endblock other_stylesheets %}
 
-{% block title %}Item History{% endblock title %}
+{% block title %}Item History | {{ item }} {% endblock title %}
 
-{% block page-title %}{{ item }} - Item History{% endblock page-title %} {# TODO: Add item to view context to render for title #}
+{% block page-title %}
+<a href="{% url "inventory:item_detail" item.id %}"> {{ item }} </a>
+- Item History
+{% endblock page-title %} {# TODO: Add item to view context to render for title #}
 
 {% block content %}
 {# TODO: Back button for going back to item detail page #}
+<button type="button" onclick="window.location.href='{% url "inventory:item_detail" item.id %}'">Back to Item Details</button>
 <table>
     <thead>
         <tr>
@@ -25,7 +29,7 @@
         <tr>
             <td class="col action">{{ history.get_action_display }}</td>
             <td class="col timestamp">{{ history.timestamp }}</td>
-            <td class="col user">{{ history.user }}</td>
+            <td class="col user"><a href="{% url "authentication:user_details" history.user.id %}">{{ history.user }}</a></td>
             <td class="col changes">{{ history.changes }}</td>
         </tr>
         {% endfor %}

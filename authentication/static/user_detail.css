@@ -13,7 +13,7 @@ tr th, td {
     padding: 10px;
 }
 
-tr.first-name, .email, .user-group {
+tr.first_name, .email, .user_group {
     border-top: 3px solid rgb(225, 225, 225);
 }
 
