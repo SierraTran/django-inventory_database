@@ -15,8 +15,8 @@ urlpatterns = [
     # This url will create an ItemRequest object. It needs the id of the current Item object
     path("items/<int:pk>/request", views.ItemRequestCreateView.as_view(), name="item_request_form"),
     
-    # This url will create a UsedItem object. It need the id of the current Item object
-    path("items/<int:pk>/use", views.UsedItemCreateView.as_view(), name="item_use_form"),
+    # This url will create a UsedItem object. It needs the id of the current Item object
+    path("items/use", views.UsedItemCreateView.as_view(), name="item_use_form"),
     
     path("items/<int:pk>/update/", views.ItemUpdateSuperuserView.as_view(), name="item_update_form_superuser"),
     path("items/<int:pk>/update/", views.ItemUpdateTechnicianView.as_view(), name="item_update_form_technician"),

@@ -9,10 +9,6 @@ div.header {
     align-items: center;
 }
 
-div.user {
-    background-color: pink;
-}
-
 div.page-title {
     font-size: 110%;
     font-weight: bold;
@@ -39,7 +35,7 @@ span:hover, p>a:hover {
     /* Stay at the top */
     right: 0;
     background-color: #111;
-    /* Black*/
+    /* Black */
     overflow-x: hidden;
     /* Disable horizontal scroll */
     padding-top: 60px;
@@ -49,13 +45,12 @@ span:hover, p>a:hover {
 }
 
 /* The navigation menu links */
-.sidenav a {
+.sidenav a, .sidenav h1 {
     padding: 8px 8px 8px 32px;
     text-decoration: none;
     font-size: 25px;
     color: #818181;
     display: block;
-    transition: 0.3s;
 }
 
 /* When you mouse over the navigation links, change their color */
@@ -64,7 +59,7 @@ span:hover, p>a:hover {
 }
 
 /* Position and style the close button (top right corner) */
-.sidenav .closebtn {
+.sidenav .close-button {
     position: absolute;
     top: 0;
     right: 25px;

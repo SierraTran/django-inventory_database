@@ -24,6 +24,10 @@
 {% else %}
     <p>There's no information available.</p>
 {% endif %}
-{# TODO: Back button #}
-{# TODO: Delete button? #}
+<div class="buttons">
+    <button class="back" onclick="window.location.href='{% url "inventory:used_items" %}'">Back to Used Items</button>
+    {# TODO: Delete button #}
+    <button class="delete">Delete</button>
+</div>
+
 {% endblock content %}

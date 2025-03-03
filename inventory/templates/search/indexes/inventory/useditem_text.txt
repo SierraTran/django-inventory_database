@@ -1,2 +1,2 @@
-{{ object.work_order }}
-{{ object.item }}
+{{ object.work_order|stringformat:"s" }}
+{{ object.item|stringformat:"s" }}

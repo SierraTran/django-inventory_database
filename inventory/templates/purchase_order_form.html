@@ -13,6 +13,7 @@
 <form id="form-container" method="post"> {% csrf_token %}
     {{ formset.management_form }}
     {% for form in formset %}
+
     <fieldset class="item-form">
         {% if form.non_field_errors %}
         <div class="form-errors">
@@ -91,6 +92,7 @@
             {{ form.DELETE }}
         </div>
     </fieldset>
+
     {% endfor %}
     <div class="buttons">
         <button type="button" id="back-to-home-page">Back to Home Page</button>

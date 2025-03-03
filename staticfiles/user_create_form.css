@@ -31,7 +31,13 @@ input {
     height: 20px;
 }
 
-input[type="submit"] {
+.buttons {
+    width: 75%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.buttons input, .buttons button {
     width: 40%;
     height: 2em;
     margin-top: 1em;

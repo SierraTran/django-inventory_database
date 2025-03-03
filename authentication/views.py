@@ -7,12 +7,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import User, Group
 
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 
 from django.views.generic import View
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, DeleteView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from .models import *
 
@@ -79,6 +79,7 @@ class UsersView(UserPassesTestMixin, ListView):
         template_name (str): The template that will be used to render the page.
         context_object_name (str): The context variable name for the list of users.
     """
+
     model = User
     template_name = "users.html"
     context_object_name = "users_list"
@@ -111,6 +112,7 @@ class UserDetailsView(UserPassesTestMixin, DetailView):
         model (User): The model that the view will operate on.
         template_name (str): The template that will be used to render the page.
     """
+
     model = User
     template_name = "user_detail.html"
 
@@ -152,6 +154,7 @@ class CreateUserView(UserPassesTestMixin, CreateView):
         fields (list[str]): The fields to be displayed in the form.
         template_name (str): The template that will be used to render the page.
     """
+
     model = User
     fields = ["username", "first_name", "last_name", "email", "password"]
     template_name = "user_create_form.html"
@@ -209,6 +212,47 @@ class CreateUserView(UserPassesTestMixin, CreateView):
         return context
 
 
+class UpdateUserView(UserPassesTestMixin, UpdateView):
+    """
+    Handles updates for an existing user.
+
+    Attributes:
+        model (User): The model that the view will operate on.
+        fields (str): THe
+        template_name (str): The tempalte that will be used to render the page.
+    """
+
+    model = User
+    fields = [
+        "username", 
+        "first_name", 
+        "last_name", 
+        "email", 
+        "groups",
+    ]
+    template_name = "user_update_form.html"
+
+    def test_func(self) -> bool:
+        """
+        Checks if the user is in the "SUperuser" group
+
+        Returns:
+            bool: True if the user is in the "Superuser" group, False otherwise.
+        """
+        user_group = self.request.user.groups.first()
+        return user_group is not None and user_group.name == "Superuser"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+    
+    def get_success_url(self):
+        return reverse("authentication:user_details", kwargs={"pk": self.object.pk})
+
+    def form_valid(self, form):
+        return super().form_valid(form)
+
+
 class DeleteUserView(UserPassesTestMixin, DeleteView):
     """
     Handles the deletion of a user.
@@ -217,6 +261,7 @@ class DeleteUserView(UserPassesTestMixin, DeleteView):
         model (User): The model that the view will operate on.
         success_url (str): The URL to redirect to after a successful deletion.
     """
+
     model = User
     success_url = reverse_lazy("authentication:users")
 

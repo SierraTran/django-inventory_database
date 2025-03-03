@@ -27,7 +27,10 @@
             </select>
         </div>
     </fieldset>
-    {# TODO: Cancel button? #}
-    <input type="submit" value="Create User">
+    <div class="buttons">
+        <button type="button" onclick="window.location.href='{% url "authentication:home" %}'">Cancel</button>
+        <input type="submit" value="Create User">
+    </div>
+    
 </form>
 {% endblock content %}
