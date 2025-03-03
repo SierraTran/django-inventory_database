@@ -11,3 +11,8 @@ TEMPLATES = [
         },
     },
 ]
+
+INSTALLED_APPS = [
+    "authentication",
+    "authentication.templatetags.custom_filters"
+]

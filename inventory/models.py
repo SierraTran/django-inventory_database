@@ -102,8 +102,9 @@ class ItemHistory(models.Model):
 
     ACTION_CHOICES = [
         ("create", "Create"),
-        ("update", "Update"),
+        ("update", "Update"),        
         ("delete", "Delete"),
+        ("use", "Use"),
     ]
 
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
@@ -139,8 +140,8 @@ class UsedItem(models.Model):
         db_table = 'inventory_useditem'
         managed = True
 
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    work_order = models.IntegerField()
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, error_messages={"required": "An Item is required."})
+    work_order = models.IntegerField(error_messages={"required": "A Work Order number is required."})
 
     def get_absolute_url(self):
         return reverse("inventory:used_item_detail", kwargs={"pk": self.pk})

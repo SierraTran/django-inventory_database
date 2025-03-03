@@ -1,8 +1,6 @@
-{{ object.manufacturer }}
-{{ object.model }}
-{{ object.part_or_unit }}
-{{ object.part_number }}
-{{ object.description }}
+{{ object.manufacturer|stringformat:"s" }}
+{{ object.model|stringformat:"s" }}
+{{ object.part_or_unit|stringformat:"s" }}
+{{ object.part_number|stringformat:"s" }}
+{{ object.description|stringformat:"s" }}
 {{ object.location }}
-{{ object.quantity }}
-{{ object.unit_price }}

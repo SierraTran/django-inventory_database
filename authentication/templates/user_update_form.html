@@ -1,0 +1,28 @@
+{% extends "authentication_base_template.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block other_stylesheets %}
+<link rel="stylesheet" href="{% static "user_detail.css" %}" />
+{% endblock other_stylesheets %}
+
+{% block title %}{# TODO: Title #}{% endblock title %}
+
+{% block page-title %}{# TODO: Page Title #}{% endblock page-title %}
+
+{% block content %}
+<form method="post"> {% csrf_token %}
+<table>
+    {% for field in form %}
+    <tr class="{{ field.id_for_label|clean_id_for_label }}">
+        <th>{{ field.label_tag }}</th>
+        <td>{{ field }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<div class="buttons">
+    <button type="button" onclick="window.location.href='{% url "authentication:user_details" pk=user.pk %}'">Cancel</button>
+    <input type="submit" value="Save" />
+</div>
+</form>
+{% endblock content %}

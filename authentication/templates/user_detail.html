@@ -17,22 +17,23 @@
     <tr class="username">
         <th>Username</th><td>{{ user.username }}</td>
     </tr>
-    <tr class="first-name">
+    <tr class="first_name">
         <th>First Name</th><td>{{ user.first_name }}</td>
     </tr>
-    <tr class="last-name">
+    <tr class="last_name">
         <th>Last Name</th><td>{{ user.last_name }}</td>
     </tr>
     <tr class="email">
         <th>Email</th><td>{{ user.email }}</td>
     </tr>
-    <tr class="user-group">
+    <tr class="user_group">
         <th>User Group</th><td>{{ user_detail_group_name }}</td>
     </tr>
 </table>
 <div class="buttons">
-    <button onclick="window.location.href='{% url "authentication:users" %}'">Back</button>
-    <button>Update</button>
+    <button type="button" onclick="window.location.href='{% url "authentication:users" %}'">Back</button>
+    {# TODO: Update User functionality #}
+    <button type="button" onclick="window.location.href='{% url "authentication:user_update_form" user.id %}'">Update</button>
 </div>
 <div class="buttons danger-zone">
     <button onclick="window.location.href='{% url "authentication:user_confirm_delete" user.id %}'">Delete</button>

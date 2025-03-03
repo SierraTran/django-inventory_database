@@ -32,6 +32,7 @@ This is a Django-based web application for managing an inventory database. The a
 - Create, update, and delete items (based on user permissions)
 - Import item data
 - Manage item requests
+- Make purchase orders
 
 ## User Roles
 

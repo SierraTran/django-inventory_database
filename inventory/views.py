@@ -1,10 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db import IntegrityError
+from django.forms import formset_factory
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, FormView, DeleteView
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 
@@ -12,7 +13,7 @@ from haystack.query import SearchQuerySet
 
 from openpyxl import load_workbook
 
-from .forms import ImportFileForm, PurchaseOrderItemFormSet
+from .forms import ImportFileForm, UsedItemForm, PurchaseOrderItemFormSet
 
 from .models import Item, ItemHistory, ItemRequest, PurchaseOrderItem, UsedItem
 
@@ -97,6 +98,7 @@ class ItemHistoryView(LoginRequiredMixin, ListView):
         get_queryset(): Retrieves the history records for the specific item.
         get_context_data(**kwargs): Adds the specific item to the context data.
     """
+
     model = ItemHistory
     template_name = "item_history.html"
     context_object_name = "item_history_list"
@@ -186,7 +188,7 @@ class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
         model (Item): The model that this view will operate on.
         fields (list[str]): The fields to be displayed in the form.
         template_name (str): The template used to render the form.
-        
+
     Methods:
         test_func(): Checks if the user is in the 'Technician' group.
         form_valid(form): Overrides form_valid to pass current user to save method
@@ -508,7 +510,7 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
     Renders a view to allow users to import items from an .xlsx file to the database.
 
     Attributes:
-        form_class (Form): THe form that the view operates on.
+        form_class (Form): The form that the view operates on.
         template_name (str): The name of the template to be rendered by the class.
 
     Methods:
@@ -546,7 +548,7 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
         workbook = load_workbook(file)
         sheet = workbook.active
         user = self.request.user
-        
+
         # For each record in the excel file ...
         for row in sheet.iter_rows(min_row=2, values_only=True):
             # If the row is completely blank, stop the for loop
@@ -582,7 +584,7 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
                 unit_price=unit_price,
                 last_modified_by=user,
             )
-            
+
             # # Create an ItemHistory record for the new item
             # ItemHistory.objects.create(
             #     item=item,
@@ -590,10 +592,10 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
             #     user=user,
             #     changes=f"Item imported by {user.username}",
             # )
-            
+
         # Go to items page after finishing
         return HttpResponseRedirect(reverse("inventory:items"))
-    
+
     def save(self, *args, **kwargs):
         """
         Saves the item with additional keyword arguments.
@@ -684,7 +686,7 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
     def get_context_data(self, **kwargs):
         """
         Adds the specific item to the context data.
-        
+
         Args:
             **kwargs: Additional keyword arguments.
 
@@ -701,6 +703,7 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
 # Views for the UsedItem Model
 ##############################
 class UsedItemView(LoginRequiredMixin, ListView):
+    # TODO: Doc comment
     model = UsedItem
     template_name = "used_items.html"
     context_object_name = "used_items_list"
@@ -708,7 +711,7 @@ class UsedItemView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         """
         Retrieves all used items from the database.
-        
+
         Used items are ordered by `work_order` and then `item`.
 
         Returns:
@@ -750,6 +753,7 @@ class UsedItemDetailView(LoginRequiredMixin, DetailView):
 class UsedItemCreateView(UserPassesTestMixin, CreateView):
     # TODO: Doc comment
     model = UsedItem
+    # form_class = UsedItemForm
     template_name = "item_use_form.html"
     fields = "__all__"
 
@@ -760,12 +764,24 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
         Returns:
             bool: True if the user is in the "Superuser" or "Technician" group, False otherwise.
         """
-        user_group_name = self.request.user.groups.first().name
-        return user_group_name in ["Superuser", "Technician"]
+        user_group = self.request.user.groups.first()
+        return user_group is not None and user_group.name in ["Superuser", "Technician"]
+
+    def get_initial(self):
+        initial = super().get_initial()
+        item_id = self.request.GET.get("item_id")
+        if item_id:
+            item = get_object_or_404(Item, pk=item_id)
+            initial.update(
+                {
+                    "item": item,
+                }
+            )
+        return initial
 
     def get_context_data(self, **kwargs):
         """
-        Adds the specific item to the context data.
+
 
         Args:
             **kwargs: Additional keyword arguments.
@@ -774,8 +790,12 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
             dict: The context data with the specific item added.
         """
         context = super().get_context_data(**kwargs)
-        item_id = self.kwargs.get("pk")
-        context["item"] = Item.objects.get(pk=item_id)
+        item_id = self.request.GET.get("item_id")
+        item = Item.objects.get(pk=item_id)
+        context["item"] = item
+        if self.request.method == "GET":
+            form = context["form"]
+            form.initial.update(self.get_initial())
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -790,7 +810,7 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
         Returns:
             HttpResponse: The HTTP response object.
         """
-        item_id = self.kwargs.get("pk")
+        item_id = self.request.GET.get("item_id")
         item = Item.objects.get(pk=item_id)
         if item.quantity <= 0:
             messages.error(request, "Cannot use item with quantity 0.")
@@ -801,6 +821,7 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
         # TODO: form variable type
         """
         Override form_valid to decrement the quantity of the associated Item when a new UsedItem is created.
+        It also makes an ItemHistory record to explain the decrement. 
 
         Args:
             form (): The form that handles the data for creating a new UsedItem object.
@@ -813,6 +834,14 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
         item = used_item.item
         item.quantity -= 1
         item.save()
+
+        ItemHistory.objects.create(
+            item=item,
+            action="use",
+            user=self.request.user,
+            changes=f"Item used in work order {used_item.work_order}",
+        )
+
         return response
 
 
@@ -829,6 +858,7 @@ class SearchUsedItemsView(LoginRequiredMixin, ListView):
     Methods:
         get_queryset(): Retrieves the search results based on the query.
     """
+
     model = UsedItem
     template_name = "search/used_item_search.html"
     context_object_name = "results_list"
@@ -869,6 +899,7 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
         get_context_data(**kwargs): Adds the formset to the context data.
         form_valid(formset): Processes the formset data and writes it to an Excel file for download.
     """
+
     form_class = PurchaseOrderItemFormSet
     template_name = "purchase_order_form.html"
     success_url = reverse_lazy("inventory:items")
@@ -881,7 +912,7 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
             bool: True if the user is in the 'Superuser' group, False otherwise.
         """
         return self.request.user.groups.first().name == "Superuser"
-    
+
     def get_initial(self):
         """
         Returns the initial data to use for forms on this view.
@@ -890,12 +921,14 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
             dict: The initial data for the form.
         """
         initial = super().get_initial()
-        initial.update({
-            'manufacturer': self.request.GET.get('manufacturer', ''),
-            'model_part_num': self.request.GET.get('model_part_num', ''),
-            'description': self.request.GET.get('description', ''),
-        })
-        return initial 
+        initial.update(
+            {
+                "manufacturer": self.request.GET.get("manufacturer", ""),
+                "model_part_num": self.request.GET.get("model_part_num", ""),
+                "description": self.request.GET.get("description", ""),
+            }
+        )
+        return initial
 
     def get_context_data(self, **kwargs):
         """
@@ -914,9 +947,9 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
             context["formset"] = PurchaseOrderItemFormSet(
                 queryset=PurchaseOrderItem.objects.none()
             )
-        context["manufacturer"] = self.request.GET.get('manufacturer', '')
-        context["model_part_num"] = self.request.GET.get('model_part_num', '')
-        context["description"] = self.request.GET.get('description', '')
+        context["manufacturer"] = self.request.GET.get("manufacturer", "")
+        context["model_part_num"] = self.request.GET.get("model_part_num", "")
+        context["description"] = self.request.GET.get("description", "")
         return context
 
     def form_valid(self, formset):
@@ -951,7 +984,7 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
 
         if itemCount >= 8:
             setup_worksheet(worksheet, itemCount)
-            
+
         # workbook.save()
 
         # Write data to the worksheet
