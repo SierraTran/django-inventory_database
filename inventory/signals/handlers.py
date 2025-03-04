@@ -9,7 +9,7 @@ from inventory.models import Item, ItemHistory, ItemRequest, UsedItem
 
 
 @receiver(post_save, sender=Item)
-def create_or_update_item_history(sender, instance, created, **kwargs):
+def create_or_update_item_history(sender, instance, created, action, **kwargs):
     """
     Creates an ItemHistory record when an item has been created or updated.
 
@@ -40,7 +40,14 @@ def create_or_update_item_history(sender, instance, created, **kwargs):
 
 @receiver(pre_delete, sender=Item)
 def handle_related_records(sender, instance, **kwargs):
-    # Handle related records before deleting the item
+    """
+    Deletes records related to the item being deleted before its actual deletion.
+
+    Arguments:
+        sender (Item): The model class that sent the signal.
+        instance (Item): The instance of the model that's being created or updated.
+        **kwargs: Additional keyword arguments sent by the signal.
+    """
     ItemHistory.objects.filter(item=instance).delete()
     ItemRequest.objects.filter(item=instance).delete()
     UsedItem.objects.filter(item=instance).delete()

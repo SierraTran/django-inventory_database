@@ -10,4 +10,27 @@
 {% block content %}
 {# TODO: Item request Details page #}
 This is the item request detail page.
+{% if itemrequest%}
+I don't know how to display the information yet.
+<table>
+    <tr class="field requested_by">
+        <th>Requested by:</th>
+        <td>{{ itemrequest.requested_by }}</td>
+    </tr>
+    <tr class="field timestamp">
+        <th>Date & Time:</th>
+        <td>{{ itemrequest.teimestamp }}</td>
+    </tr>
+    <tr class="field status">
+        <th>Requested by:</th>
+        <td>{{ itemrequest.requested_by }}</td>
+    </tr>
+    <tr class="field timestamp">
+        <th>Date & Time:</th>
+        <td>{{ itemrequest.teimestamp }}</td>
+    </tr>
+</table>
+{% else %}
+There's no information.
+{% endif %}
 {% endblock content %}
