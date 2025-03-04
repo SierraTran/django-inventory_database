@@ -13,8 +13,8 @@
 {% if users_list %}
 <div class="grid">
     <div class="field-name">Username</div>
-    <div class="field-name">Last Name</div>
     <div class="field-name">First Name</div>
+    <div class="field-name">Last Name</div>
     <div class="field-name">Email</div>
     {% for user in users_list %}
     <a href="{% url "authentication:user_details" user.id %}">

@@ -95,12 +95,15 @@
     {# Technicians REQUEST more. Superusers ORDER more. #}
     {% if user_group.name == 'Superuser' %}
     <button type="button" id="order-more" 
-        onclick="window.location.href='{% url "inventory:purchase_order_form" %}?manufacturer={{ item.manufacturer }}'"
+        onclick="window.location.href='{% url "inventory:purchase_order_form" %}'"
     >
         Order More
     </button>
     {% else %}
-    <button type="button" id="order-more" onclick="window.location.href='{% url "inventory:item_request_form" item.id %}'">
+    <button type="button" id="order-more" 
+        onclick="window.location.href='{% url "inventory:item_request_form" %}?item_id={{ item.id }}&manufacturer={{ item.manufacturer }}&model_part_num={{ item.model_part_num }}&description={{ item.description }}&unit_price={{ item.unit_price }}'"
+    >
+    {# TODO: "Request More" functionality #}
         Request More (Coming Soon)
     </button>
     {% endif %}

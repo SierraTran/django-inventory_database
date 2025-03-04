@@ -11,9 +11,11 @@ form {
     width: 80%;
     min-width: 1000px;
     margin: 0 auto;
-}
-table {
     background-color: var(--gray);
+}
+
+table {
+    
     border-collapse: collapse;
     width: 100%;
 }

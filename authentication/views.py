@@ -1,9 +1,11 @@
+from django import forms
 from django.shortcuts import render, redirect
 
 from django.contrib import messages
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import User, Group
 
@@ -43,6 +45,10 @@ def login_page(request):
     Returns:
         HttpResponse: The rendered "login.html" template or a redirect to the home page.
     """
+    # Redirect authenticaated users to the home page
+    if request.user.is_authenticated:
+        return redirect("authentication:home")
+    
     # Check if the HTTP request method is POST (form submission)
     if request.method == "POST":
         username = request.POST.get("username")
@@ -190,6 +196,7 @@ class CreateUserView(UserPassesTestMixin, CreateView):
         Returns:
             HttpResponse: The response after form submission.
         """
+        form.instance.password = make_password(form.cleaned_data["password"])
         response = super().form_valid(form)
         group_name = self.request.POST.get("user_group")
         group = Group.objects.get(name=group_name)
@@ -218,7 +225,7 @@ class UpdateUserView(UserPassesTestMixin, UpdateView):
 
     Attributes:
         model (User): The model that the view will operate on.
-        fields (str): THe
+        fields (list[str]): The fields to be displayed in the form.
         template_name (str): The tempalte that will be used to render the page.
     """
 
@@ -228,7 +235,6 @@ class UpdateUserView(UserPassesTestMixin, UpdateView):
         "first_name", 
         "last_name", 
         "email", 
-        "groups",
     ]
     template_name = "user_update_form.html"
 
@@ -243,7 +249,7 @@ class UpdateUserView(UserPassesTestMixin, UpdateView):
         return user_group is not None and user_group.name == "Superuser"
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)        
         return context
     
     def get_success_url(self):

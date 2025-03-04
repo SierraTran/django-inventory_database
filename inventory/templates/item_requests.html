@@ -1,10 +1,50 @@
 {% extends "inventory_base_template.html" %}
 {% load static %}
 
+{% block other_stylesheets %}
+{# TODO: Stylesheet #}
+{% endblock other_stylesheets %}
+
 {% block title %}Item Requests | Inventory Database{% endblock title %}
 
 {% block page-title %}Item Requests{% endblock page-title %}
 
 {% block content %}
+{# TODO: Item Requests Page #}
 This is the item requests page.
+{% if item_requests_list %}
+<div class="grid">
+    <div class="field-name">Date & Time</div>
+    <div class="field-name">Requested by</div>
+    <div class="field-name">Manufacturer</div>
+    <div class="field-name">Model /Part #</div>
+    <div class="field-name">Quantity</div>
+    <div class="field-name">Status</div>
+
+    {% for item_request in item_requests_list %}
+    {% if forloop.counter|divisibleby:2 %}
+    <a href="{% url 'inventory:item_request_detail' item_request.id %}">
+        <div class="even">{{ item_request.timestamp }}</div>
+        <div class="even">{{ item_request.requested_by }}</div>
+        <div class="even">{{ item_request.manufacturer }}</div>
+        <div class="even">{{ item_request.model_part_num }}</div>
+        <div class="even">{{ item_request.quantity_requested }}</div>
+        <div class="even">{{ item_request.status }}</div>
+    </a>
+    {% else %}
+    <a href="{% url 'inventory:item_request_detail' item_request.id %}">
+        <div class="odd">{{ item_request.timestamp }}</div>
+        <div class="odd">{{ item_request.requested_by }}</div>
+        <div class="odd">{{ item_request.manufacturer }}</div>
+        <div class="odd">{{ item_request.model_part_num }}</div>
+        <div class="odd">{{ item_request.quantity_requested }}</div>
+        <div class="odd">{{ item_request.status }}</div>
+    </a>
+    {% endif %}
+    {% endfor %}
+</div>
+{% else %}
+No item requests are available.
+{% endif %}
+
 {% endblock content %}

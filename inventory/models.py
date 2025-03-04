@@ -13,7 +13,7 @@ class Item(models.Model):
     class Meta:
         db_table = "inventory_item"
         managed = True
-    
+
     PART = "Part"
     UNIT = "Unit"
 
@@ -63,7 +63,7 @@ class Item(models.Model):
     @property
     def low_stock(self):
         return self.quantity <= self.min_quantity
-    
+
     @property
     def model_part_num(self):
         return f"{self.model} {self.part_number}"
@@ -97,12 +97,12 @@ class ItemHistory(models.Model):
     class Meta:
         verbose_name = "Item History"
         verbose_name_plural = "Item Histories"
-        db_table = 'inventory_itemhistory'
+        db_table = "inventory_itemhistory"
         managed = True
 
     ACTION_CHOICES = [
         ("create", "Create"),
-        ("update", "Update"),        
+        ("update", "Update"),
         ("delete", "Delete"),
         ("use", "Use"),
     ]
@@ -121,27 +121,43 @@ class ItemRequest(models.Model):
     class Meta:
         verbose_name = "Item Request"
         verbose_name_plural = "Item Requests"
-        db_table = 'inventory_itemrequest'
+        db_table = "inventory_itemrequest"
         managed = True
 
     STATUS = Choices("Pending", "Accepted", "Rejected")
 
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    quantity_requested = models.IntegerField()
+    manufacturer = models.CharField(max_length=100, blank=True)
+    model_part_num = models.CharField(max_length=100, blank=True)
+    quantity_requested = models.IntegerField(validators=[MinValueValidator(0)])
+    description = models.TextField(blank=True)
+    unit_price = models.DecimalField(
+        decimal_places=2, max_digits=14, validators=[MinValueValidator(0.00)]
+    )
     requested_by = models.ForeignKey(User, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
-    status = StatusField(db_index=True)
+    status = StatusField(db_index=True, default="Pending")
+
+    def get_absolute_url(self):
+        return reverse("inventory:item_request_detail", kwargs={"pk": self.pk})
 
 
 class UsedItem(models.Model):
     class Meta:
         verbose_name = "Used Item"
         verbose_name_plural = "Used Items"
-        db_table = 'inventory_useditem'
+        db_table = "inventory_useditem"
         managed = True
 
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, error_messages={"required": "An Item is required."})
-    work_order = models.IntegerField(error_messages={"required": "A Work Order number is required."})
+    item = models.ForeignKey(
+        Item,
+        on_delete=models.CASCADE,
+        error_messages={"required": "An Item is required."},
+    )
+    work_order = models.IntegerField(
+        error_messages={"required": "A Work Order number is required."}
+    )
+    # TODO: datetime_used attribute
+    # TODO: used_by attribute
 
     def get_absolute_url(self):
         return reverse("inventory:used_item_detail", kwargs={"pk": self.pk})
@@ -154,12 +170,12 @@ class PurchaseOrderItem(models.Model):
     class Meta:
         verbose_name = "Purchase Order Item"
         verbose_name_plural = "Purchase Order Items"
-        db_table = 'inventory_purchaseorderitem'
+        db_table = "inventory_purchaseorderitem"
         managed = True
 
     manufacturer = models.CharField(max_length=100, blank=True)
     model_part_num = models.CharField(max_length=100, blank=True)
-    quantity_ordered = models.IntegerField()
+    quantity_ordered = models.IntegerField(validators=[MinValueValidator(0)])
     description = models.TextField(blank=True)
     serial_num = models.CharField(max_length=100, blank=True)
     property_num = models.CharField(max_length=100, blank=True)

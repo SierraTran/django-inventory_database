@@ -1,7 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db import IntegrityError
-from django.forms import formset_factory
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, FormView, DeleteView
@@ -13,7 +12,7 @@ from haystack.query import SearchQuerySet
 
 from openpyxl import load_workbook
 
-from .forms import ImportFileForm, UsedItemForm, PurchaseOrderItemFormSet
+from .forms import ImportFileForm, PurchaseOrderItemFormSet
 
 from .models import Item, ItemHistory, ItemRequest, PurchaseOrderItem, UsedItem
 
@@ -23,9 +22,9 @@ from .excel_functions import setup_worksheet
 # Create your views here.
 
 
-##########################
-# Views for the Item Model
-##########################
+###################################################################################################
+# Views for the Item Model ########################################################################
+###################################################################################################
 class ItemView(LoginRequiredMixin, ListView):
     """
     Class-based view to list all items.
@@ -214,7 +213,7 @@ class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
         Returns:
             bool: True if the user is in the 'Technician' group, False otherwise.
         """
-        user_group = self.request.user.group.first()
+        user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name == "Technician"
 
     def form_valid(self, form):
@@ -264,8 +263,7 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
             bool: True if the user is in the "Superuser" group, False otherwise.
         """
         user_group = self.request.user.groups.first()
-        user_group_name = user_group.name
-        return user_group != None and user_group_name == "Superuser"
+        return user_group is not None and user_group.name == "Superuser"
 
     def form_valid(self, form):
         """
@@ -326,8 +324,8 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
         Returns:
             bool: True if the user is in the "Technician" group, False otherwise.
         """
-        user_group_name = self.request.user.groups.first().name
-        return user_group_name == "Technician"
+        user_group = self.request.user.groups.first()
+        return user_group is not None and user_group.name == "Technician"
 
     def form_valid(self, form):
         """
@@ -440,8 +438,7 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
             bool: True if the user is in the "Superuser" or "Technician" group, False otherwise.
         """
         user_group = self.request.user.groups.first()
-        user_group_name = user_group.name
-        return user_group != None and user_group_name in ["Superuser", "Technician"]
+        return user_group is not None and user_group.name in ["Superuser", "Technician"]
 
     def post(self, request, *args, **kwargs):
         """
@@ -611,9 +608,9 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
         return super().save(*args, **kwargs)
 
 
-#################################
-# Views for the ItemRequest Model
-#################################
+###################################################################################################
+# Views for the ItemRequest Model #################################################################
+###################################################################################################
 class ItemRequestView(UserPassesTestMixin, ListView):
     """
     Class-based view for displaying item requests.
@@ -641,8 +638,8 @@ class ItemRequestView(UserPassesTestMixin, ListView):
         Returns:
             bool: True if the user is in the "Superuser" or "Technician" group, False otherwise.
         """
-        user_group_name = self.request.user.groups.first().name
-        return user_group_name in ["Superuser", "Technician"]
+        user_group = self.request.user.groups.first()
+        return user_group is not None and user_group.name in ["Superuser", "Technician"]
 
     def get_queryset(self):
         """
@@ -651,6 +648,17 @@ class ItemRequestView(UserPassesTestMixin, ListView):
         Returns:
             QuerySet: The queryset containing all item requests.
         """
+        return ItemRequest.objects.all()
+
+
+class ItemRequestDetailView(LoginRequiredMixin, DetailView):
+    # TODO: ItemRequestDetailView
+    """ """
+    model = ItemRequest
+    template_name = "item_request_detail.html"
+    context_object_name = "item_requests_list"
+
+    def get_queryset(self):
         return ItemRequest.objects.all()
 
 
@@ -667,10 +675,11 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
 
     model = ItemRequest
     fields = [
-        "item",
+        "manufacturer",
+        "model_part_num",
         "quantity_requested",
-        "requested_by",
-        "status",
+        "description",
+        "unit_price",
     ]
     template_name = "item_request_form.html"
 
@@ -681,7 +690,16 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
         Returns:
             bool: True if the user is in the "Technician" group, False otherwise.
         """
-        return self.request.user.groups.first().name == "Technician"
+        user_group = self.request.user.groups.first()
+        return user_group is not None and user_group.name == "Technician"
+    
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["manufacturer"] = self.request.GET.get("manufacturer")
+        initial["model_part_num"] = self.request.GET.get("model_part_num")
+        # initial["description"] = self.request.GET.get("description")
+        initial["unit_price"] = self.request.GET.get("unit_price")        
+        return initial
 
     def get_context_data(self, **kwargs):
         """
@@ -694,16 +712,25 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
             dict: The context data with the specific item added.
         """
         context = super().get_context_data(**kwargs)
-        item_id = self.kwargs.get("pk")
-        context["item"] = Item.objects.get(pk=item_id)
+        item_id = self.request.GET.get("item_id")
+        context["item"] = Item.objects.filter(id=item_id)[0]
         return context
 
 
-##############################
-# Views for the UsedItem Model
-##############################
+###################################################################################################
+# Views for the UsedItem Model ####################################################################
+###################################################################################################
 class UsedItemView(LoginRequiredMixin, ListView):
-    # TODO: Doc comment
+    """
+    Class-based view to displaying all Used Items.
+    Users must be logged in to have access to this view.
+
+    Attributes:
+        model (UsedItem): The model that the view will operate on.
+        template_name (str): The template that will be used to render the view
+        context_object_name (str): The name of the context object.
+    """
+
     model = UsedItem
     template_name = "used_items.html"
     context_object_name = "used_items_list"
@@ -721,17 +748,16 @@ class UsedItemView(LoginRequiredMixin, ListView):
 
 
 class UsedItemDetailView(LoginRequiredMixin, DetailView):
-    # TODO: Doc comment
     """
-    _summary_
+    Class-based view to display the details for a specific Used Item.
+    Users must be logged in to have access to this view.
 
-    Arguments:
-        LoginRequiredMixin -- _description_
-        DetailView -- _description_
+    Attributes:
+        model (UsedItem): The model that the view will operate on.
+        template_name (str): The template that will be used to render the view.
 
-    Returns:
-        _description_
     """
+
     model = UsedItem
     template_name = "used_item_detail.html"
 
@@ -751,11 +777,19 @@ class UsedItemDetailView(LoginRequiredMixin, DetailView):
 
 
 class UsedItemCreateView(UserPassesTestMixin, CreateView):
-    # TODO: Doc comment
+    """
+    Class-based view for displaying the page to create a Used Item.
+    Only users in the "Superuser" and "Technician" group have access to this view.
+
+    Attributes:
+        model (UsedItem): The model that the view will operate on.
+        fields (str): The fields that wil displayed in the view.
+        template_name (str): The template that will be used to render the view.
+    """
+
     model = UsedItem
-    # form_class = UsedItemForm
-    template_name = "item_use_form.html"
     fields = "__all__"
+    template_name = "item_use_form.html"
 
     def test_func(self) -> bool:
         """
@@ -768,6 +802,13 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
         return user_group is not None and user_group.name in ["Superuser", "Technician"]
 
     def get_initial(self):
+        # TODO: Doc comment
+        """
+        _summary_
+
+        Returns:
+            dict: The initial data for the `UsedItem`.
+        """
         initial = super().get_initial()
         item_id = self.request.GET.get("item_id")
         if item_id:
@@ -818,13 +859,12 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        # TODO: form variable type
         """
         Override form_valid to decrement the quantity of the associated Item when a new UsedItem is created.
-        It also makes an ItemHistory record to explain the decrement. 
+        It also makes an ItemHistory record to explain the decrement.
 
         Args:
-            form (): The form that handles the data for creating a new UsedItem object.
+            form (ModelForm): The form that handles the data for creating a new UsedItem object.
 
         Returns:
             HttpResponse: The HTTP response object
@@ -882,9 +922,9 @@ class SearchUsedItemsView(LoginRequiredMixin, ListView):
         return results
 
 
-#######################################
-# Views for the PurchaseOrderItem model
-#######################################
+###################################################################################################
+# Views for the PurchaseOrderItem model ###########################################################
+###################################################################################################
 class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
     """
     Renders a view to allow users to create purchase orders using a formset.
@@ -911,7 +951,8 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
         Returns:
             bool: True if the user is in the 'Superuser' group, False otherwise.
         """
-        return self.request.user.groups.first().name == "Superuser"
+        user_group = self.request.user.groups.first()
+        return user_group is not None and user_group.name == "Superuser"
 
     def get_initial(self):
         """
