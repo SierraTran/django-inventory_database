@@ -9,7 +9,7 @@ class ImportFileForm(forms.Form):
 class UsedItemForm(forms.ModelForm):
     class Meta:
         model = UsedItem
-        fields =[
+        fields = [
             "item",
             "work_order",
         ]
@@ -30,7 +30,13 @@ class ItemRequestForm(forms.ModelForm):
             "quantity_requested",
             "description",
             "unit_price",
+            "requested_by",
         ]
+        widgets = {
+            "requested_by": forms.CharField()
+        }
+        
+        
 
 
 class PurchaseOrderItemForm(forms.ModelForm):
