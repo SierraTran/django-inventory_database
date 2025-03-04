@@ -6,9 +6,9 @@
 <link rel="stylesheet" href="{% static "user_detail.css" %}" />
 {% endblock other_stylesheets %}
 
-{% block title %}{# TODO: Title #}{% endblock title %}
+{% block title %}Update {{ user.first_name }} {{ user.last_name }} | Inventory Database{% endblock title %}
 
-{% block page-title %}{# TODO: Page Title #}{% endblock page-title %}
+{% block page-title %}Update {{ user.first_name }} {{ user.last_name }}{% endblock page-title %}
 
 {% block content %}
 <form method="post"> {% csrf_token %}

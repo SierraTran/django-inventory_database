@@ -65,6 +65,12 @@ class ItemModelTests(TestCase):
         item = Item.objects.create(unit_price=200.0)
         self.assertEqual(item.unit_price, 200.0)
         
-# TODO: ItemHistory tests
-# TODO: ItemRequest tests
-# TODO: UsedItem tests
+
+class ItemHistoryModelTests(TestCase):
+    # TODO: ItemHistory tests
+    
+class ItemRequestModelTests(TestCase):
+    # TODO: ItemRequest tests
+    
+class UsedItemModelTests(TestCase):
+    # TODO: UsedItem tests

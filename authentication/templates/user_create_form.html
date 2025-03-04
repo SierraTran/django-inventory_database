@@ -1,5 +1,6 @@
 {% extends "authentication_base_template.html" %}
 {% load static %}
+{% load custom_filters %}
 
 {% block other_stylesheets %}
 <link rel="stylesheet" href="{% static "user_create_form.css" %}" />
@@ -16,6 +17,12 @@
         <div class="field {{ field.name }}">
             {{ field.label_tag }}
             {{ field }}
+
+            {% if field.errors %}
+            <div class="error">
+                {{ field.errors }}
+            </div>
+            {% endif %}
         </div>
         {% endfor %}
         <div class="field user-group">

@@ -25,10 +25,11 @@ class ItemRequestForm(forms.ModelForm):
     class Meta:
         model = ItemRequest
         fields = [
-            "item",
+            "manufacturer",
+            "model_part_num",
             "quantity_requested",
-            "requested_by",
-            "status",
+            "description",
+            "unit_price",
         ]
 
 
