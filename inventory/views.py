@@ -653,16 +653,19 @@ class ItemRequestView(UserPassesTestMixin, ListView):
 
 class ItemRequestDetailView(LoginRequiredMixin, DetailView):
     # TODO: ItemRequestDetailView
-    """ """
+    """ 
+    
+    """
     model = ItemRequest
     template_name = "item_request_detail.html"
-    context_object_name = "item_requests_list"
 
-    def get_queryset(self):
-        return ItemRequest.objects.all()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
 
 class ItemRequestCreateView(UserPassesTestMixin, CreateView):
+    # FIXME: Add user, set status, and set timestamp for the request upon submission
     """
     Class-based view for creating an item request.
     This view requires the user to be in the "Technician" group.
@@ -680,6 +683,7 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
         "quantity_requested",
         "description",
         "unit_price",
+        "requested_by"
     ]
     template_name = "item_request_form.html"
 
@@ -698,7 +702,8 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
         initial["manufacturer"] = self.request.GET.get("manufacturer")
         initial["model_part_num"] = self.request.GET.get("model_part_num")
         # initial["description"] = self.request.GET.get("description")
-        initial["unit_price"] = self.request.GET.get("unit_price")        
+        initial["unit_price"] = self.request.GET.get("unit_price")
+        initial["requested_by"] = self.request.user.username
         return initial
 
     def get_context_data(self, **kwargs):
@@ -807,7 +812,7 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
         _summary_
 
         Returns:
-            dict: The initial data for the `UsedItem`.
+            dict: The initial data for creating a Used Item.
         """
         initial = super().get_initial()
         item_id = self.request.GET.get("item_id")
@@ -821,6 +826,7 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
         return initial
 
     def get_context_data(self, **kwargs):
+        # TODO: Doc comment
         """
 
 
@@ -954,23 +960,6 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name == "Superuser"
 
-    def get_initial(self):
-        """
-        Returns the initial data to use for forms on this view.
-
-        Returns:
-            dict: The initial data for the form.
-        """
-        initial = super().get_initial()
-        initial.update(
-            {
-                "manufacturer": self.request.GET.get("manufacturer", ""),
-                "model_part_num": self.request.GET.get("model_part_num", ""),
-                "description": self.request.GET.get("description", ""),
-            }
-        )
-        return initial
-
     def get_context_data(self, **kwargs):
         """
         Adds the formset and query parameters to the context data.
@@ -988,9 +977,6 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
             context["formset"] = PurchaseOrderItemFormSet(
                 queryset=PurchaseOrderItem.objects.none()
             )
-        context["manufacturer"] = self.request.GET.get("manufacturer", "")
-        context["model_part_num"] = self.request.GET.get("model_part_num", "")
-        context["description"] = self.request.GET.get("description", "")
         return context
 
     def form_valid(self, formset):
