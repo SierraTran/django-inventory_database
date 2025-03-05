@@ -1,0 +1,34 @@
+{% extends "authentication_base_template.html" %}
+{% load static %}
+
+{% block other_stylesheets %}
+
+{% endblock other_stylesheets %}
+
+{% block title %}{% endblock title %}
+
+{% block page-title %}{% endblock page-title %}
+
+{% block content %}
+{# TODO: Notifications Page #}
+This is the Notifications page.
+{% if notifications_list %}
+I don't know how to display the notifications yet.
+<table>
+    <tr>
+        <th>Date & Time</th>
+        <th>Subject</th>
+        <th>Message</th>
+    </tr>
+    {% for notification in notifications_list %}
+    <tr>
+        <td>{{ notification.timestamp }}</td>
+        <td>{{ notification.subject }}</td>
+        <td>{{ notification.message }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+There are no notifications.
+{% endif %}
+{% endblock content %}

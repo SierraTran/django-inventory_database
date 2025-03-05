@@ -11,9 +11,10 @@ form {
     width: 80%;
     min-width: 1000px;
     margin: 0 auto;
-}
-table {
     background-color: var(--gray);
+}
+
+table {    
     border-collapse: collapse;
     width: 100%;
 }
@@ -23,8 +24,7 @@ table.first {
 }
 
 table.first tr th, tr td {
-    padding-left: 0.25em;
-    padding-right: 0.25em;    
+    padding: 0 0.25em 0 0.25em;  
 }
 
 table.first tr th {
@@ -41,9 +41,7 @@ table.second tr:nth-child(2) {
 }
 
 table.second tr th, tr td {
-    padding: 0.5em;
-    padding-left: 0.75em;
-    padding-right: 0.75em;
+    padding: 0.5em 1.25em 0.5em 1.25em;
     width: 20%;
 }
 

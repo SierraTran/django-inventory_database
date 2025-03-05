@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db import IntegrityError
+from django.views.generic import TemplateView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, FormView, DeleteView
@@ -651,21 +652,49 @@ class ItemRequestView(UserPassesTestMixin, ListView):
         return ItemRequest.objects.all()
 
 
-class ItemRequestDetailView(LoginRequiredMixin, DetailView):
-    # TODO: ItemRequestDetailView
+class ItemRequestDetailView(UserPassesTestMixin, DetailView):
     """ 
+    Class-based view for displaying the details of a ItemRequest.
+    Users must be in the "Technician" or "Superuser" group to access this view.
     
+    Attributes:
+        model (ItemRequest): The model that the view will operate on.
+        template_name (str): The template that will be used to render the view.
+        
+    Methods:
+        test_func(): Checks if the user is in the "Technician" or "Superuser" group.
+        get_context_data(**kwargs):  Adds the name of the current user's group to the context.
     """
+    
     model = ItemRequest
     template_name = "item_request_detail.html"
+    
+    def test_func(self) -> bool:
+        """
+        Checks if the user is in the "Technician" or "Superuser" group.
+
+        Returns:
+            bool: True if the user is in the "Technician" or "Superuser" group. False otherwise.
+        """
+        user_group = self.request.user.groups.first()
+        return user_group is not None and user_group.name in ["Technician", "Superuser"]
 
     def get_context_data(self, **kwargs):
+        """
+        Adds the name of the current user's group to the context.
+        
+        Arguments:
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            dict: The context data for the view.
+        """
         context = super().get_context_data(**kwargs)
+        context["current_user_group_name"] = self.request.user.groups.first().name
         return context
 
 
 class ItemRequestCreateView(UserPassesTestMixin, CreateView):
-    # FIXME: Add user, set status, and set timestamp for the request upon submission
     """
     Class-based view for creating an item request.
     This view requires the user to be in the "Technician" group.
@@ -701,7 +730,6 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
         initial = super().get_initial()
         initial["manufacturer"] = self.request.GET.get("manufacturer")
         initial["model_part_num"] = self.request.GET.get("model_part_num")
-        # initial["description"] = self.request.GET.get("description")
         initial["unit_price"] = self.request.GET.get("unit_price")
         initial["requested_by"] = self.request.user.username
         return initial
@@ -721,6 +749,68 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
         context["item"] = Item.objects.filter(id=item_id)[0]
         return context
 
+
+class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
+    model = ItemRequest
+    template_name = "item_request_confirm_accept.html"
+    
+    def test_func(self):
+        # TODO: Doc comment
+        user_group = self.request.user.groups.first()
+        return user_group is not None and user_group.name == "Superuser"
+    
+    def get_fail_url(self):
+        """
+        Returns the URL to redirect to if the acceptance is canceled.
+
+        Returns:
+            str: The URL to redirect to.
+        """
+        return reverse_lazy(
+            "inventory:item_request_detail", kwargs={"pk": self.get_object().pk}
+        )
+    # FIXME: AttributeError at /inventory_database/item_requests/6/accept
+    # 'ItemRequestAcceptView' object has no attribute 'get_object'
+    # C:\Users\jimmyd\Documents\GitHub\django-inventory_database\inventory\views.py, line 770, in get_fail_url
+        
+    fail_url = property(get_fail_url)
+    
+    def post(self, request, *args, **kwargs):
+        # TODO: Doc comment
+        """
+        _summary_
+
+        Arguments:
+            request -- _description_
+
+        Returns:
+            _description_
+        """
+        if "Cancel" in request.POST:
+            return redirect(self.fail_url)
+        
+class ItemRequestRejectView(UserPassesTestMixin, TemplateView):
+    model = ItemRequest
+    template_name = "item_request_confirm_reject.html"
+    
+    def get_fail_url(self):
+        """
+        Returns the URL to redirect to if the deletion is canceled.
+
+        Returns:
+            str: The URL to redirect to.
+        """
+        return reverse_lazy(
+            "inventory:item_request_detail", kwargs={"pk": self.get_object().pk} # FIXME
+        )
+        
+    fail_url = property(get_fail_url)
+    
+    def post(self, request, *args, **kwargs):
+        if "Cancel" in request.POST:
+            return redirect(self.fail_url)  
+    
+    
 
 ###################################################################################################
 # Views for the UsedItem Model ####################################################################
@@ -807,9 +897,8 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
         return user_group is not None and user_group.name in ["Superuser", "Technician"]
 
     def get_initial(self):
-        # TODO: Doc comment
         """
-        _summary_
+        Adds the specific item to the initial data to be used in the form .
 
         Returns:
             dict: The initial data for creating a Used Item.
@@ -826,9 +915,8 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
         return initial
 
     def get_context_data(self, **kwargs):
-        # TODO: Doc comment
         """
-
+        Adds the item and initial data for the form to the context.
 
         Args:
             **kwargs: Additional keyword arguments.
@@ -880,13 +968,11 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
         item = used_item.item
         item.quantity -= 1
         item.save()
-
-        ItemHistory.objects.create(
-            item=item,
-            action="use",
-            user=self.request.user,
-            changes=f"Item used in work order {used_item.work_order}",
-        )
+        
+        history_record_to_edit = ItemHistory.objects.last()        
+        history_record_to_edit.action = "use"
+        history_record_to_edit.changes += f", Item used in work order {used_item.work_order}"        
+        history_record_to_edit.save()
 
         return response
 
