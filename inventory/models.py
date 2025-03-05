@@ -31,7 +31,7 @@ class Item(models.Model):
         max_length=5,
     )
     part_number = models.CharField(blank=True, max_length=100)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     location = models.CharField(default="N/A", max_length=50)
     quantity = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     min_quantity = models.IntegerField(default=0, validators=[MinValueValidator(0)])
@@ -139,6 +139,9 @@ class ItemRequest(models.Model):
 
     def get_absolute_url(self):
         return reverse("inventory:item_request_detail", kwargs={"pk": self.pk})
+    
+    def __str__(self):
+        return f"[{self.timestamp}] Request from {self.requested_by}: {self.manufacturer}, {self.model_part_num}"
 
 
 class UsedItem(models.Model):
