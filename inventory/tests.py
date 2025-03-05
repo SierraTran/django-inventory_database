@@ -5,6 +5,13 @@ from .models import Item
 
 # Create your tests here.
 class ItemModelTests(TestCase):
+    def setUp(self): 
+        """
+        Set up for ItemModelTests
+        [STUBBED]
+        """
+        return        
+        
     def test_create_item_unit(self):
         """
         Test that an item (unit) can be created.
@@ -68,9 +75,15 @@ class ItemModelTests(TestCase):
 
 class ItemHistoryModelTests(TestCase):
     # TODO: ItemHistory tests
+    def setUp(self):
+        return
     
 class ItemRequestModelTests(TestCase):
     # TODO: ItemRequest tests
+    def setUp(self):
+        return
     
 class UsedItemModelTests(TestCase):
     # TODO: UsedItem tests
+    def setUp(self):
+        return

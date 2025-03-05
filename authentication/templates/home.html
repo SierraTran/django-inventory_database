@@ -10,8 +10,8 @@
 {% block content %}
     {% if request.user.is_authenticated %}
     <h1>Items</h1>
-        <p><a href="{% url "inventory:items" %}">Browse available items.</a></p>
-        <p><a href="{% url "inventory:used_items" %}">Browse used items.</a></p>
+        <p><a href="{% url "inventory:items" %}">Browse available items</a></p>
+        <p><a href="{% url "inventory:used_items" %}">Browse used items</a></p>
 
         {# Technician / Superuser only links #}
         {% if user_group.name == 'Technician' or user_group.name == 'Superuser' %}
@@ -30,7 +30,7 @@
 
         {# Superuser only links #}
         {% if user_group.name != 'Technician' %} 
-        <p><a href="{% url "inventory:purchase_order_form" %}">Make a Purchase Order</a></p>
+        <p><a href="{% url "inventory:purchase_order_form" %}" target="_blank">Make a Purchase Order</a></p>
     <h1>Users</h1>
             <p><a href="{% url "authentication:user_create_form" %}">Create New User</a></p>
             <p><a href="{% url "authentication:users" %}">See All Users</a></p>
@@ -39,7 +39,7 @@
 
         <form action="{% url 'logout' %}" method="post"> {% csrf_token %}
             <button type="submit">Log out</button>
-        </form>        
+        </form>
     {% else %}
         <p>Please <a href="{% url 'login' %}">log in</a> to see the database.</p>
     {% endif %}

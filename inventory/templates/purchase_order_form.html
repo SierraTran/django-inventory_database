@@ -10,6 +10,7 @@
 {% block page-title %}Purchase Order Items Form{% endblock page-title %}
 
 {% block content %}
+<p>This new window has been provided so you can fill out this form while referring to the database for information.</p>
 <form id="form-container" method="post"> {% csrf_token %}
     {{ formset.management_form }}
     {% for form in formset %}

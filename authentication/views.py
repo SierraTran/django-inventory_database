@@ -1,3 +1,4 @@
+from typing import Any
 from django import forms
 from django.shortcuts import render, redirect
 
@@ -6,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.contrib.auth.models import User, Group
 
 from django.urls import reverse, reverse_lazy
@@ -16,7 +17,7 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
-from .models import *
+from .models import User, Notification
 
 
 # Create your views here.
@@ -75,6 +76,31 @@ def login_page(request):
     # Render the login page template (GET request)
     return render(request, "login.html")
 
+
+class NotificationsView(LoginRequiredMixin, ListView):
+    """
+    _summary_
+
+    Attributes:
+        LoginRequiredMixin -- _description_
+        ListView -- _description_
+
+    """
+    
+    model = Notification
+    template_name = "notifications.html"
+    context_object_name = "notifications_list"
+    
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        # context[""] = 
+        return context
+    
+    def get_queryset(self):
+        current_user = self.request.user
+        current_user_notifications = Notification.objects.filter(user=current_user)
+        return current_user_notifications
+    
 
 class UsersView(UserPassesTestMixin, ListView):
     """

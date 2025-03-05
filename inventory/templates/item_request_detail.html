@@ -1,17 +1,18 @@
 {% extends "inventory_base_template.html" %}
 {% load static %}
 
-{% block other_stylesheets %}{# TODO: Stylesheet #}{% endblock other_stylesheets %}
+{% block other_stylesheets %}
+{# TODO: Stylesheet #}
+<link rel="stylesheet" href="{% static "item_request_detail.css" %}" />
+{% endblock other_stylesheets %}
 
 {% block title %}{# TODO: Title #}{% endblock title %}
 
 {% block page-title %}{# TODO: Page Title #}{% endblock page-title %}
 
 {% block content %}
-{# TODO: Item request Details page #}
-This is the item request detail page.
+
 {% if itemrequest%}
-I don't know how to display the information yet.
 <table>
     <tr class="field requested_by">
         <th>Requested by:</th>
@@ -19,18 +20,47 @@ I don't know how to display the information yet.
     </tr>
     <tr class="field timestamp">
         <th>Date & Time:</th>
-        <td>{{ itemrequest.teimestamp }}</td>
+        <td>{{ itemrequest.timestamp }}</td>
     </tr>
     <tr class="field status">
-        <th>Requested by:</th>
-        <td>{{ itemrequest.requested_by }}</td>
+        <th>Status</th>
+        <td>{{ itemrequest.status }}</td>
     </tr>
-    <tr class="field timestamp">
-        <th>Date & Time:</th>
-        <td>{{ itemrequest.teimestamp }}</td>
+    <tr class="field manufacturer">
+        <th>Manufacturer:</th>
+        <td>{{ itemrequest.manufacturer }}</td>
+    </tr>
+    <tr class="field model_part_num">
+        <th>Model / Part #:</th>
+        <td>{{ itemrequest.model_part_num }}</td>
+    </tr>
+    <tr class="field description">
+        <th>Description:</th>
+        <td>{{ itemrequest.description }}</td>
+    </tr>
+    <tr class="field quantity_requested">
+        <th>Quantity requested:</th>
+        <td>{{ itemrequest.quantity_requested }}</td>
+    </tr>
+    <tr class="field unit_price">
+        <th>Unit price:</th>
+        <td>{{ itemrequest.unit_price }}</td>
     </tr>
 </table>
+<div class="buttons set1">
+    <button type="button" onclick="window.location.href='{% url "inventory:item_requests" %}'">Back</button>
+{# TODO: Item request buttons for the requesting user #}
+{% if request.user == itemrequest.requested_by %}
+    <button type="button" name="delete">Delete</button>
+{% endif %}
+{# TODO: Item request buttons for Superusers #}
+{% if current_user_group_name == "Superuser" %}
+</div><div class="buttons set2">
+    <button type="button" name="reject" onclick="window.location.href='{% url "inventory:item_request_confirm_reject" itemrequest.id %}'">Reject</button>
+    <button type="button" name="accept" onclick="window.location.href='{% url "inventory:item_request_confirm_accept" itemrequest.id %}'">Accept</button>
+{% endif %}
+</div>
 {% else %}
-There's no information.
+There's no information. Something must have gone wrong on our end.
 {% endif %}
 {% endblock content %}

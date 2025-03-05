@@ -83,3 +83,8 @@ span:hover, p>a:hover {
         font-size: 18px;
     }
 }
+
+hr.sidenav-divider {
+    border: 1px solid #818181;
+    width: 85%;
+}

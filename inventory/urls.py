@@ -30,7 +30,8 @@ urlpatterns = [
     # urls for the ItemRequest model
     path("item_requests/", views.ItemRequestView.as_view(), name="item_requests"),
     path("item_requests/<int:pk>", views.ItemRequestDetailView.as_view(), name="item_request_detail"),
-
+    path("item_requests/<int:pk>/accept", views.ItemRequestAcceptView.as_view(), name="item_request_confirm_accept"),
+    path("item_requests/<int:pk>/reject", views.ItemRequestRejectView.as_view(), name="item_request_confirm_reject"),
     
     # urls for the UseItem model
     path("used_items/", views.UsedItemView.as_view(), name="used_items"),
