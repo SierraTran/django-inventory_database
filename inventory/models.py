@@ -141,7 +141,7 @@ class ItemRequest(models.Model):
         return reverse("inventory:item_request_detail", kwargs={"pk": self.pk})
     
     def __str__(self):
-        return f"[{self.timestamp}] Request from {self.requested_by}: {self.manufacturer}, {self.model_part_num}"
+        return f"Request by {self.requested_by} for {self.manufacturer}, {self.model_part_num}"
 
 
 class UsedItem(models.Model):

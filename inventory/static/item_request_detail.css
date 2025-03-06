@@ -28,7 +28,12 @@ tr.status {
     height: 2em;
 }
 
-.buttons button[name="delete"] {
+.buttons button[name="delete"], .buttons button[name="reject"] {
     border-color: red;
     background-color: rgba(255, 100, 100, 0.5);
+}
+
+button[name="accept"] {
+    border-color: green;
+    background-color: rgba(100, 255, 100, 0.5);
 }
