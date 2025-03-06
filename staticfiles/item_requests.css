@@ -1,6 +1,6 @@
 div.grid {
     display: grid;
-    grid-template-columns: repeat(8, minmax(1em, auto));
+    grid-template-columns: repeat(6, minmax(1em, auto));
     min-width: 950px;
     margin: 2em auto;
 }

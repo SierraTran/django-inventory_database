@@ -59,7 +59,7 @@ def send_item_request_notification(sender, instance, created, **kwargs):
         return
     else: 
         subject = f"Item Request {instance.status}"
-        message = f"Your Item Request (( {instance} )) has been " + str(instance.status).lower() + "."
+        message = f"Your Item Request for {instance.manufacturer}, {instance.model_part_num} has been " + str(instance.status).lower() + "."
     with transaction.atomic():
         Notification.objects.create(
             is_read=False,

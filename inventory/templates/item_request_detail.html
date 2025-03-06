@@ -6,9 +6,13 @@
 <link rel="stylesheet" href="{% static "item_request_detail.css" %}" />
 {% endblock other_stylesheets %}
 
-{% block title %}{# TODO: Title #}{% endblock title %}
+{% block title %}{# TODO: Title #}
+{{ itemrequest }} | Inventory Database
+{% endblock title %}
 
-{% block page-title %}{# TODO: Page Title #}{% endblock page-title %}
+{% block page-title %}{# TODO: Page Title #}
+{{ itemrequest }}
+{% endblock page-title %}
 
 {% block content %}
 
@@ -22,8 +26,16 @@
         <th>Date & Time:</th>
         <td>{{ itemrequest.timestamp }}</td>
     </tr>
-    <tr class="field status">
-        <th>Status</th>
+    <tr class="field status"
+        {% if itemrequest.status == "Pending" %}
+        style="background-color:rgba(255, 255, 100, 0.5)"
+        {% elif itemrequest.status == "Accepted" %}
+        style="background-color:rgba(100, 255, 100, 0.5)"
+        {% else %}
+        style="background-color:rgba(255, 100, 100, 0.5)"
+        {% endif %}     
+    >
+        <th>Status:</th>
         <td>{{ itemrequest.status }}</td>
     </tr>
     <tr class="field manufacturer">
