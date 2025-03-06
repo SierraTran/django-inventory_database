@@ -653,22 +653,22 @@ class ItemRequestView(UserPassesTestMixin, ListView):
 
 
 class ItemRequestDetailView(UserPassesTestMixin, DetailView):
-    """ 
+    """
     Class-based view for displaying the details of a ItemRequest.
     Users must be in the "Technician" or "Superuser" group to access this view.
-    
+
     Attributes:
         model (ItemRequest): The model that the view will operate on.
         template_name (str): The template that will be used to render the view.
-        
+
     Methods:
         test_func(): Checks if the user is in the "Technician" or "Superuser" group.
         get_context_data(**kwargs):  Adds the name of the current user's group to the context.
     """
-    
+
     model = ItemRequest
     template_name = "item_request_detail.html"
-    
+
     def test_func(self) -> bool:
         """
         Checks if the user is in the "Technician" or "Superuser" group.
@@ -682,7 +682,7 @@ class ItemRequestDetailView(UserPassesTestMixin, DetailView):
     def get_context_data(self, **kwargs):
         """
         Adds the name of the current user's group to the context.
-        
+
         Arguments:
             **kwargs: Additional keyword arguments.
 
@@ -712,7 +712,7 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
         "quantity_requested",
         "description",
         "unit_price",
-        "requested_by"
+        "requested_by",
     ]
     template_name = "item_request_form.html"
 
@@ -725,7 +725,7 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
         """
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name == "Technician"
-    
+
     def get_initial(self):
         initial = super().get_initial()
         initial["manufacturer"] = self.request.GET.get("manufacturer")
@@ -753,12 +753,21 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
 class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
     model = ItemRequest
     template_name = "item_request_confirm_accept.html"
-    
+
     def test_func(self):
-        # TODO: Doc comment
+        """
+        Checks if the user is in the "SUperuser" group
+
+        Returns:
+            bool: True if the user is in the "Superuser" group. False otherwise.
+        """
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name == "Superuser"
-    
+
+    def get_object(self):
+        # TODO: Doc comment
+        return get_object_or_404(ItemRequest, pk=self.kwargs.get("pk"))
+
     def get_fail_url(self):
         """
         Returns the URL to redirect to if the acceptance is canceled.
@@ -769,12 +778,15 @@ class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
         return reverse_lazy(
             "inventory:item_request_detail", kwargs={"pk": self.get_object().pk}
         )
-    # FIXME: AttributeError at /inventory_database/item_requests/6/accept
-    # 'ItemRequestAcceptView' object has no attribute 'get_object'
-    # C:\Users\jimmyd\Documents\GitHub\django-inventory_database\inventory\views.py, line 770, in get_fail_url
-        
+
     fail_url = property(get_fail_url)
-    
+
+    def get_context_data(self, **kwargs):
+        # TODO: Doc comment
+        context = super().get_context_data(**kwargs)
+        context["object"] = self.get_object()
+        return context
+
     def post(self, request, *args, **kwargs):
         # TODO: Doc comment
         """
@@ -788,11 +800,33 @@ class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
         """
         if "Cancel" in request.POST:
             return redirect(self.fail_url)
-        
+        else:
+            item_request = self.get_object()
+            item_request.status = "Accepted"
+            item_request.save()
+            return redirect(item_request.get_absolute_url())
+            
+
+
 class ItemRequestRejectView(UserPassesTestMixin, TemplateView):
+    # TODO: Doc comment
     model = ItemRequest
     template_name = "item_request_confirm_reject.html"
-    
+
+    def test_func(self):
+        """
+        Checks if the user is in the "SUperuser" group
+
+        Returns:
+            bool: True if the user is in the "Superuser" group. False otherwise.
+        """
+        user_group = self.request.user.groups.first()
+        return user_group is not None and user_group.name == "Superuser"
+
+    def get_object(self):
+        # TODO: Doc comment
+        return get_object_or_404(ItemRequest, pk=self.kwargs.get("pk"))
+
     def get_fail_url(self):
         """
         Returns the URL to redirect to if the deletion is canceled.
@@ -801,16 +835,46 @@ class ItemRequestRejectView(UserPassesTestMixin, TemplateView):
             str: The URL to redirect to.
         """
         return reverse_lazy(
-            "inventory:item_request_detail", kwargs={"pk": self.get_object().pk} # FIXME
+            "inventory:item_request_detail", kwargs={"pk": self.get_object().pk}
         )
         
     fail_url = property(get_fail_url)
-    
+
+    def get_context_data(self, **kwargs):
+        """
+        Adds the specific item request to the context data.
+        
+        Args:
+            **kwargs: Additional keyword arguments
+
+        Returns:
+            dict: The context data for the view
+        """
+        context = super().get_context_data(**kwargs)
+        context["object"] = self.get_object()
+        return context
+
     def post(self, request, *args, **kwargs):
+        # TODO: Doc comment
+        """
+        _summary_
+
+        Arguments:
+            request (HttpRequest):
+            *args: Additional positional arguments
+            **kwargs: Additional keyword arguments
+
+        Returns:
+            _description_
+        """
         if "Cancel" in request.POST:
-            return redirect(self.fail_url)  
-    
-    
+            return redirect(self.fail_url)
+        else:
+            item_request = self.get_object()
+            item_request.status = "Rejected"
+            item_request.save()
+            return redirect(item_request.get_absolute_url())
+
 
 ###################################################################################################
 # Views for the UsedItem Model ####################################################################
@@ -968,10 +1032,12 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
         item = used_item.item
         item.quantity -= 1
         item.save()
-        
-        history_record_to_edit = ItemHistory.objects.last()        
+
+        history_record_to_edit = ItemHistory.objects.last()
         history_record_to_edit.action = "use"
-        history_record_to_edit.changes += f", Item used in work order {used_item.work_order}"        
+        history_record_to_edit.changes += (
+            f", Item used in work order {used_item.work_order}"
+        )
         history_record_to_edit.save()
 
         return response

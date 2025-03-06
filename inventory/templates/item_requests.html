@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block other_stylesheets %}
-{# TODO: Stylesheet #}
 <link rel="stylesheet" href="{% static "item_requests.css" %}" />
 {% endblock other_stylesheets %}
 
@@ -12,7 +11,6 @@
 
 {% block content %}
 {# TODO: Item Requests Page #}
-This is the item requests page.
 {% if item_requests_list %}
 <div class="grid">
     <div class="field-name">Date & Time</div>
@@ -30,7 +28,16 @@ This is the item requests page.
         <div class="even">{{ item_request.manufacturer }}</div>
         <div class="even">{{ item_request.model_part_num }}</div>
         <div class="even">{{ item_request.quantity_requested }}</div>
-        <div class="even">{{ item_request.status }}</div>
+        <div class="even"><span
+            {% if item_request.status == "Pending" %}
+            style="background-color:rgba(255, 255, 100, 0.5)"
+            {% elif item_request.status == "Accepted" %}
+            style="background-color:rgba(100, 255, 100, 0.5)"
+            {% else %}
+            style="background-color:rgba(255, 100, 100, 0.5)"
+            {% endif %}
+            
+        >{{ item_request.status }}</span></div>
     </a>
     {% else %}
     <a href="{% url 'inventory:item_request_detail' item_request.id %}">
@@ -39,7 +46,16 @@ This is the item requests page.
         <div class="odd">{{ item_request.manufacturer }}</div>
         <div class="odd">{{ item_request.model_part_num }}</div>
         <div class="odd">{{ item_request.quantity_requested }}</div>
-        <div class="odd">{{ item_request.status }}</div>
+        <div class="odd"><span
+            {% if item_request.status == "Pending" %}
+            style="background-color:rgba(255, 255, 100, 0.5)"
+            {% elif item_request.status == "Accepted" %}
+            style="background-color:rgba(100, 255, 100, 0.5)"
+            {% else %}
+            style="background-color:rgba(255, 100, 100, 0.5)"
+            {% endif %}
+            
+        >{{ item_request.status }}</span></div>
     </a>
     {% endif %}
     {% endfor %}

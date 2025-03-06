@@ -1,4 +1,4 @@
-form {
+#form-container {
     margin: 0 auto;
     background-color: rgb(200, 200, 200);
     display: flex;
@@ -7,15 +7,19 @@ form {
     max-width: 1000px;
 }
 
+p {
+    text-align: center;
+}
+
 fieldset {
     width: 95%;
     border: 0;
-    border-bottom: 4px solid rgb(220, 220, 220);;
+    border-bottom: 4px solid rgb(220, 220, 220);
     margin-bottom: 10px;
-}  
+}
 
 .field-pair {
-    display:flex;
+    display: flex;
     justify-content: space-between;
 }
 
@@ -42,6 +46,7 @@ fieldset {
     height: 2em;
 }
 
-.buttons button, input[type="submit"] {
+.buttons button,
+input[type="submit"] {
     width: 30%;
 }
