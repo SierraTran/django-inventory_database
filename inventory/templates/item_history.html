@@ -5,15 +5,16 @@
 <link rel="stylesheet" href="{% static "item_history.css" %}" />
 {% endblock other_stylesheets %}
 
-{% block title %}Item History | {{ item }} {% endblock title %}
+{% block title %}Item History | {{ item }} | Iventory Database{% endblock title %}
 
+{# TODO: Remove link decoration or link altogether? #}
 {% block page-title %}
 <a href="{% url "inventory:item_detail" item.id %}"> {{ item }} </a>
 - Item History
-{% endblock page-title %} {# TODO: Add item to view context to render for title #}
+{% endblock page-title %}
 
 {% block content %}
-{# TODO: Back button for going back to item detail page #}
+{# TODO: Center and format back button #}
 <button type="button" onclick="window.location.href='{% url "inventory:item_detail" item.id %}'">Back to Item Details</button>
 <table>
     <thead>

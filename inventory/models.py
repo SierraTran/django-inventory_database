@@ -1,11 +1,11 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.contrib.auth.models import User, Group
 from django.urls import reverse
+from django.utils import timezone
 
 from model_utils.fields import StatusField
 from model_utils import Choices, FieldTracker
-
-from authentication.models import User
 
 
 # Create your models here.
@@ -159,8 +159,8 @@ class UsedItem(models.Model):
     work_order = models.IntegerField(
         error_messages={"required": "A Work Order number is required."}
     )
-    # TODO: datetime_used attribute
-    # TODO: used_by attribute
+    datetime_used = models.DateTimeField(default=timezone.now)
+    used_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
 
     def get_absolute_url(self):
         return reverse("inventory:used_item_detail", kwargs={"pk": self.pk})

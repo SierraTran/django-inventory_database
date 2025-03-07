@@ -35,6 +35,8 @@
         </h2>
         <p>
             The page you requested couldn't be found.
+
+            {{ exception }}
         </p>
         {% if not request.user.is_authenticated %}
         <p>

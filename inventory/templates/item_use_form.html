@@ -2,16 +2,16 @@
 {% load static %}
 
 {% block other_stylesheets %}
-{# TODO: Stylesheet #}
+<link rel="stylesheet" href="{% static "item_form.css" %}" />
+<link rel="stylesheet" href="{% static "item_use_form.css" %}" />
 {% endblock other_stylesheets %}
 
 
-{% block title %}{% endblock title %}
+{% block title %}Using {{ item }} | Inventory Database{% endblock title %}
 
 {% block page-title %}Using {{ item }}{% endblock page-title %}
 
 {% block content %}
-{# TODO: Automatically set item to match item in context and/or get rid of the item field #}
 <form method="post"> {% csrf_token %}
     <table>
         {% if form.non_field_errors %}
@@ -27,11 +27,7 @@
         <tr>
             <th>{{ field.label_tag }}</th>
             <td>
-                {% if field.name == 'item' %}
-                    {{ field }}
-                {% else %}
-                    {{ field }}
-                {% endif %}
+                {{ field }}
                 {% if field.errors %}
                 <div class="field-errors">
                     {{ field.errors }}
@@ -56,8 +52,14 @@
 <script>
     $(document).ready(function() {
         $('#id_item').select2({
-            placeholder: 'Select an item',
-            allowClear: true
+            width: '400px',
+            placeholder: 'Please select an item',
+            allowClear: false
+        });
+        $('#id_used_by').select2({
+            width: '200px',
+            placeholder: 'Please select the user using this item',
+            allowClear: false
         });
     });
 </script> 
