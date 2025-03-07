@@ -3,6 +3,7 @@
 
 {% block other_stylesheets %}
 {# TODO: Stylesheet #}
+<link rel="stylesheet" href="{% static "item_detail.css" %}" />
 {% endblock other_stylesheets %}
 
 {% block title %}Used Item Detail{% endblock title %}
@@ -19,6 +20,14 @@
         <tr>
             <th>Item:</th>
             <td><a href="{% url "inventory:item_detail" used_item.item.id %}">{{ used_item.item }}</a></td>
+        </tr>
+        <tr>
+            <th>Date & Time used:</th>
+            <td>{{ used_item.datetime_used }}</td>
+        </tr>
+        <tr>
+            <th>Used by:</th>
+            <td><a href="{% url "authentication:user_details" used_item.used_by.id %}">{{ used_item.used_by }}</a></td>
         </tr>
     </table>
 {% else %}

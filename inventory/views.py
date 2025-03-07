@@ -5,8 +5,8 @@ from django.views.generic import TemplateView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, FormView, DeleteView
-from django.shortcuts import get_object_or_404, redirect
-from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, redirect, render
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 
 from haystack.query import SearchQuerySet
@@ -16,6 +16,7 @@ from openpyxl import load_workbook
 from .forms import ImportFileForm, PurchaseOrderItemFormSet
 
 from .models import Item, ItemHistory, ItemRequest, PurchaseOrderItem, UsedItem
+from authentication.models import User
 
 from .excel_functions import setup_worksheet
 
@@ -265,6 +266,17 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
         """
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name == "Superuser"
+    
+    def handle_no_permission(self):
+        # TODO: Doc comment
+        """
+        Renders the 403 page with a message explaining the error.
+
+        Returns:
+            HttpResponse: 
+        """
+        message = "You need to be a Superuser to access this view."    
+        return render(self.request, "403.html", {'message': message})
 
     def form_valid(self, form):
         """
@@ -327,6 +339,17 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
         """
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name == "Technician"
+    
+    def handle_no_permission(self):
+        # TODO: Doc comment
+        """
+        Renders the 403 page with a message explaining the error.
+
+        Returns:
+            HttpResponse: 
+        """
+        message = "You need to be a Technician to access this view."    
+        return render(self.request, "403.html", {'message': message})
 
     def form_valid(self, form):
         """
@@ -369,7 +392,18 @@ class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
             bool: True if the user is in the "Intern" group, False otherwise.
         """
         return self.request.user.groups.first().name == "Intern"
+    
+    def handle_no_permission(self):
+        # TODO: DOc comment
+        """
+        Renders the 403 page with a message explaining the error.
 
+        Returns:
+            HttpResponse: 
+        """
+        message = "You need to be an Intern to access this view."    
+        return render(self.request, "403.html", {'message': message})
+    
     def form_valid(self, form):
         """
         Overrides the form_valid function of the parent class (`UpdateView`) to pass the current user to the save method.
@@ -725,13 +759,25 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
         """
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name == "Technician"
+    
+    def handle_no_permission(self):
+        # TODO: Doc comment
+        """
+        Renders the 403 page with a message explaining the error.
+
+        Returns:
+            HttpResponse: 
+        """
+        message = "You need to be a Technician to access this view."
+        return render(self.request, "403.html", {"message": message})
 
     def get_initial(self):
         initial = super().get_initial()
         initial["manufacturer"] = self.request.GET.get("manufacturer")
         initial["model_part_num"] = self.request.GET.get("model_part_num")
+        initial["description"] = self.request.GET.get("description")
         initial["unit_price"] = self.request.GET.get("unit_price")
-        initial["requested_by"] = self.request.user.username
+        initial["requested_by"] = self.request.user
         return initial
 
     def get_context_data(self, **kwargs):
@@ -751,6 +797,17 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
 
 
 class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
+    # TODO: Doc comment
+    """
+    _summary_
+
+    Arguments:
+        UserPassesTestMixin -- _description_
+        TemplateView -- _description_
+
+    Returns:
+        _description_
+    """
     model = ItemRequest
     template_name = "item_request_confirm_accept.html"
 
@@ -765,7 +822,12 @@ class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
         return user_group is not None and user_group.name == "Superuser"
 
     def get_object(self):
-        # TODO: Doc comment
+        """
+        Retrieves the specific ItemRequest object for the view.
+
+        Returns:
+            ItemRequest: The ItemRequest object that may or may not be accepted by a Superuser.
+        """
         return get_object_or_404(ItemRequest, pk=self.kwargs.get("pk"))
 
     def get_fail_url(self):
@@ -793,7 +855,9 @@ class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
         _summary_
 
         Arguments:
-            request -- _description_
+            request (HttpRequest):
+            *args: Additional positional arguments
+            **kwargs: Additional keyword arguments            
 
         Returns:
             _description_
@@ -824,7 +888,12 @@ class ItemRequestRejectView(UserPassesTestMixin, TemplateView):
         return user_group is not None and user_group.name == "Superuser"
 
     def get_object(self):
-        # TODO: Doc comment
+        """
+        Retrieves the specific item request for the view.
+
+        Returns:
+            ItemRequest: The item request that may or may not be rejected by a Superuser.
+        """
         return get_object_or_404(ItemRequest, pk=self.kwargs.get("pk"))
 
     def get_fail_url(self):
@@ -881,12 +950,12 @@ class ItemRequestRejectView(UserPassesTestMixin, TemplateView):
 ###################################################################################################
 class UsedItemView(LoginRequiredMixin, ListView):
     """
-    Class-based view to displaying all Used Items.
+    Class-based view for displaying all Used Items.
     Users must be logged in to have access to this view.
 
     Attributes:
         model (UsedItem): The model that the view will operate on.
-        template_name (str): The template that will be used to render the view
+        template_name (str): The template that will be used to render the view.
         context_object_name (str): The name of the context object.
     """
 
@@ -968,14 +1037,14 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
             dict: The initial data for creating a Used Item.
         """
         initial = super().get_initial()
+        # TODO: Add current user to initial data
+        current_user = self.request.user
+        initial.update({"used_by": current_user})
+        # Add item to initial data
         item_id = self.request.GET.get("item_id")
         if item_id:
             item = get_object_or_404(Item, pk=item_id)
-            initial.update(
-                {
-                    "item": item,
-                }
-            )
+            initial.update({"item": item,})
         return initial
 
     def get_context_data(self, **kwargs):
