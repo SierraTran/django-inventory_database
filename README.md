@@ -57,7 +57,7 @@ More info about [Django](https://www.djangoproject.com/)
 
 #### Haystack and Whoosh
 
-For searching through the database, Haystack has been implemented with the Whoosh backend.
+For database searching, Haystack has been implemented with the Whoosh backend. Whoosh is easy to set up and well-suited for small applications, which makes it an ideal choice for this application. 
 
 ## Required Software
 
