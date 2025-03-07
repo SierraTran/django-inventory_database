@@ -2,17 +2,12 @@
 {% load static %}
 
 {% block other_stylesheets %}
-{# TODO: Stylesheet #}
 <link rel="stylesheet" href="{% static "item_request_detail.css" %}" />
 {% endblock other_stylesheets %}
 
-{% block title %}{# TODO: Title #}
-{{ itemrequest }} | Inventory Database
-{% endblock title %}
+{% block title %}{{ itemrequest }} | Inventory Database{% endblock title %}
 
-{% block page-title %}{# TODO: Page Title #}
-{{ itemrequest }}
-{% endblock page-title %}
+{% block page-title %}{{ itemrequest }}{% endblock page-title %}
 
 {% block content %}
 
@@ -60,12 +55,11 @@
     </tr>
 </table>
 <div class="buttons set1">
-    <button type="button" onclick="window.location.href='{% url "inventory:item_requests" %}'">Back</button>
+    <button type="button" onclick="window.location.href='{% url "inventory:item_requests" %}'">Back to Item Requests</button>
 {# TODO: Item request buttons for the requesting user #}
 {% if request.user == itemrequest.requested_by %}
     <button type="button" name="delete">Delete</button>
 {% endif %}
-{# TODO: Item request buttons for Superusers #}
 {% if current_user_group_name == "Superuser" %}
 </div><div class="buttons set2">
     <button type="button" name="reject" onclick="window.location.href='{% url "inventory:item_request_confirm_reject" itemrequest.id %}'">Reject</button>

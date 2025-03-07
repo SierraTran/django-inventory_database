@@ -78,3 +78,35 @@ input {
     height: 2em;
 }
 
+#id_requested_by {
+    display: none;
+}
+
+.select2-dropdown {
+    max-height: 200px; /* Adjust height as needed */    
+    overflow-y: auto;
+    position: absolute; /* Ensures dropdown stays anchored */
+    z-index: 1; /* Keeps it above background but manageable */
+    background-color: #f0f0f0; /* Choose a color or use a hex code */
+    border: 1px solid #ccc; /* Optional: Add a border for better visibility */
+    border-radius: 5px; /* Optional: Round the edges */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle shadow */
+}
+
+.select2-container {
+    width: 100%; /* Matches the width of the select element */
+}
+
+.select2-container--default .select2-results__options {
+    margin-top: 0; /* Prevent additional gaps */
+}
+
+@media (max-width: 768px) {
+    .select2-dropdown {
+        max-height: 150px; /* Slightly smaller for mobile */
+    }
+}
+
+input[type="search"] {
+    width: 100%;
+}

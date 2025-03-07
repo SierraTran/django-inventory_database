@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="{% static "item_request_form.css" %}" />
 {% endblock other_stylesheets %}
 
-{% block title %}{% endblock title %}
+{% block title %}Item Request Form | Inventory Database{% endblock title %}
 
 {% block page-title %}Item Request Form{% endblock page-title %}
 
@@ -17,7 +17,13 @@
     {% for field in form %}
         <tr>
             <th>{{ field.label_tag }}</th>
-            <td>{{ field }}</td>
+            <td>
+                {% if field.name == 'description' %}
+                <textarea name="description" cols="40" rows="10" id="id_description">{{ field.value }}</textarea>
+                {% else %}
+                {{ field }}
+                {% endif %}
+            </td>
         </tr>
     {% endfor %}
     </table>
@@ -30,4 +36,20 @@
         and have an email sent to the admin(s)
     </p>
 </form>
+
+<!-- Include jQuery and Select2 -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- Initialize Select2 for the item dropdown -->
+  
+<script>
+    $(document).ready(function() {
+        $('#id_requested_by').select2({
+            width: '200px',
+            placeholder: 'Please select the user using this item',
+            allowClear: false,
+        });
+    });
+</script> 
 {% endblock content %}

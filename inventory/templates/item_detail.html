@@ -103,13 +103,12 @@
     <button type="button" id="order-more" 
         onclick="window.open('{% url "inventory:item_request_form" %}?item_id={{ item.id }}&manufacturer={{ item.manufacturer }}&model_part_num={{ item.model_part_num }}&description={{ item.description }}&unit_price={{ item.unit_price }}', '_blank')"
     >
-    {# TODO: "Request More" functionality #}
-        Request More (Coming Soon)
+        Request More
     </button>
     {% endif %}
 </div>
 <div class="buttons danger-zone">
-    <button type="button" onclick="window.location.href='{% url "inventory:item_confirm_delete" item.id %}'">Delete</button>
+    <button type="button" class="delete" onclick="window.location.href='{% url "inventory:item_confirm_delete" item.id %}'">Delete</button>
 </div>
 {% endif %} 
 

@@ -18,12 +18,12 @@ urlpatterns = [
     # This url will create a UsedItem object. It needs the id of the current Item object
     path("items/use", views.UsedItemCreateView.as_view(), name="item_use_form"),
     
-    path("items/<int:pk>/update/", views.ItemUpdateSuperuserView.as_view(), name="item_update_form_superuser"),
-    path("items/<int:pk>/update/", views.ItemUpdateTechnicianView.as_view(), name="item_update_form_technician"),
-    path("items/<int:pk>/update/", views.ItemUpdateInternView.as_view(), name="item_update_form_intern"),
+    path("items/<int:pk>/update/superuser", views.ItemUpdateSuperuserView.as_view(), name="item_update_form_superuser"),
+    path("items/<int:pk>/update/technician", views.ItemUpdateTechnicianView.as_view(), name="item_update_form_technician"),
+    path("items/<int:pk>/update/intern", views.ItemUpdateInternView.as_view(), name="item_update_form_intern"),
     path("items/<int:pk>/delete/", views.ItemDeleteView.as_view(), name="item_confirm_delete"),
-    path("items/new_item_form/", views.ItemCreateSuperuserView.as_view(), name="item_create_form_superuser"),
-    path("items/new_item_form/", views.ItemCreateTechnicianView.as_view(), name="item_create_form_technician"),
+    path("items/new_item_form/superuser", views.ItemCreateSuperuserView.as_view(), name="item_create_form_superuser"),
+    path("items/new_item_form/technician", views.ItemCreateTechnicianView.as_view(), name="item_create_form_technician"),
     path("items/search/", views.SearchItemsView.as_view(), name="search_items"),   
     path("items/import_item_data/", views.ImportItemDataView.as_view(), name="import_item_data"),
     
