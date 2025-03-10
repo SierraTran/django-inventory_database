@@ -268,12 +268,11 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
         return user_group is not None and user_group.name == "Superuser"
     
     def handle_no_permission(self):
-        # TODO: Doc comment
         """
         Renders the 403 page with a message explaining the error.
 
         Returns:
-            HttpResponse: 
+            HttpResponse: The HTTP response object that that's returned to the client. 
         """
         message = "You need to be a Superuser to access this view."    
         return render(self.request, "403.html", {'message': message})
@@ -341,12 +340,11 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
         return user_group is not None and user_group.name == "Technician"
     
     def handle_no_permission(self):
-        # TODO: Doc comment
         """
         Renders the 403 page with a message explaining the error.
 
         Returns:
-            HttpResponse: 
+            HttpResponse: The HTTP response object that that's returned to the client. 
         """
         message = "You need to be a Technician to access this view."    
         return render(self.request, "403.html", {'message': message})
@@ -359,7 +357,7 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
             form (ModelForm): The form that handles the data for updating the Item object.
 
         Returns:
-            HttpResponse: The HTTP response object.
+            HttpResponse: The HTTP response object that that's returned to the client. 
         """
         form.instance.updated_by = self.request.user
         return super().form_valid(form)
@@ -394,12 +392,11 @@ class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
         return self.request.user.groups.first().name == "Intern"
     
     def handle_no_permission(self):
-        # TODO: DOc comment
         """
         Renders the 403 page with a message explaining the error.
 
         Returns:
-            HttpResponse: 
+            HttpResponse: The HTTP response object that that's returned to the client. 
         """
         message = "You need to be an Intern to access this view."    
         return render(self.request, "403.html", {'message': message})
@@ -761,12 +758,11 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
         return user_group is not None and user_group.name == "Technician"
     
     def handle_no_permission(self):
-        # TODO: Doc comment
         """
         Renders the 403 page with a message explaining the error.
 
         Returns:
-            HttpResponse: 
+            HttpResponse: The HTTP response object that that's returned to the client. 
         """
         message = "You need to be a Technician to access this view."
         return render(self.request, "403.html", {"message": message})

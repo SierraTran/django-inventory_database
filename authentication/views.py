@@ -78,13 +78,13 @@ def login_page(request):
 
 
 class NotificationsView(LoginRequiredMixin, ListView):
+    # TODO: Doc comment
     """
     _summary_
 
     Attributes:
         LoginRequiredMixin -- _description_
         ListView -- _description_
-
     """
     
     model = Notification
@@ -92,11 +92,13 @@ class NotificationsView(LoginRequiredMixin, ListView):
     context_object_name = "notifications_list"
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
+        # TODO: Doc comment
         context = super().get_context_data(**kwargs)
         # context[""] = 
         return context
     
     def get_queryset(self):
+        # TODO: Doc comment
         current_user = self.request.user
         current_user_notifications = Notification.objects.filter(user=current_user)
         return current_user_notifications
@@ -158,7 +160,7 @@ class UserDetailsView(UserPassesTestMixin, DetailView):
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name == "Superuser"
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
         """
         Retrieves additional context data for the template.
 
@@ -266,7 +268,7 @@ class UpdateUserView(UserPassesTestMixin, UpdateView):
 
     def test_func(self) -> bool:
         """
-        Checks if the user is in the "SUperuser" group
+        Checks if the user is in the "Superuser" group.
 
         Returns:
             bool: True if the user is in the "Superuser" group, False otherwise.
@@ -279,6 +281,12 @@ class UpdateUserView(UserPassesTestMixin, UpdateView):
         return context
     
     def get_success_url(self):
+        """
+        Redirects back to the updated user's details upon success.
+
+        Returns:
+            str: The URL to the updated'user's page.
+        """
         return reverse("authentication:user_details", kwargs={"pk": self.object.pk})
 
     def form_valid(self, form):
