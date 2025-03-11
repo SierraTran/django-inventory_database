@@ -1,0 +1,11 @@
+{% extends 'error_template.html' %}
+
+{% block title %}Server Error (500){% endblock title %}
+
+{% block code_and_name %}
+    500: Server Error
+{% endblock code_and_name %}
+
+{% block description %}Something went wrong on our end.{% endblock description %}
+
+{% block exception %}{{ exception }}{% endblock exception %}
