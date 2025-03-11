@@ -1,49 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'error_template.html' %}
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="shortcut icon" href="https://hayesinstruments.com/HayesLogo.ico">
-    <style>
-        body {
-            font-family: arial, sans-serif;
-        }
-        .content {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-    </style>
-    <title> Page Not Found | Inventory Database </title>
-</head>
+{% block title %}Page Not Found (404){% endblock title %}
 
-<body>
-    <div class="header">
-        <a href="{% url 'authentication:home' %}">
-            <img class="image" height="94" width="532" src="https://hayesinstruments.com/images/HayesLetterhead.gif"
-                alt="Hayes Instrument Service">
-        </a>
-    </div>
-    <div class="content">
-        <h1>
-            Oops!
-        </h1>
-        <h2>
-            404: Not Found
-        </h2>
-        <p>
-            The page you requested couldn't be found.
+{% block code_and_name %}404: Page Note Found{% endblock code_and_name %}
 
-            {{ exception }}
-        </p>
-        {% if not request.user.is_authenticated %}
-        <p>
-            Are you <a href="{% url 'login' %}">logged in</a>?
-        </p>
-        {% endif %}
-    </div>
-</body>
+{% block description %}The page you requested couldn't be found.{% endblock description %}
 
-</html>
+{% block exception %}Error: {{ exception }}{% endblock exception %}
+    
