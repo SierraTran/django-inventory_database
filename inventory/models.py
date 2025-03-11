@@ -114,7 +114,7 @@ class ItemHistory(models.Model):
     changes = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.item} - {self.action} - {self.timestamp}"
+        return f"{self.item} - {self.action} - {self.timestamp.strftime("%Y-%m-%d %H:%M:%S")}"
 
 
 class ItemRequest(models.Model):
@@ -139,7 +139,7 @@ class ItemRequest(models.Model):
 
     def get_absolute_url(self):
         return reverse("inventory:item_request_detail", kwargs={"pk": self.pk})
-    
+
     def __str__(self):
         return f"Request by {self.requested_by} for {self.manufacturer}, {self.model_part_num}"
 
