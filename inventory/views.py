@@ -28,6 +28,7 @@ from .excel_functions import setup_worksheet
 # Views for the Item Model ########################################################################
 ###################################################################################################
 class ItemView(LoginRequiredMixin, ListView):
+    # TODO: Update Docstring
     """
     Class-based view to list all items.
     The user is required to be logged in to access this view.
@@ -40,6 +41,8 @@ class ItemView(LoginRequiredMixin, ListView):
     Methods:
         get_queryset(): Retrieves the list of items to be displayed.
     """
+    login_url = reverse_lazy("login")
+    redirect_field_name = "next"
 
     model = Item
     template_name = "items.html"
@@ -56,7 +59,8 @@ class ItemView(LoginRequiredMixin, ListView):
         return Item.objects.all().order_by("manufacturer", "model", "part_number")
 
 
-class ItemDetailView(LoginRequiredMixin, DetailView):
+class ItemDetailView(LoginRequiredMixin, DetailView):    
+    # TODO: Update Docstring
     """
     Class-based view for displaying the details of a single item.
     This view requires the user to be logged in and inherits from LoginRequiredMixin
@@ -69,6 +73,8 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
     Methods:
         get_context_data(**kwargs): Adds the user's group to the context data.
     """
+    login_url = reverse_lazy("login")
+    redirect_field_name = "next"
 
     model = Item
     template_name = "item_detail.html"
@@ -86,6 +92,7 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
 
 
 class ItemHistoryView(LoginRequiredMixin, ListView):
+    # TODO: Update Docstring
     """
     Class-based view for displaying the history of a specific item.
     This view requires the user to be logged in.
@@ -98,7 +105,9 @@ class ItemHistoryView(LoginRequiredMixin, ListView):
     Methods:
         get_queryset(): Retrieves the history records for the specific item.
         get_context_data(**kwargs): Adds the specific item to the context data.
-    """
+    """    
+    login_url = reverse_lazy("login")
+    redirect_field_name = "next"
 
     model = ItemHistory
     template_name = "item_history.html"
@@ -867,7 +876,6 @@ class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
             return redirect(item_request.get_absolute_url())
             
 
-
 class ItemRequestRejectView(UserPassesTestMixin, TemplateView):
     # TODO: Doc comment
     model = ItemRequest
@@ -945,6 +953,7 @@ class ItemRequestRejectView(UserPassesTestMixin, TemplateView):
 # Views for the UsedItem Model ####################################################################
 ###################################################################################################
 class UsedItemView(LoginRequiredMixin, ListView):
+    # TODO: Update Docstring
     """
     Class-based view for displaying all Used Items.
     Users must be logged in to have access to this view.
@@ -954,6 +963,8 @@ class UsedItemView(LoginRequiredMixin, ListView):
         template_name (str): The template that will be used to render the view.
         context_object_name (str): The name of the context object.
     """
+    login_url = reverse_lazy("login")
+    redirect_field_name = "next"
 
     model = UsedItem
     template_name = "used_items.html"
@@ -972,6 +983,7 @@ class UsedItemView(LoginRequiredMixin, ListView):
 
 
 class UsedItemDetailView(LoginRequiredMixin, DetailView):
+    # TODO: Update docstring
     """
     Class-based view to display the details for a specific Used Item.
     Users must be logged in to have access to this view.
@@ -979,8 +991,9 @@ class UsedItemDetailView(LoginRequiredMixin, DetailView):
     Attributes:
         model (UsedItem): The model that the view will operate on.
         template_name (str): The template that will be used to render the view.
-
     """
+    login_url = reverse_lazy("login")
+    redirect_field_name = "next"
 
     model = UsedItem
     template_name = "used_item_detail.html"
@@ -1109,6 +1122,7 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
 
 
 class SearchUsedItemsView(LoginRequiredMixin, ListView):
+    # TODO: Update Docstring
     """
     Class-based view for searching used items.
     This view uses Haystack to perform the search.
@@ -1121,6 +1135,8 @@ class SearchUsedItemsView(LoginRequiredMixin, ListView):
     Methods:
         get_queryset(): Retrieves the search results based on the query.
     """
+    login_url = reverse_lazy("login")
+    redirect_field_name = "next"
 
     model = UsedItem
     template_name = "search/used_item_search.html"
