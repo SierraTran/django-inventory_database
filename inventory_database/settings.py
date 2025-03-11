@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "haystack",
+    "coverage",
+    "discover_runner",
     "inventory_database",
     "inventory",
     "authentication",
@@ -67,7 +69,10 @@ ROOT_URLCONF = "inventory_database.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [            
+            BASE_DIR / "authentication/templates",
+            BASE_DIR / "inventory/templates/inventory",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -144,6 +149,8 @@ LANGUAGE_CODE = "en-us"
 
 # Since this project is only going to be used by Hayes Instruments,
 # I used the EST timezone.
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+
 TIME_ZONE = "EST"
 
 USE_I18N = True
