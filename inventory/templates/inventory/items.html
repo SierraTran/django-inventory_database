@@ -30,7 +30,7 @@
     <div class="field-name">Unit Price</div>
     {% for item in items_list %}
     {% if forloop.counter|divisibleby:2 %}
-    <a href="{% url 'inventory:item_detail' item.id %}">
+    <a href="{% url 'inventory:item_detail' pk=item.id %}">
         <div class="even">{{ item.manufacturer }}</div>
         <div class="even">{{ item.model }}</div>
         <div class="even">{{ item.part_or_unit }}</div>
@@ -47,7 +47,7 @@
         <div class="even">{{ item.unit_price }}</div>
     </a>
     {% else %}
-    <a href="{% url 'inventory:item_detail' item.id %}">
+    <a href="{% url 'inventory:item_detail' pk=item.id %}">
         <div class="odd">{{ item.manufacturer }}</div>
         <div class="odd">{{ item.model }}</div>
         <div class="odd">{{ item.part_or_unit }}</div>

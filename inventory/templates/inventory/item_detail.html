@@ -62,7 +62,7 @@
     the page automatically.
 {% endcomment %}
 <div class="buttons">
-    <button type="buttons" id="history" onclick="window.location.href='{% url "inventory:item_history" item.id %}'">
+    <button type="button" id="history" onclick="window.location.href='{% url "inventory:item_history" item.id %}'">
         History
     </button>
 </div>
@@ -100,7 +100,7 @@
         Order More
     </button>
     {% else %}
-    <button type="button" id="order-more" 
+    <button type="button" id="request-more" 
         onclick="window.open('{% url "inventory:item_request_form" %}?item_id={{ item.id }}&manufacturer={{ item.manufacturer }}&model_part_num={{ item.model_part_num }}&description={{ item.description }}&unit_price={{ item.unit_price }}', '_blank')"
     >
         Request More
@@ -108,7 +108,7 @@
     {% endif %}
 </div>
 <div class="buttons danger-zone">
-    <button type="button" class="delete" onclick="window.location.href='{% url "inventory:item_confirm_delete" item.id %}'">Delete</button>
+    <button type="button" class="delete" id="delete" onclick="window.location.href='{% url "inventory:item_confirm_delete" item.id %}'">Delete</button>
 </div>
 {% endif %} 
 
