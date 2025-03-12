@@ -7,11 +7,7 @@
 
 {% block title %}Item History | {{ item }} | Iventory Database{% endblock title %}
 
-{# TODO: Remove link decoration or link altogether? #}
-{% block page-title %}
-<a href="{% url "inventory:item_detail" item.id %}"> {{ item }} </a>
-- Item History
-{% endblock page-title %}
+{% block page-title %}{{ item }} - Item History{% endblock page-title %}
 
 {% block content %}
 {# TODO: Center and format back button #}
@@ -31,7 +27,7 @@
             <td class="col action">{{ history.get_action_display }}</td>
             <td class="col timestamp">{{ history.timestamp }}</td>
             <td class="col user"><a href="{% url "authentication:user_details" history.user.id %}">{{ history.user }}</a></td>
-            <td class="col changes">{{ history.changes }}</td>
+            <td class="col changes">{{ history.changes|safe }}</td>
         </tr>
         {% endfor %}
     </tbody>
