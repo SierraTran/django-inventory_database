@@ -58,6 +58,7 @@
     <button type="button" onclick="window.location.href='{% url "inventory:item_requests" %}'">Back to Item Requests</button>
 {# TODO: Item request buttons for the requesting user #}
 {% if request.user == itemrequest.requested_by %}
+    {# [ ]: Delete button for requesting user #}
     <button type="button" name="delete">Delete</button>
 {% endif %}
 {% if current_user_group_name == "Superuser" %}
