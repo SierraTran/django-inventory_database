@@ -26,7 +26,7 @@ I don't know how to display the notifications yet.
     <tr>
         <td>{{ notification.timestamp }}</td>
         <td>{{ notification.subject }}</td>
-        <td>{{ notification.message }}</td>
+        <td>{{ notification.message|safe }}</td>
     </tr>
     {% endfor %}
 </table>
