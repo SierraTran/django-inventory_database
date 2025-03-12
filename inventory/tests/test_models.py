@@ -1,8 +1,9 @@
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.urls import reverse
 import time_machine
 import datetime
 
+from django.contrib.auth.models import User, Group
 from inventory.models import Item, ItemHistory
 
 
@@ -31,6 +32,13 @@ class ItemModelTests(TestCase):
             part_or_unit=Item.PART,
             part_number="Test Part Number",
         )
+        
+        cls.technician_group = Group.objects.create(name="Technician")
+        
+        cls.user = User.objects.create_user(username="testuser", password="hayes4800")
+        cls.user.groups.add(cls.technician_group)
+        
+        cls.client = Client()
 
     def test_item_unit(self):
         """
@@ -159,7 +167,15 @@ class ItemModelTests(TestCase):
         """
         expected_url = reverse("inventory:item_detail", kwargs={"pk": self.item3.pk})
         self.assertEqual(self.item3.get_absolute_url(), expected_url)
-        
+  
+    def test_last_modified_by_none(self):
+        """
+        The `last_modified_by` is set to None since no user has been signed in.
+        """
+        self.assertEqual(self.item1.last_modified_by, None)
+        self.assertEqual(self.item2.last_modified_by, None)
+        self.assertEqual(self.item3.last_modified_by, None)
+              
 
 class ItemHistoryModelTests(TestCase):
     # TODO: ItemHistory tests
