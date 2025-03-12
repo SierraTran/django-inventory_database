@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, RegexValidator
 from django.contrib.auth.models import User, Group
 from django.urls import reverse
 from django.utils import timezone
@@ -126,14 +126,14 @@ class ItemRequest(models.Model):
 
     STATUS = Choices("Pending", "Accepted", "Rejected")
 
-    manufacturer = models.CharField(max_length=100, blank=True)
+    manufacturer = models.CharField(max_length=100, blank=True, validators=[RegexValidator(r'^[a-zA-Z0-9\s]+$')])
     model_part_num = models.CharField(max_length=100, blank=True)
     quantity_requested = models.IntegerField(validators=[MinValueValidator(0)])
     description = models.TextField(blank=True)
     unit_price = models.DecimalField(
         decimal_places=2, max_digits=14, validators=[MinValueValidator(0.00)]
     )
-    requested_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    requested_by = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'groups__name': "Technician"})
     timestamp = models.DateTimeField(auto_now_add=True)
     status = StatusField(db_index=True, default="Pending")
 
@@ -160,7 +160,7 @@ class UsedItem(models.Model):
         error_messages={"required": "A Work Order number is required."}
     )
     datetime_used = models.DateTimeField(default=timezone.now)
-    used_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
+    used_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, limit_choices_to={'groups__name__in': ["Technician", "Superuser"]})
 
     def get_absolute_url(self):
         return reverse("inventory:used_item_detail", kwargs={"pk": self.pk})
