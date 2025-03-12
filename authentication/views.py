@@ -78,33 +78,41 @@ def login_page(request):
 
 
 class NotificationsView(LoginRequiredMixin, ListView):
-    # TODO: Doc comment
     """
-    _summary_
+    Class-based view to list all notifications for the currently logged-in user.
+    
+    The `LoginRequiredMixin` is used to restrict access to authenticated users. Unauthenticated users will be 
+    redirected to the login page. After logging in, they will be redirected back to the original destination
+    preserved by the query parameter defined by `redirect_field_name`.
 
     Attributes:
-        LoginRequiredMixin -- _description_
-        ListView -- _description_
+        model (Notification): The model that this view will display.
+        template_name (str): The name of the template to use for rendering the view.
+        context_object_name (str): The name of the context variable to use for the list of notifications.
+        
+    Methods:
+        get_queryset(): Retrieves all notifications for the currently logged-in user.
     """
-    
+    login_url = reverse_lazy("login")
+    redirect_field_name = "next"
     model = Notification
     template_name = "notifications.html"
     context_object_name = "notifications_list"
     
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        # TODO: Doc comment
-        context = super().get_context_data(**kwargs)
-        # context[""] = 
-        return context
-    
     def get_queryset(self):
-        # TODO: Doc comment
+        """
+        Retrieves all notifications for the currently logged-in user.
+
+        Returns:
+            QuerySet: The QuerySet of Notifications for the current user.
+        """
         current_user = self.request.user
-        current_user_notifications = Notification.objects.filter(user=current_user)
+        current_user_notifications = Notification.objects.filter(user=current_user).order_by("-timestamp")
         return current_user_notifications
     
 
 class UsersView(UserPassesTestMixin, ListView):
+    # TODO: Update docstring
     """
     Displays a list of users.
 
@@ -139,6 +147,7 @@ class UsersView(UserPassesTestMixin, ListView):
 
 
 class UserDetailsView(UserPassesTestMixin, DetailView):
+    # TODO: Update docstring
     """
     Displays the details of a specific user.
 
@@ -180,6 +189,7 @@ class UserDetailsView(UserPassesTestMixin, DetailView):
 
 
 class CreateUserView(UserPassesTestMixin, CreateView):
+    # TODO: Update docstring
     """
     Handles the creation of a new user.
 
@@ -248,6 +258,7 @@ class CreateUserView(UserPassesTestMixin, CreateView):
 
 
 class UpdateUserView(UserPassesTestMixin, UpdateView):
+    # TODO: Update docstring
     """
     Handles updates for an existing user.
 
@@ -294,6 +305,7 @@ class UpdateUserView(UserPassesTestMixin, UpdateView):
 
 
 class DeleteUserView(UserPassesTestMixin, DeleteView):
+    # TODO: Update docstring
     """
     Handles the deletion of a user.
 
