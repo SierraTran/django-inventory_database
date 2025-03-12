@@ -22,8 +22,6 @@ class UsedItemForm(forms.ModelForm):
         
         self.fields["item"].queryset = Item.objects.order_by("manufacturer", "model", "part_number")
         self.fields["datetime_used"].label = "Date & Time used:"
-        # FIXME: This filter isn't working?
-        self.fields["used_by"].queryset = User.objects.filter(groups__name__in=["Technician", "Superuser"])
 
 
 class ItemRequestForm(forms.ModelForm):
@@ -40,9 +38,7 @@ class ItemRequestForm(forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         super(UsedItemForm, self).__init__(*args, **kwargs)
-        
-        # FIXME: This filter isn't working?
-        self.fields["requested_by"].queryset = User.objects.filter(groups__name="Technician")
+
         self.fields["model_part_num"].label = "Model / Part #:"
         
         
