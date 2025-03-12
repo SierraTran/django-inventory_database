@@ -22,6 +22,7 @@ Login | Inventory Database
 {% endif %}
 
 <form method="post"> {% csrf_token %} 
+    <input type="hidden" name="next" value="{{ request.GET.next }}">
     <fieldset>
         <label for="username">
         Username <input type="text" id="username" name="username" placeholder="username" required />
