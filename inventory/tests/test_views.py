@@ -3,8 +3,7 @@ from django.urls import reverse
 import time_machine
 import datetime
 
-from django.contrib.auth.models import Group
-from authentication.models import User
+from django.contrib.auth.models import User, Group
 from inventory.models import Item, ItemHistory
 
 
@@ -13,8 +12,23 @@ class ItemViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         """
-        Set up
+        Set up initial data.
         """
+        items = [
+            Item(manufacturer="Fluke", model="Dials", part_or_unit=Item.UNIT, quantity=7),
+            Item(manufacturer="Fluke", model="45", part_or_unit=Item.PART, part_number="814137 Rev 2", quantity=1),
+            Item(manufacturer="Amprobe", model="Bodys", part_or_unit=Item.PART, part_number="ACDC-100 TRMS", quantity=2),
+            Item(manufacturer="Fluke", model="45", part_or_unit=Item.PART, part_number="814137 Rev 102", quantity=1),
+            Item(manufacturer="Chroma", part_or_unit=Item.PART, part_number="8-16500016", description="16502 Board", quantity=4, unit_price=341.40),
+            Item(manufacturer="HP", model="Handles", part_or_unit=Item.PART, part_number="E3623A", quantity=2),
+        ]        
+        Item.objects.bulk_create(items)
+        
+        cls.technician_group = Group.objects.create(name="Technician")
+        
+        cls.user = User.objects.create_user(username="testuser", password="hayes4800")
+        cls.user.groups.add(cls.technician_group)
+        
         cls.client = Client()
         cls.items_list_url = reverse("inventory:items")
         
@@ -28,12 +42,28 @@ class ItemViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "registration/login.html")
         
+    def test_item_view_GET_authenticated(self):
+        """
+        The ItemView displays all items in the database for authenticated users.
+        """
+        self.client.login(username="testuser", password="hayes4800")
+        response = self.client.get(self.items_list_url, follow=True)
+        
+        expected_order = list(Item.objects.all().order_by("manufacturer", "model", "part_number"))
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "items.html")
+        
+        # Assert that all items in the database are displayed and in the correct order
+        self.assertEqual(len(response.context["items_list"]), Item.objects.count())
+        self.assertEqual(list(response.context["items_list"]), expected_order)
+        
         
 class ItemDetailViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         """
-        Set up
+        Set up initial data.
         """
         cls.item = Item.objects.create(
             manufacturer = "HP",
@@ -139,8 +169,7 @@ class ItemDetailViewTests(TestCase):
         self.assertContains(response, '<button type="button" class="delete" id="delete"')
         
         # Technician doesn't have an order more button       
-        self.assertNotContains(response, '<button type="button" id="order-more"')
-        
+        self.assertNotContains(response, '<button type="button" id="order-more"')  
         
     def test_item_detail_GET_superuser(self):
         """
