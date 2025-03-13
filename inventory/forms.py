@@ -25,7 +25,6 @@ class UsedItemForm(forms.ModelForm):
 
 
 class ItemRequestForm(forms.ModelForm):
-    # TODO: Docstring
     """
     A form for creating new `ItemRequest` objects, used in the ItemRequestCreateView.
 
@@ -39,6 +38,8 @@ class ItemRequestForm(forms.ModelForm):
         - unit_price : DecimalField
         - requested_by : ForeignKey
 
+    Methods:
+        __init__(): Constructor method that initializes the form and sets the label for the `model_part_num` field tp "Model / Part #:".
     """
 
     class Meta:
