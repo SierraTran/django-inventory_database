@@ -1,3 +1,30 @@
+"""
+This module defines class-based views for displaying and managing items, item history, used items, item requests, and purchase order forms.
+
+### Mixins
+    - LoginRequiredMixin: 
+        Restricts access to authenticated users. Unauthenticated users will be redirected to the login page. After logging in, they 
+        will be redirected back to the original destination preserved by the query parameter defined by `redirect_field_name`.
+    - UserPassesTestMixin:
+        Restricts access based on user-specific conditions.
+
+### Base Classes
+    - TemplateView: 
+        Renders a template with parameters from the URL included in the context.
+    - ListView: 
+        Displays a list of objects.
+    - DetailView: 
+        Shows the details of an object.
+    - CreateView: 
+        Provides a form for creating new objects in the database.
+    - UpdateView: 
+        Provides a form for updating existing objects in the database.
+    - FormView: 
+        Displays a form and handles validation.
+    - DeleteView: 
+        Confirms and processes object deletions.
+"""
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db import IntegrityError
@@ -6,7 +33,7 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, FormView, DeleteView
 from django.shortcuts import get_object_or_404, redirect, render
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 
 from haystack.query import SearchQuerySet
@@ -16,7 +43,6 @@ from openpyxl import load_workbook
 from .forms import ImportFileForm, PurchaseOrderItemFormSet
 
 from .models import Item, ItemHistory, ItemRequest, PurchaseOrderItem, UsedItem
-from authentication.models import User
 
 from .excel_functions import setup_worksheet
 
@@ -31,11 +57,10 @@ class ItemView(LoginRequiredMixin, ListView):
     Class-based view to list all items.
     The user is required to be logged in to access this view. 
     
-    The `LoginRequiredMixin` is used to restrict access to authenticated users. Unauthenticated users will be 
-    redirected to the login page. After logging in, they will be redirected back to the original destination
-    preserved by the query parameter defined by `redirect_field_name`.
-
-    `ListView` is the parent class.
+    Inherits functionality from:
+        - LoginRequiredMixin
+        - ListView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
@@ -69,16 +94,15 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
     Class-based view for displaying the details of a single item.
     The user is required to be logged in to access this view. 
     
-    The `LoginRequiredMixin` is used to restrict access to authenticated users. Unauthenticated users will be 
-    redirected to the login page. After logging in, they will be redirected back to the original destination
-    preserved by the query parameter defined by `redirect_field_name`.
-
-    `DetailView` is the parent class.
+    Inherits functionality from:
+        - LoginRequiredMixin
+        - DetailView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
         redirect_field_name (str): The query parameter for the URL the user will be redirected to after logging in.
-        model (Item): The model that this view will operate on.
+        model (Item): The model that this view operates on.
         template_name (str): The template used to render the detail view.
 
     Methods:
@@ -93,7 +117,7 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
         """
         Adds the user's group to the context data.
 
-        This method calls the parent class's `get_context_data` function to retrieve the base context data,
+        This method calls the base class's `get_context_data` function to retrieve the base context data,
         obtains the first group the current user belongs to, and includes it in the context data.
 
         Args:
@@ -112,16 +136,15 @@ class ItemHistoryView(LoginRequiredMixin, ListView):
     Class-based view for displaying the history of a specific item.
     This view requires the user to be logged in.
     
-    The `LoginRequiredMixin` is used to restrict access to authenticated users. Unauthenticated users will be 
-    redirected to the login page. After logging in, they will be redirected back to the original destination
-    preserved by the query parameter defined by `redirect_field_name`.
-
-    `ListView` is the parent class.
+    Inherits functionality from:
+        - LoginRequiredMixin
+        - ListView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
         redirect_field_name (str): The query parameter for the URL the user will be redirected to after logging in.
-        model (ItemHistory): The model that this view will operate on.
+        model (ItemHistory): The model that this view operates on.
         template_name (str): The template used to render the history view.
         context_object_name (str): The context variable name for the list of item history records.
 
@@ -154,7 +177,7 @@ class ItemHistoryView(LoginRequiredMixin, ListView):
         """
         Adds the specific item to the context data.
 
-        This method extracts the ID of the item from the URL parameters, calls the parent class's 
+        This method extracts the ID of the item from the URL parameters, calls the base class's 
         `get_context_data` method to get the base context, and then fetches the specific Item 
         object with the matching ID before including it in the context data.
         
@@ -175,22 +198,20 @@ class ItemHistoryView(LoginRequiredMixin, ListView):
 class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
     """
     Class-based view for creating a new item.
-    This view requires the user to be in the 'Superuser' group.
+    Only users in the 'Superuser' group can proceed. All other users will be shown a 403 page explaining why they can't access the view.
     
-    The `UserPassesTestMixin` is used to restrict access. 
-    In this view, it ensures that only users in the 'Superuser' group can proceed. 
-    Users who are not in this group will be shown a 403 page explaining why they can't access the view.
-
-    `CreateView` is the parent class. It provides the functionality to display and process 
-    a form for creating new objects in the database.
+    Inherits functionality from:
+        - UserPassesTestMixin
+        - CreateView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
-        model (Item): The model that this view will operate on.
+        model (Item): The model that this view operates on.
         fields (list): The fields to be displayed in the form.
-        template_name (str): The template used to render the form.
+        template_name (str): The name of the template used to render the view.
         
     Methods:
-        test_func(): Checks if the user is in the 'Superuser' group.
+        test_func(): Verifies if the user is in the 'Superuser' group.
         handle_no_permission(): Renders the 403 page with a message explaining the error.
         form_valid(): Sets the `last_modified_by` field of the created Item as the current user.
     """
@@ -211,7 +232,10 @@ class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
 
     def test_func(self) -> bool:
         """
-        Checks if the user is in the 'Superuser' group.
+        Verifies if the user is in the 'Superuser' group.
+        
+        This method checks the first group the current user belongs to. 
+        If the group exists and its name is 'Superuser', it returns True; otherwise, it returns False.
 
         Returns:
             bool: True if the user is in the 'Superuser' group, False otherwise.
@@ -230,8 +254,9 @@ class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
         return render(self.request, "403.html", {'message': message})
 
     def form_valid(self, form):
+        # TODO: More details about the method
         """
-        Overrides the form_valid function of the parent class (`CreateView`) to pass the current user to the save method.
+        Overrides the form_valid function of the base class (`CreateView`) to pass the current user to the save method.
 
         Args:
             form (ModelForm): The form that handles the data for updating the Item object.
@@ -248,18 +273,18 @@ class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
     Class-based view for creating a new item.
     This view requires the user to be in the 'Technician' group.
     
-    The `UserPassesTestMixin` is used to restrict access to users who are in the 'Technician' group. 
-    Users who are not in this group will be shown a 403 page explaining why they can't access the view.
-
-    `CreateView` is the parent class.
+    Inherits functionality from:
+        - UserPassesTestMixin
+        - CreateView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
-        model (Item): The model that this view will operate on.
+        model (Item): The model that this view operates on.
         fields (list[str]): The fields to be displayed in the form.
-        template_name (str): The template used to render the form.
+        template_name (str): The name of the template used to render the view.
 
     Methods:
-        test_func(): Checks if the user is in the 'Technician' group.
+        test_func(): Verifies if the user is in the 'Technician' group.
         handle_no_permission(): Renders the 403 page with a message explaining the error.
         form_valid(): Overrides form_valid to pass current user to save method
     """
@@ -279,7 +304,10 @@ class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
 
     def test_func(self) -> bool:
         """
-        Checks if the user is in the 'Technician' group.
+        Verifies if the user is in the 'Technician' group.
+        
+        This method checks the first group the current user belongs to. 
+        If the group exists and its name is 'Technician', it returns True; otherwise, it returns False.
 
         Returns:
             bool: True if the user is in the 'Technician' group, False otherwise.
@@ -299,7 +327,7 @@ class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
 
     def form_valid(self, form):
         """
-        Overrides the form_valid function of the parent class (`CreateView`) to pass the current user to the save method.
+        Overrides the form_valid function of the base class (`CreateView`) to pass the current user to the save method.
 
         Args:
             form (ModelForm): The form that handles the data for updating the Item object.
@@ -316,16 +344,18 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
     Class-based view for updating an existing item as a Superuser.
     This view requires the user to be in the "Superuser" group.
     
-    The `UserPassesTestMixin` is used to restrict access to users who are in the 'Superuser' group. 
-    Users who are not in this group will be shown a 403 page explaining why they can't access the view.
+    Inherits functionality from:
+        - UserPassesTestMixin
+        - UpdateView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
-        model (Item): The model that this view will operate on.
+        model (Item): The model that this view operates on.
         fields (list[str]): The fields to be displayed in the form.
-        template_name (str): The template used to render the form.
+        template_name (str): The name of the template used to render the view.
         
     Methods:
-        test_func(): Checks if the user is in the "Superuser" group.
+        test_func(): Verifies if the user is in the "Superuser" group.
         handle_no_permission(): Renders the 403 page with a message explaining the error.
         form_valid(): Passes the current user to the save method.
         save(): Saves the updated item with additional keyword arguments.
@@ -347,7 +377,10 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
 
     def test_func(self) -> bool:
         """
-        Checks if the user is in the "Superuser" group.
+        Verifies if the user is in the "Superuser" group.
+        
+        This method checks the first group the current user belongs to. 
+        If the group exists and its name is 'Superuser', it returns True; otherwise, it returns False.
 
         Returns:
             bool: True if the user is in the "Superuser" group, False otherwise.
@@ -366,8 +399,9 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
         return render(self.request, "403.html", {'message': message})
 
     def form_valid(self, form):
+        # TODO: Update docstring?
         """
-        Overrides the form_valid function of the parent class (`UpdateView`) to pass the current user to the save method.
+        Overrides the form_valid function of the base class (`UpdateView`) to pass the current user to the save method.
 
         Args:
             form (ModelForm): The form that handles the data for updating the Item object.
@@ -379,6 +413,7 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
         return super().form_valid(form)
 
     def save(self, *args, **kwargs):
+        # TODO: Update docstring?
         """
         Saves the updated item with additional keyword arguments.
 
@@ -398,18 +433,18 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
     Class-based view for updating an existing item as a Technician.
     This view requires the user to be in the "Technician" group.
     
-    The `UserPassesTestMixin` is used to restrict access to users who are in the 'Superuser' group. 
-    Users who are not in this group will be shown a 403 page explaining why they can't access the view.
-
-    `UpdateView` is the parent class.
+    Inherits functionality from:
+        - UserPassesTestMixin
+        - UpdateView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
-        model (Item): The model that this view will operate on.
+        model (Item): The model that this view operates on.
         fields (list[str]): The fields to be displayed in the form.
-        template_name (str): The template used to render the form.
+        template_name (str): The name of the template used to render the view.
         
     Methods:
-        test_func(): Checks if the user is in the "Technician" group.
+        test_func(): Verifies if the user is in the "Technician" group.
         handle_no_permission(): Renders the 403 page with a message explaining the error.
         form_valid(): Passes the current user to the save method.
         save(): 
@@ -430,7 +465,10 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
 
     def test_func(self) -> bool:
         """
-        Checks if the user is in the "Technician" group.
+        Verifies if the user is in the "Technician" group.
+        
+        This method checks the first group the current user belongs to. 
+        If the group exists and its name is 'Technician', it returns True; otherwise, it returns False.
 
         Returns:
             bool: True if the user is in the "Technician" group, False otherwise.
@@ -450,7 +488,7 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
 
     def form_valid(self, form):
         """
-        Overrides form_valid function of the `UpdateView` parent class to pass the current user to the save method.
+        Overrides form_valid function of the `UpdateView` base class to pass the current user to the save method.
 
         Args:
             form (ModelForm): The form that handles the data for updating the Item object.
@@ -463,9 +501,9 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
 
     def save(self, *args, **kwargs):
         """
-        Saves the current user as an argument for the save function of the `UpdateView` parent class.
+        Saves the current user as an argument for the save function of the `UpdateView` base class.
 
-        This method updates `kwargs` to include the current user before delegating the save operation to the parent class.
+        This method updates `kwargs` to include the current user before delegating the save operation to the base class.
 
         Args:
             *args: Additional positional arguments
@@ -480,11 +518,22 @@ class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
     """
     Class-based view for updating the quantity of an existing item as an Intern.
     This view requires the user to be in the "Intern" group.
+    
+    Inherits functionality from:
+        - UserPassesTestMixin
+        - UpdateView
+    (See module docstring for more details on the inherited classes)    
 
     Attributes:
-        model (Item): The model that this view will operate on.
+        model (Item): The model that this view operates on.
         fields (list[str]): The fields to be displayed in the form. For interns, only the quantity is available to them.
-        template_name (str): The template used to render the form.
+        template_name (str): The name of the template used to render the view.
+        
+    Methods:
+        test_func(): Verifies if the user is in the "Intern" group.
+        handle_no_permission(): Renders the 403 page with a message explaining the error.
+        form_valid():
+        save(): Saves the item with the current user included in the keyword arguments.
     """
 
     model = Item
@@ -493,12 +542,16 @@ class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
 
     def test_func(self) -> bool:
         """
-        Checks if the user is in the "Intern" group.
+        Verifies if the user is in the "Intern" group.
+        
+        This method checks the first group the current user belongs to. 
+        If the group exists and its name is 'Intern', it returns True; otherwise, it returns False.
 
         Returns:
             bool: True if the user is in the "Intern" group, False otherwise.
         """
-        return self.request.user.groups.first().name == "Intern"
+        user_group = self.request.user.groups.first()
+        return user_group is not None and user_group.name == "Intern"
     
     def handle_no_permission(self):
         """
@@ -511,8 +564,9 @@ class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
         return render(self.request, "403.html", {'message': message})
     
     def form_valid(self, form):
+        # TODO: Update docstring?
         """
-        Overrides the form_valid function of the parent class (`UpdateView`) to pass the current user to the save method.
+        Overrides the form_valid function of the base class (`UpdateView`) to pass the current user to the save method.
 
         Args:
             form (ModelForm): The form that handles the data for updating the Item object.
@@ -525,11 +579,14 @@ class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
 
     def save(self, *args, **kwargs):
         """
-        Saves the updated item with additional keyword arguments.
+        Saves the item with the current user included in the keyword arguments.
+        
+        This method retrieves the current user object from the request, adds it to the `kwargs` under the key "user"
+        and calls the base class's `save` method with the provided arguments
 
         Args:
-            *args: Additional positional arguments.
-            **kwargs: Additional keyword arguments.
+            *args: Additional positional arguments passed to the base class's `save` method.
+            **kwargs: Additional keyword arguments passed to the base class's `save` method.
 
         Returns:
             HttpResponse: The HTTP response object.
@@ -543,15 +600,22 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
     """
     Class-based view for deleting an existing item.
     This view requires the user to be in the "Superuser" or "Technician" group.
+    
+    Inherits functionality from:
+        - UserPassesTestMixin
+        - DeleteView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
-        model (Item): The model that this view will operate on.
+        model (Item): The model that this view operates on.
         template_name (str): The name of the template that the view will render.
         success_url (str): The URL to redirect to upon successful deletion.
-        fail_url (str): The URL to redirect to if the deletion is cancelled.
+        fail_url (str): The URL to redirect to if the deletion is canceled.
 
     Methods:
-        test_func(): Checks if the user is in the "Superuser" or "Technician" group.
+        get_fail_url(): Returns the URL to redirect to if the deletion is canceled.
+        test_func(): Verifies if the user is in the "Superuser" or "Technician" group.
+        handle_no_permission(): Renders the 403 page with a message explaining the error.
         post(): Handles POST requests to delete the item or cancel the deletion.
     """
 
@@ -560,6 +624,7 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy("inventory:items")
 
     def get_fail_url(self):
+        # TODO: Update docstring
         """
         Returns the URL to redirect to if the deletion is canceled.
 
@@ -574,7 +639,10 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
 
     def test_func(self) -> bool:
         """
-        Checks if the user is in the "Superuser" or "Technician" group.
+        Verifies if the user is in the "Superuser" or "Technician" group.
+        
+        This method checks the first group the current user belongs to. 
+        If the group exists and its name is 'Superuser' or 'Technican', it returns True; otherwise, it returns False.
 
         Returns:
             bool: True if the user is in the "Superuser" or "Technician" group, False otherwise.
@@ -582,11 +650,18 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name in ["Superuser", "Technician"]
     
-    # TODO: Handle no permission function
     def handle_no_permission(self):
-        return super().handle_no_permission()
+        """
+        Renders the 403 page with a message explaining the error.
+
+        Returns:
+            HttpResponse: The HTTP response object that's returned to the client. 
+        """
+        message = "You need to be a Technician or Superuser to access this view."    
+        return render(self.request, "403.html", {'message': message})
 
     def post(self, request, *args, **kwargs):
+        # TODO: Update docstring
         """
         Handles POST requests to delete the item or cancel the deletion.
 
@@ -612,13 +687,20 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
                 return redirect(self.fail_url)
 
 
-class SearchItemsView(ListView):
+class SearchItemsView(LoginRequiredMixin, ListView):
     """
     Class-based view for searching items.
     This view uses Haystack to perform the search.
+    
+    Inherits functionality from:
+        - LoginRequiredMixin
+        - ListView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
-        model (Item): The model that this view will operate on.
+        login_url (str): The URL to the login page (resolved using reverse_lazy).
+        redirect_field_name (str): The query parameter for the URL the user will be redirected to after logging in.
+        model (Item): The model that this view operates on.
         template_name (str): The template used to render the search results.
         context_object_name (str): The name of the context variable to use for the search results.
 
@@ -626,16 +708,22 @@ class SearchItemsView(ListView):
         get_queryset(): Retrieves the search results based on the query.
     """
 
+    login_url = reverse_lazy("login")
+    redirect_field_name = "next"
     model = Item
     template_name = "search/item_search.html"
     context_object_name = "results_list"
 
     def get_queryset(self):
         """
-        Retrieves the search results based on the query.
+        Retrieves search results based on the query parameter.
+
+        This method extracts the search query from the GET request (`q` parameter), filters the 
+        search queryset for objects containing the query term, and sorts the results by 
+        `manufacturer`, `model`, and `part_number`.
 
         Returns:
-            list: A list of search results.
+            list: A list of filtered and ordered search results. Returns an empty list if no query is provided.
         """
         query = self.request.GET.get("q")
         results = (
@@ -649,9 +737,13 @@ class SearchItemsView(ListView):
 
 
 class ImportItemDataView(UserPassesTestMixin, FormView):
-    # TODO: Update docstring
     """
     Renders a view to allow users to import items from an .xlsx file to the database.
+    
+    Inherits functionality from:
+        - UserPassesTestMixin
+        - FormView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
         form_class (Form): The form that the view operates on.
@@ -659,8 +751,9 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
         success_url (str):
 
     Methods:
-        test_func(): Checks if the user is in the "Superuser" or "Technician" group.
+        test_func(): Verifies if the user is in the "Superuser" or "Technician" group.
         form_valid(form): Processes data from an uploaded Excel file to the database.
+        save(): Saves the item with the current user included in the keyword arguments.
     """
 
     form_class = ImportFileForm
@@ -669,7 +762,10 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
 
     def test_func(self) -> bool:
         """
-        Checks if the user is in the "Superuser" or "Technician" group.
+        Verifies if the user is in the "Superuser" or "Technician" group.
+        
+        This method checks the first group the current user belongs to. 
+        If the group exists and its name is 'Superuser' and 'Technician', it returns True; otherwise, it returns False.
 
         Returns:
             bool: True if the user is in the "Superuser" or "Technician" group, False otherwise.
@@ -709,7 +805,7 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
             description = (
                 row[4]
                 if row[4] is not None
-                else ""  # str(model) + " " + str(part_number)
+                else ""
             )
             location = row[5] if row[5] is not None else "N/A"
             quantity = row[6] if row[6] is not None else 0
@@ -717,7 +813,7 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
             unit_price = row[8] if row[8] is not None else 0.01
 
             # Create a new Item with the data
-            item = Item.objects.create(
+            Item.objects.create(
                 manufacturer=manufacturer,
                 model=model,
                 part_or_unit=part_or_unit,
@@ -735,11 +831,14 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
 
     def save(self, *args, **kwargs):
         """
-        Saves the item with additional keyword arguments.
+        Saves the item with the current user included in the keyword arguments.
+        
+        This method retrieves the current user object from the request, adds it to the `kwargs` under the key "user"
+        and calls the base class's `save` method with the provided arguments
 
         Args:
-            *args: Additional positional arguments.
-            **kwargs: Additional keyword arguments.
+            *args: Additional positional arguments passed to the base class's `save` method.
+            **kwargs: Additional keyword arguments passed to the base class's `save` method.
 
         Returns:
             HttpResponse: The HTTP response object.
@@ -752,10 +851,15 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
 # Views for the ItemRequest Model #################################################################
 ###################################################################################################
 class ItemRequestView(UserPassesTestMixin, ListView):
+    # Update docstring
     """
     Class-based view for displaying item requests.
-    This view inherits from UserPassesTestMixin and ListView to display a list of item requests.
     Only users belonging to the "Technician" or "Superuser" groups are allowed to access this view.
+    
+    Inherits functionality from:
+        - UserPassesTestMixin
+        - ListView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
         model (ItemRequest): The model that this view will display.
@@ -764,6 +868,7 @@ class ItemRequestView(UserPassesTestMixin, ListView):
 
     Methods:
         test_func(): Checks if the user belongs to the "Technician" or "Superuser" group.
+        handle_no_permission(): Renders the 403 page with a message explaining the error.
         get_queryset(): Returns the queryset of all item requests.
     """
 
@@ -774,12 +879,25 @@ class ItemRequestView(UserPassesTestMixin, ListView):
     def test_func(self) -> bool:
         """
         Checks if the user belongs to the "Superuser" or "Technician" group.
+        
+        This method checks the first group the current user belongs to. 
+        If the group exists and its name is 'Superuser' and 'Technician', it returns True; otherwise, it returns False.
 
         Returns:
             bool: True if the user is in the "Superuser" or "Technician" group, False otherwise.
         """
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name in ["Superuser", "Technician"]
+    
+    def handle_no_permission(self):
+        """
+        Renders the 403 page with a message explaining the error.
+
+        Returns:
+            HttpResponse: The HTTP response object that's returned to the client. 
+        """
+        message = "You need to be a Technician or Superuser to access this view."    
+        return render(self.request, "403.html", {'message': message})
 
     def get_queryset(self):
         """
@@ -795,13 +913,19 @@ class ItemRequestDetailView(UserPassesTestMixin, DetailView):
     """
     Class-based view for displaying the details of a ItemRequest.
     Users must be in the "Technician" or "Superuser" group to access this view.
+    
+    Inherits functionality from:
+        - UserPassesTestMixin
+        - DetailView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
         model (ItemRequest): The model that the view will operate on.
         template_name (str): The template that will be used to render the view.
 
     Methods:
-        test_func(): Checks if the user is in the "Technician" or "Superuser" group.
+        test_func(): Verifies if the user is in the "Technician" or "Superuser" group.
+        handle_no_permission(): Renders the 403 page with a message explaining the error.
         get_context_data(**kwargs):  Adds the name of the current user's group to the context.
     """
 
@@ -810,23 +934,40 @@ class ItemRequestDetailView(UserPassesTestMixin, DetailView):
 
     def test_func(self) -> bool:
         """
-        Checks if the user is in the "Technician" or "Superuser" group.
+        Verifies if the user is in the "Technician" or "Superuser" group.
+        
+        This method checks the first group the current user belongs to. 
+        If the group exists and its name is 'Technician' or 'Superuser', it returns True; otherwise, it returns False.
 
         Returns:
             bool: True if the user is in the "Technician" or "Superuser" group. False otherwise.
         """
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name in ["Technician", "Superuser"]
+    
+    def handle_no_permission(self):
+        """
+        Renders the 403 page with a message explaining the error.
+
+        Returns:
+            HttpResponse: The HTTP response object that's returned to the client. 
+        """
+        message = "You need to be a Technician or Superuser to access this view."    
+        return render(self.request, "403.html", {'message': message})
 
     def get_context_data(self, **kwargs):
         """
         Adds the name of the current user's group to the context.
+        
+        This method retrieves the base context by calling the base class's `get_context_data` method.
+        Then, it retrieves the name of the first group the current user belongs to and adds it to the 
+        context data under the "current_user_group_name" key.
 
         Arguments:
             **kwargs: Additional keyword arguments.
 
         Returns:
-            dict: The context data for the view.
+            dict: The context data, including the name of the current user's first group, for use in the view.
         """
         context = super().get_context_data(**kwargs)
         context["current_user_group_name"] = self.request.user.groups.first().name
@@ -837,11 +978,22 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
     """
     Class-based view for creating an item request.
     This view requires the user to be in the "Technician" group.
+    
+    Inherits functionality from:
+        - UserPassesTestMixin
+        - DetailView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
-        model (ItemRequest): The model that this view will operate on.
-        fields (list): The fields tp be displayed in the form.
-        template_name (str): The template used to render the form.
+        model (ItemRequest): The model that this view operates on.
+        fields (list): The fields to be displayed in the form.
+        template_name (str): The name of the template used to render the view.
+        
+    Methods:
+        test_func(): Verifies if the user is in the "Technician" group.
+        handle_no_permission(): Renders the 403 page with a message explaining the error.
+        get_initial():
+        get_context_data():
     """
 
     model = ItemRequest
@@ -857,7 +1009,10 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
 
     def test_func(self) -> bool:
         """
-        Checks if the user is in the "Technician" group.
+        Verifies if the user is in the "Technician" group.
+        
+        This method checks the first group the current user belongs to. 
+        If the group exists and its name is 'Technician', it returns True; otherwise, it returns False.
 
         Returns:
             bool: True if the user is in the "Technician" group, False otherwise.
@@ -876,6 +1031,13 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
         return render(self.request, "403.html", {"message": message})
 
     def get_initial(self):
+        # TODO: Docstring
+        """
+        
+
+        Returns:
+            _type_: _description_
+        """
         initial = super().get_initial()
         initial["manufacturer"] = self.request.GET.get("manufacturer")
         initial["model_part_num"] = self.request.GET.get("model_part_num")
@@ -887,41 +1049,56 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
     def get_context_data(self, **kwargs):
         """
         Adds the specific item to the context data.
+        
+        This method retrieves the base context by calling the base class's `get_context_data` method.
+        Then, it obtains the "item_id" through the GET parameters of the request. Finally, it fetches
+        the `Item` object with the provided ID and adds it to the context under the "item" key. If no 
+        `Item` object is found, an `Http404` exception is raised.
 
         Args:
-            **kwargs: Additional keyword arguments.
+            **kwargs: Additional keyword arguments ot pass to the base class.
 
         Returns:
             dict: The context data with the specific item added.
         """
         context = super().get_context_data(**kwargs)
         item_id = self.request.GET.get("item_id")
-        context["item"] = Item.objects.filter(id=item_id)[0]
+        context["item"] = get_object_or_404(Item, item_id=item_id)
         return context
 
 
 class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
-    # TODO: Doc comment
     """
-    Class-based view for confirming the acceptance of an item request. 
+    Class-based view for confirming or canceling the acceptance of an item request. 
+    Only users in the 'Superuser' group can access this view.
+    
+    Inherits functionality from:
+        - UserPassesTestMixin
+        - TemplateView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
-        model (Item):
-        template_name (str): 
-        fail_url ():
+        model (ItemRequest): The model that this view operates on.
+        template_name (str): The name of the template used to render the view.
+        fail_url (str): The URL to redirect to if the acceptance is canceled.
 
     Methods:
-        test_func():
-        handle_no_permission():
-        get_object():
-        get_fail_url(): 
+        test_func(): Verifies if the user is in the "Superuser" group.
+        handle_no_permission(): Renders the 403 page with a message explaining the error.
+        get_object(): Retrieves the specific ItemRequest object for the view.
+        get_fail_url(): Returns the URL to redirect to if the acceptance is canceled.
+        get_context_data(): Adds the specific item request to the context data.
+        post(): Handles POST requests to set the item request's status to "Accepted" or cancel the operation.
     """
     model = ItemRequest
     template_name = "item_request_confirm_accept.html"
 
     def test_func(self) -> bool:
         """
-        Checks if the user is in the "Superuser" group
+        Verifies if the user is in the "Superuser" group.
+        
+        This method checks the first group the current user belongs to. 
+        If the group exists and its name is 'Superuser', it returns True; otherwise, it returns False.
 
         Returns:
             bool: True if the user is in the "Superuser" group. False otherwise.
@@ -929,13 +1106,15 @@ class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name == "Superuser"
     
-    # TODO: Handle no permission function
     def handle_no_permission(self):
-        # TODO: Docstring
         """
-        
+        Renders the 403 page with a message explaining the error.
+
+        Returns:
+            HttpResponse: The HTTP response object that's returned to the client. 
         """
-        return 
+        message = "You need to be a Superuser to access this view."    
+        return render(self.request, "403.html", {'message': message})
 
     def get_object(self):
         """
@@ -948,35 +1127,44 @@ class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
 
     def get_fail_url(self):
         """
-        Returns the URL to redirect to if the acceptance is canceled.
+        Resolves the URL to redirect to if the acceptance is canceled.
+        
+        This method uses reverse_lazy to resolve the failure URL with the primary key (pk) of the object being processed.
 
         Returns:
-            str: The URL to redirect to.
+            str: The resolved URL for redirction.
         """
-        return reverse_lazy(
-            "inventory:item_request_detail", kwargs={"pk": self.get_object().pk}
-        )
+        return reverse_lazy("inventory:item_request_detail", kwargs={"pk": self.get_object().pk})
 
     fail_url = property(get_fail_url)
 
     def get_context_data(self, **kwargs):
-        # TODO: Doc comment
+        """
+        Adds the specific item request to the context data.
+        
+        This method retrieves the base context by calling the base class's `get_context_data` method. 
+        Then, it adds the object returned by `get_object` method to the context under the "object" key.
+
+        Returns:
+            dict: The context data for the view including the specific item request.
+        """
         context = super().get_context_data(**kwargs)
         context["object"] = self.get_object()
         return context
 
-    def post(self, request, *args, **kwargs):
-        # TODO: Doc comment
+    def post(self, request):
         """
-        _summary_
+        Handles POST requests to set the item request's status to "Accepted" or cancel the operation.
+        
+        This method checks the submitted form data to determine if the operation should be canceled (redirecting to the failure URL)
+        or if the item request's status should be updated to "Accepted". If the item request's status is updated, the object will be saved
+        and the user wil be redirected to the item request's detail page.
 
         Arguments:
-            request (HttpRequest):
-            *args: Additional positional arguments
-            **kwargs: Additional keyword arguments            
+            request (HttpRequest): The HTTP request object containing POST data.          
 
         Returns:
-            _description_
+            HttpResponseRedirect: A redirect response after canceling or confirming the status change.
         """
         if "Cancel" in request.POST:
             return redirect(self.fail_url)
@@ -988,29 +1176,36 @@ class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
             
 
 class ItemRequestRejectView(UserPassesTestMixin, TemplateView):
-    # TODO: Doc comment
     """
-    _summary_ 
-
+    Class-based view for confirming or canceling the acceptance of an item request. 
+    Only users in the 'Superuser' group can access this view.
     
+    Inherits functionality from:
+        - UserPassesTestMixin
+        - TemplateView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
-        model (ItemRequest):
-        template_name (str):
+        model (ItemRequest): The model that this view operates on.
+        template_name (str): The name of the template used to render the view.
+        fail_url (str): The URL to redirect to if the deletion is canceled.
 
     Methods:
-        test_func(): Checks if the user is in the "Superuser" group.
+        test_func(): Verifies if the user is in the "Superuser" group.
         get_object(): Retrieves the specific item request for the view.
-        get_fail_url(): 
-        get_context_data():
-        post():
+        get_fail_url(): Returns the URL to redirect if the deletion is canceled.
+        get_context_data(): Adds the specific item request to the context data.
+        post(): Handles POST requests to set the item request's status to "Rejected" or cancel the operation.
     """
     model = ItemRequest
     template_name = "item_request_confirm_reject.html"
 
     def test_func(self) -> bool:
         """
-        Checks if the user is in the "Superuser" group
+        Verifies if the user is in the "Superuser" group.
+        
+        This method checks the first group the current user belongs to. 
+        If the group exists and its name is 'Superuser', it returns True; otherwise, it returns False.
 
         Returns:
             bool: True if the user is in the "Superuser" group. False otherwise.
@@ -1018,11 +1213,22 @@ class ItemRequestRejectView(UserPassesTestMixin, TemplateView):
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name == "Superuser"
     
-    # TODO: Handle no permission function
+    def handle_no_permission(self):
+        """
+        Renders the 403 page with a message explaining the error.
+
+        Returns:
+            HttpResponse: The HTTP response object that's returned to the client. 
+        """
+        message = "You need to be a Superuser to access this view."    
+        return render(self.request, "403.html", {'message': message})
 
     def get_object(self):
         """
         Retrieves the specific item request for the view.
+        
+        This method retrieves the primary key (pk) from `kwargs` and then fetches the `ItemRequest` object with the matching primary key. 
+        If no `ItemRequest` object is found with the given primary key, an `Http404` exception is raised.
 
         Returns:
             ItemRequest: The item request that may or may not be rejected by a Superuser.
@@ -1031,14 +1237,14 @@ class ItemRequestRejectView(UserPassesTestMixin, TemplateView):
 
     def get_fail_url(self):
         """
-        Returns the URL to redirect if the deletion is canceled.
+        Resolves the URL to redirect to if the rejection is canceled.
+        
+        This method uses reverse_lazy to resolve the failure URL with the primary key (pk) of the object being processed.
 
         Returns:
-            str: The URL to redirect.
+            str: The resolvd URL for redirection.
         """
-        return reverse_lazy(
-            "inventory:item_request_detail", kwargs={"pk": self.get_object().pk}
-        )
+        return reverse_lazy("inventory:item_request_detail", kwargs={"pk": self.get_object().pk})
         
     fail_url = property(get_fail_url)
 
@@ -1046,28 +1252,32 @@ class ItemRequestRejectView(UserPassesTestMixin, TemplateView):
         """
         Adds the specific item request to the context data.
         
+        This method retrieves the base context by calling the base class's `get_context_data` method. 
+        Then, it adds the object returned by `get_object` method to the context under the "object" key.
+        
         Args:
-            **kwargs: Additional keyword arguments
+            **kwargs: Additional keyword arguments passed to the base class.
 
         Returns:
-            dict: The context data for the view
+            dict: The context data for the view including the specific item request.
         """
         context = super().get_context_data(**kwargs)
         context["object"] = self.get_object()
         return context
 
-    def post(self, request, *args, **kwargs):
-        # TODO: Doc comment
+    def post(self, request):
         """
-        _summary_
+        Handles POST requests to set the item request's status to "Rejected" or cancel the operation.
+        
+        This method checks the submitted form data to determine if the operation should be canceled (redirecting to the failure URL)
+        or if the item request's status should be updated to "Rejected". If the item request's status is updated, the object will be saved
+        and the user wil be redirected to the item request's detail page.
 
         Arguments:
-            request (HttpRequest):
-            *args: Additional positional arguments
-            **kwargs: Additional keyword arguments
+            request (HttpRequest): The HTTP request object containing POST data.
 
         Returns:
-            _description_
+            HttpResponseredirect: A redirect response after canceling or confirming the status change.
         """
         if "Cancel" in request.POST:
             return redirect(self.fail_url)
@@ -1086,11 +1296,10 @@ class UsedItemView(LoginRequiredMixin, ListView):
     Class-based view for displaying all Used Items.
     Users must be logged in to have access to this view.
     
-    The `LoginRequiredMixin` is used to restrict access to authenticated users. Unauthenticated users will be 
-    redirected to the login page. After logging in, they will be redirected back to the original destination
-    preserved by the query parameter defined by `redirect_field_name`.
-
-    `ListView` is the parent class.
+    Inherits functionality from:
+        - LoginrequiredMixin
+        - ListView
+    (See module docstring for more details on the inherited classes)    
 
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
@@ -1109,6 +1318,7 @@ class UsedItemView(LoginRequiredMixin, ListView):
     context_object_name = "used_items_list"
 
     def get_queryset(self):
+        # TODO: Explain method in detail
         """
         Retrieves all used items from the database.
 
@@ -1125,11 +1335,10 @@ class UsedItemDetailView(LoginRequiredMixin, DetailView):
     Class-based view to display the details for a specific used item.
     Users must be logged in to have access to this view.
     
-    The `LoginRequiredMixin` is used to restrict access to authenticated users. Unauthenticated users will be 
-    redirected to the login page. After logging in, they will be redirected back to the original destination
-    preserved by the query parameter defined by `redirect_field_name`.
-
-    `DetailView` is the parent class.
+    Inherits functionality from:
+        - LoginrequiredMixin
+        - DetailView
+    (See module docstring for more details on the inherited classes)   
 
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
@@ -1148,12 +1357,16 @@ class UsedItemDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         """
         Adds the specific used item to the context data.
+        
+        This method retrieves the base context data by calling the base class's `get_context_data` function.
+        Then, it adds the specific `UsedItem` object, represented by `self.object`, to the context under the 
+        "used_item" key.
 
         Args:
-            **kwargs: Additional keyword arguments.
+            **kwargs: Additional keyword arguments passed to the base class's `get_context_data` method.
 
         Returns:
-            dict: The context data with the specific item that will be used by the template
+            dict: The context data, including the used item, for use in the template.
         """
         context = super().get_context_data(**kwargs)
         context["used_item"] = self.object
@@ -1162,16 +1375,30 @@ class UsedItemDetailView(LoginRequiredMixin, DetailView):
 
 class UsedItemCreateView(UserPassesTestMixin, CreateView):
     # TODO: Update docstring
+    # [x]: Explain UserPassesTestMixin
+    # [x]: More info on CreateView base class
+    # [ ]: Mention methods and summarize
     """
     Class-based view for displaying the page to create a Used Item.
     Only users in the "Superuser" and "Technician" group have access to this view.
 
-    `CreateView` is the parent class.
+    Inherits functionality from:
+        - UserPassesTestMixin
+        - CreateView
+    (See module docstring for more details on the inherited classes)   
 
     Attributes:
         model (UsedItem): The model on which the view will operate.
         fields (str): The fields to be displayed in the view.
         template_name (str): The template that will be used to render the view.
+        
+    Methods:
+        test_func(): Verifies if the user belongs to the "Superuser" or "Technician" group.
+        handle_no_permission(): Renders the 403 page with a message explaining the error.
+        get_initial(): Adds the specific item to the initial data to be used in the form.
+        get_context_data(): Adds the item and initial data for the form to the context.
+        dispatch(): Checks if the item's quantity is greater than 0 before allowing access to the view.
+        form_valid(): 
     """
 
     model = UsedItem
@@ -1180,26 +1407,42 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
 
     def test_func(self) -> bool:
         """
-        Checks if the user belongs to the "Superuser" or "Technician" group.
+        Verifies if the user belongs to the "Superuser" or "Technician" group.
+        
+        This method checks the first group the current user belongs to. 
+        If the group exists and its name is 'Superuser' and 'Technician', it returns True; otherwise, it returns False.
 
         Returns:
             bool: True if the user is in the "Superuser" or "Technician" group, False otherwise.
         """
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name in ["Superuser", "Technician"]
+    
+    def handle_no_permission(self):
+        """
+        Renders the 403 page with a message explaining the error.
+
+        Returns:
+            HttpResponse: The HTTP response object that's returned to the client. 
+        """
+        message = "You need to be a Superuser or Technician to access this view."    
+        return render(self.request, "403.html", {'message': message})
 
     def get_initial(self):
         """
-        Adds the specific item to the initial data to be used in the form .
+        Adds the specific item and current user to the initial data to be used in the form.
+        
+        This method retrieves the base initial data by calling the base clas's `get_initial` function. 
+        Then, it adds the current user to the initial data under they "used_by" key. If an "item_id" 
+        is detected in the GET parameters, the corresponding `Item` object is retrieved and added to the
+        initial data under the "item" key.
 
         Returns:
-            dict: The initial data for creating a Used Item.
+            dict: The initial data for creating a Used Item, including the user and, if applicable, the specified item.
         """
         initial = super().get_initial()
-        # TODO: Add current user to initial data
         current_user = self.request.user
         initial.update({"used_by": current_user})
-        # Add item to initial data
         item_id = self.request.GET.get("item_id")
         if item_id:
             item = get_object_or_404(Item, pk=item_id)
@@ -1209,16 +1452,21 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
     def get_context_data(self, **kwargs):
         """
         Adds the item and initial data for the form to the context.
-
+        
+        This method retrieves the base context data by calling the base class's `get_context_data` function.
+        Then, if an "item_id" is detected in the GET parameters, the corresponding `Item` object is retrieved
+        and added to the context data under the "item" key. If the request method is GET, the form in the context 
+        (under the "form" key) has itsinitial data updated with values from `get_initial`.
+        
         Args:
-            **kwargs: Additional keyword arguments.
+            **kwargs: Additional keyword arguments passed to the base class's method.
 
         Returns:
-            dict: The context data with the specific item added.
+            dict: The context data including the specific item an updated initial data for the form.
         """
         context = super().get_context_data(**kwargs)
         item_id = self.request.GET.get("item_id")
-        item = Item.objects.get(pk=item_id)
+        item = get_object_or_404(Item, pk=item_id)
         context["item"] = item
         if self.request.method == "GET":
             form = context["form"]
@@ -1226,6 +1474,7 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
         return context
 
     def dispatch(self, request, *args, **kwargs):
+        # TODO: Explain method in detail
         """
         Checks if the item's quantity is greater than 0 before allowing access to the view.
 
@@ -1238,15 +1487,16 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
             HttpResponse: The HTTP response object.
         """
         item_id = self.request.GET.get("item_id")
-        item = Item.objects.get(pk=item_id)
+        item = get_object_or_404(Item, pk=item_id)
         if item.quantity <= 0:
             messages.error(request, "Cannot use item with quantity 0.")
             return redirect("inventory:item_detail", pk=item_id)
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
+        # TODO: Explain method in detail
         """
-        Override form_valid to decrement the quantity of the associated Item when a new UsedItem is created.
+        Overrides form_valid to decrement the quantity of the associated Item when a new UsedItem is created.
         It also makes an ItemHistory record to explain the decrement.
 
         Args:
@@ -1278,14 +1528,15 @@ class SearchUsedItemsView(LoginRequiredMixin, ListView):
     Class-based view for searching used items.
     This view uses Haystack to perform the search.
     
-    The `LoginRequiredMixin` is used to restrict access to authenticated users. Unauthenticated users will be 
-    redirected to the login page. After logging in, they will be redirected back to the original destination
-    preserved by the query parameter defined by `redirect_field_name`.
+    Inherits functionality from: 
+        - LoginRequiredMixin
+        - ListView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
         redirect_field_name (str): The query parameter for the URL the user will be redirected to after logging in.
-        model (UsedItem): The model that this view will operate on.
+        model (UsedItem): The model that this view operates on.
         template_name (str): The template used to render the search results.
         context_object_name (str): The name of the context variable to use for the search results.
 
@@ -1301,6 +1552,10 @@ class SearchUsedItemsView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         """
         Retrieves the search results based on the query.
+        
+        This method extracts the search query from the GET request (`q` parameter), filters the 
+        search queryset for objects containing the query term, and sorts the results by 
+        `work_order` and `item`.
 
         Returns:
             list: A list of search results.
@@ -1321,11 +1576,13 @@ class SearchUsedItemsView(LoginRequiredMixin, ListView):
 # Views for the PurchaseOrderItem model ###########################################################
 ###################################################################################################
 class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
-    # TODO: Update docstring
     """
     Renders a view to allow users to create purchase orders using a formset.
-
-    `FormView` is the parent class.
+    
+    Inherits functionality from: 
+        - UserPassesTestMixin
+        - FormView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
         form_class (FormSet): The formset class to use for the purchase order items.
@@ -1333,7 +1590,8 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
         success_url (str): The URL to redirect to upon successful form submission.
 
     Methods:
-        test_func(): Checks if the user is in the 'Superuser' group.
+        test_func(): Verifies if the user is in the 'Superuser' group.
+        handle_no_permission(): Renders the 403 page with a message explaining the error.
         get_context_data(): Adds the formset to the context data.
         form_valid(): Processes the formset data and writes it to an Excel file for download.
     """
@@ -1344,23 +1602,41 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
 
     def test_func(self) -> bool:
         """
-        Checks if the user is in the 'Superuser' group.
+        Verifies if the user is in the 'Superuser' group.
+        
+        This method checks the first group the current user belongs to. 
+        If the group exists and its name is 'Superuser', it returns True; otherwise, it returns False.
 
         Returns:
             bool: True if the user is in the 'Superuser' group, False otherwise.
         """
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name == "Superuser"
+    
+    def handle_no_permission(self):
+        """
+        Renders the 403 page with a message explaining the error.
+
+        Returns:
+            HttpResponse: The HTTP response object that that's returned to the client. 
+        """
+        message = "You need to be a Superuser to access this view."    
+        return render(self.request, "403.html", {'message': message})
 
     def get_context_data(self, **kwargs):
         """
         Adds the formset and query parameters to the context data.
+        
+        This method first retrieves the base context data by calling the base class's `get_context_data` method.
+        Then, if a POST request is detected, the submitted form data is added as a formset to the context under 
+        the "formset" key. Otherwise, an empty queryset is used to initialize the `PurchaseOrderItemFormSet`, 
+        which is also added to the context under the "formset" key. 
 
         Args:
-            **kwargs: Additional keyword arguments passed to the parent method.
+            **kwargs: Additional keyword arguments passed to the base class's `get_context_data` method.
 
         Returns:
-            dict: The context data with the formset and query parameters added.
+            dict: The context data, including the formset and query parameters.
         """
         context = super().get_context_data(**kwargs)
         if self.request.POST:
