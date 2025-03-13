@@ -128,13 +128,15 @@ class UsersView(UserPassesTestMixin, ListView):
 
     def test_func(self) -> bool:
         """
-        Checks if the user is in the "Superuser" group.
+        Verifies if the user is in the "Superuser" group.
 
         Returns:
             bool: True if the user is in the "Superuser" group, False otherwise.
         """
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name == "Superuser"
+    
+    # TODO: handle no permission function
 
     def get_queryset(self):
         """
@@ -161,13 +163,15 @@ class UserDetailsView(UserPassesTestMixin, DetailView):
 
     def test_func(self) -> bool:
         """
-        Checks if the user is in the "Superuser" group.
+        Verifies if the user is in the "Superuser" group.
 
         Returns:
             bool: True if the user is in the "Superuser" group, False otherwise.
         """
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name == "Superuser"
+    
+    # TODO: handle no permission function
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         """
@@ -216,13 +220,15 @@ class CreateUserView(UserPassesTestMixin, CreateView):
 
     def test_func(self) -> bool:
         """
-        Checks if the user is in the "Superuser" group.
+        Verifies if the user is in the "Superuser" group.
 
         Returns:
             bool: True if the user is in the "Superuser" group, False otherwise.
         """
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name == "Superuser"
+    
+    # TODO: handle no permission function
 
     def form_valid(self, form):
         """
@@ -242,6 +248,7 @@ class CreateUserView(UserPassesTestMixin, CreateView):
         return response
 
     def get_context_data(self, **kwargs):
+        # TODO: Update docstring
         """
         Retrieves additional context data for the template.
 
@@ -278,20 +285,25 @@ class UpdateUserView(UserPassesTestMixin, UpdateView):
     template_name = "user_update_form.html"
 
     def test_func(self) -> bool:
+        # TODO: Update docstring
         """
-        Checks if the user is in the "Superuser" group.
+        Verifies if the user is in the "Superuser" group.
 
         Returns:
             bool: True if the user is in the "Superuser" group, False otherwise.
         """
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name == "Superuser"
+    
+    # TODO: handle no permission function
 
     def get_context_data(self, **kwargs):
+        # TODO: Ddocstring
         context = super().get_context_data(**kwargs)        
         return context
     
     def get_success_url(self):
+        # TODO: Update docstring
         """
         Redirects back to the updated user's details upon success.
 
@@ -318,6 +330,7 @@ class DeleteUserView(UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy("authentication:users")
 
     def get_fail_url(self):
+        # TODO: Update docstring
         """
         Returns the URL to redirect to if the deletion is canceled.
 
@@ -331,16 +344,20 @@ class DeleteUserView(UserPassesTestMixin, DeleteView):
     fail_url = property(get_fail_url)
 
     def test_func(self) -> bool:
+        # TODO: Update docstring
         """
-        Checks if the user is in the "Superuser" group.
+        Verifies if the user is in the "Superuser" group.
 
         Returns:
             bool: True if the user is in the "Superuser" group, False otherwise.
         """
         user_group = self.request.user.groups.first()
         return user_group is not None and user_group.name == "Superuser"
+    
+    # TODO: handle no permission function
 
     def post(self, request, *args, **kwargs):
+        # TODO: Update docstring
         """
         Handles the POST request for deleting a user.
 
