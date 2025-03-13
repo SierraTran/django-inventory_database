@@ -25,6 +25,22 @@ class UsedItemForm(forms.ModelForm):
 
 
 class ItemRequestForm(forms.ModelForm):
+    # TODO: Docstring
+    """
+    A form for creating new `ItemRequest` objects, used in the ItemRequestCreateView.
+
+    Fields:
+        - manufacturer : CharField
+            The name of the manufacturer of the requested item.
+        - model_part_num : CharField
+            The model and/or part number of the requested item.
+        - quantity_requested : IntegerField
+        - description : TextField
+        - unit_price : DecimalField
+        - requested_by : ForeignKey
+
+    """
+
     class Meta:
         model = ItemRequest
         fields = [
