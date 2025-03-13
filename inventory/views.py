@@ -23,7 +23,6 @@ from .excel_functions import setup_worksheet
 
 # Create your views here.
 
-
 ###################################################################################################
 # Views for the Item Model ########################################################################
 ###################################################################################################
@@ -35,6 +34,8 @@ class ItemView(LoginRequiredMixin, ListView):
     The `LoginRequiredMixin` is used to restrict access to authenticated users. Unauthenticated users will be 
     redirected to the login page. After logging in, they will be redirected back to the original destination
     preserved by the query parameter defined by `redirect_field_name`.
+
+    `ListView` is the parent class.
 
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
@@ -58,7 +59,7 @@ class ItemView(LoginRequiredMixin, ListView):
         Items are alphanumerically ordered first by `manufacturer`, then by `model`, and finally by `part_number`.
 
         Returns:
-            QuerySet: A QuerySet containing all items.
+            QuerySet: a queryset containing all items.
         """
         return Item.objects.all().order_by("manufacturer", "model", "part_number")
 
@@ -71,6 +72,8 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
     The `LoginRequiredMixin` is used to restrict access to authenticated users. Unauthenticated users will be 
     redirected to the login page. After logging in, they will be redirected back to the original destination
     preserved by the query parameter defined by `redirect_field_name`.
+
+    `DetailView` is the parent class.
 
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
@@ -90,8 +93,14 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
         """
         Adds the user's group to the context data.
 
+        This method calls the parent class's `get_context_data` function to retrieve the base context data,
+        obtains the first group the current user belongs to, and includes it in the context data.
+
+        Args:
+            **kwargs: Additional keyword arguments passed to the parent method.
+        
         Returns:
-            dict: The context data with the user's group added.
+            dict: The context data, updated to inlcude the user's group under the key `user_group`.
         """
         context = super().get_context_data(**kwargs)
         context["user_group"] = self.request.user.groups.first()
@@ -107,6 +116,8 @@ class ItemHistoryView(LoginRequiredMixin, ListView):
     redirected to the login page. After logging in, they will be redirected back to the original destination
     preserved by the query parameter defined by `redirect_field_name`.
 
+    `ListView` is the parent class.
+
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
         redirect_field_name (str): The query parameter for the URL the user will be redirected to after logging in.
@@ -115,7 +126,7 @@ class ItemHistoryView(LoginRequiredMixin, ListView):
         context_object_name (str): The context variable name for the list of item history records.
 
     Methods:
-        get_queryset(): Retrieves the history records for the specific item.
+        get_queryset(): Retrieves the history records for the specific item in reverse chronological order.
         get_context_data(): Adds the specific item to the context data.
     """    
     login_url = reverse_lazy("login")
@@ -126,10 +137,14 @@ class ItemHistoryView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """
-        Retrieves the history records for the specific item.
+        Retrieves the history records for the specific item in reverse chronological order.
+
+        This method extracts the ID of the item from the URL parameters, filters the `ItemHistory` objects to match
+        the given item ID, and orders the resulting queryset by the `timestamp` field in descending order (most 
+        recent first).
 
         Returns:
-            QuerySet: The queryset containing the history records for the item.
+            QuerySet: A queryset containing the history records for the specified item in reverse chronological order.
         """
         item_id = self.kwargs["pk"]
         history = ItemHistory.objects.filter(item_id=item_id).order_by("-timestamp")
@@ -139,15 +154,21 @@ class ItemHistoryView(LoginRequiredMixin, ListView):
         """
         Adds the specific item to the context data.
 
+        This method extracts the ID of the item from the URL parameters, calls the parent class's 
+        `get_context_data` method to get the base context, and then fetches the specific Item 
+        object with the matching ID before including it in the context data.
+        
+        If no Item object is found with the given ID, an `Http404` exception is raised.
+
         Args:
-            **kwargs: Additional keyword arguments.
+            **kwargs: Additional keyword arguments passed to the parent method.
 
         Returns:
             dict: The context data with the specific item added.
         """
         item_id = self.kwargs["pk"]
         context = super().get_context_data(**kwargs)
-        context["item"] = Item.objects.filter(id=item_id)[0]
+        context["item"] = get_object_or_404(Item, id=item_id)
         return context
 
 
@@ -156,8 +177,12 @@ class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
     Class-based view for creating a new item.
     This view requires the user to be in the 'Superuser' group.
     
-    The `UserPassesTestMixin` is used to restrict access to users who are in the 'Superuser' group. 
+    The `UserPassesTestMixin` is used to restrict access. 
+    In this view, it ensures that only users in the 'Superuser' group can proceed. 
     Users who are not in this group will be shown a 403 page explaining why they can't access the view.
+
+    `CreateView` is the parent class. It provides the functionality to display and process 
+    a form for creating new objects in the database.
 
     Attributes:
         model (Item): The model that this view will operate on.
@@ -225,6 +250,8 @@ class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
     
     The `UserPassesTestMixin` is used to restrict access to users who are in the 'Technician' group. 
     Users who are not in this group will be shown a 403 page explaining why they can't access the view.
+
+    `CreateView` is the parent class.
 
     Attributes:
         model (Item): The model that this view will operate on.
@@ -877,14 +904,17 @@ class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
     # TODO: Doc comment
     """
     Class-based view for confirming the acceptance of an item request. 
-    
 
-    Arguments:
-        UserPassesTestMixin -- _description_
-        TemplateView -- _description_
+    Attributes:
+        model (Item):
+        template_name (str): 
+        fail_url ():
 
-    Returns:
-        _description_
+    Methods:
+        test_func():
+        handle_no_permission():
+        get_object():
+        get_fail_url(): 
     """
     model = ItemRequest
     template_name = "item_request_confirm_accept.html"
@@ -960,6 +990,8 @@ class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
 class ItemRequestRejectView(UserPassesTestMixin, TemplateView):
     # TODO: Doc comment
     """
+    _summary_ 
+
     
 
     Attributes:
@@ -999,10 +1031,10 @@ class ItemRequestRejectView(UserPassesTestMixin, TemplateView):
 
     def get_fail_url(self):
         """
-        Returns the URL to redirect to if the deletion is canceled.
+        Returns the URL to redirect if the deletion is canceled.
 
         Returns:
-            str: The URL to redirect to.
+            str: The URL to redirect.
         """
         return reverse_lazy(
             "inventory:item_request_detail", kwargs={"pk": self.get_object().pk}
@@ -1058,6 +1090,8 @@ class UsedItemView(LoginRequiredMixin, ListView):
     redirected to the login page. After logging in, they will be redirected back to the original destination
     preserved by the query parameter defined by `redirect_field_name`.
 
+    `ListView` is the parent class.
+
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
         redirect_field_name (str): The query parameter for the URL the user will be redirected to after logging in.
@@ -1088,17 +1122,19 @@ class UsedItemView(LoginRequiredMixin, ListView):
 
 class UsedItemDetailView(LoginRequiredMixin, DetailView):
     """
-    Class-based view to display the details for a specific Used Item.
+    Class-based view to display the details for a specific used item.
     Users must be logged in to have access to this view.
     
     The `LoginRequiredMixin` is used to restrict access to authenticated users. Unauthenticated users will be 
     redirected to the login page. After logging in, they will be redirected back to the original destination
     preserved by the query parameter defined by `redirect_field_name`.
 
+    `DetailView` is the parent class.
+
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
         redirect_field_name (str): The query parameter for the URL the user will be redirected to after logging in.
-        model (UsedItem): The model that the view will operate on.
+        model (UsedItem): The model on which the view will operate.
         template_name (str): The template that will be used to render the view.
         
     Methods:
@@ -1130,9 +1166,11 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
     Class-based view for displaying the page to create a Used Item.
     Only users in the "Superuser" and "Technician" group have access to this view.
 
+    `CreateView` is the parent class.
+
     Attributes:
-        model (UsedItem): The model that the view will operate on.
-        fields (str): The fields that wil displayed in the view.
+        model (UsedItem): The model on which the view will operate.
+        fields (str): The fields to be displayed in the view.
         template_name (str): The template that will be used to render the view.
     """
 
@@ -1287,6 +1325,8 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
     """
     Renders a view to allow users to create purchase orders using a formset.
 
+    `FormView` is the parent class.
+
     Attributes:
         form_class (FormSet): The formset class to use for the purchase order items.
         template_name (str): The template used to render the formset.
@@ -1294,8 +1334,8 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
 
     Methods:
         test_func(): Checks if the user is in the 'Superuser' group.
-        get_context_data(**kwargs): Adds the formset to the context data.
-        form_valid(formset): Processes the formset data and writes it to an Excel file for download.
+        get_context_data(): Adds the formset to the context data.
+        form_valid(): Processes the formset data and writes it to an Excel file for download.
     """
 
     form_class = PurchaseOrderItemFormSet
@@ -1317,7 +1357,7 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
         Adds the formset and query parameters to the context data.
 
         Args:
-            **kwargs: Additional keyword arguments.
+            **kwargs: Additional keyword arguments passed to the parent method.
 
         Returns:
             dict: The context data with the formset and query parameters added.
@@ -1355,20 +1395,20 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
         workbook = load_workbook(po_template_path)
         worksheet = workbook.active
 
-        # Setup function if there are 8 or more items.
+        # Count the items in the form
         itemCount = 0
-
         for form in formset:
             itemCount += 1
 
+        # If there are 8 or more items, set up the worksheet to accommodate them
         if itemCount >= 8:
             setup_worksheet(worksheet, itemCount)
 
-        # workbook.save()
-
         # Write data to the worksheet
+        # In the worksheet, the first item row is 16
         row = 16
         for form in formset:
+            # Ignore forms that are marked for deletion
             if form.cleaned_data.get("DELETE"):
                 continue
 
