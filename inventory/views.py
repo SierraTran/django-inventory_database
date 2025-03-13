@@ -367,13 +367,14 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
 
 
 class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
-    # TODO: Update docstring
     """
     Class-based view for updating an existing item as a Technician.
     This view requires the user to be in the "Technician" group.
     
     The `UserPassesTestMixin` is used to restrict access to users who are in the 'Superuser' group. 
     Users who are not in this group will be shown a 403 page explaining why they can't access the view.
+
+    `UpdateView` is the parent class.
 
     Attributes:
         model (Item): The model that this view will operate on.
@@ -415,26 +416,34 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
         Renders the 403 page with a message explaining the error.
 
         Returns:
-            HttpResponse: The HTTP response object that that's returned to the client. 
+            HttpResponse: The HTTP response object that's returned to the client. 
         """
         message = "You need to be a Technician to access this view."    
         return render(self.request, "403.html", {'message': message})
 
     def form_valid(self, form):
         """
-        Overrides form_valid function of the parent class (`UpdateView`) to pass the current user to the save method.
+        Overrides form_valid function of the `UpdateView` parent class to pass the current user to the save method.
 
         Args:
             form (ModelForm): The form that handles the data for updating the Item object.
 
         Returns:
-            HttpResponse: The HTTP response object that that's returned to the client. 
+            HttpResponse: The HTTP response object that's returned to the client. 
         """
         form.instance.updated_by = self.request.user
         return super().form_valid(form)
 
     def save(self, *args, **kwargs):
-        # TODO: Docstring
+        """
+        Saves the current user as an argument for the save function of the `UpdateView` parent class.
+
+        This method updates `kwargs` to include the current user before delegating the save operation to the parent class.
+
+        Args:
+            *args: Additional positional arguments
+            **kwargs: Additional keyword arguments
+        """
         kwargs["user"] = self.request.user
         return super().save(*args, **kwargs)
 
@@ -469,7 +478,7 @@ class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
         Renders the 403 page with a message explaining the error.
 
         Returns:
-            HttpResponse: The HTTP response object that that's returned to the client. 
+            HttpResponse: The HTTP response object that's returned to the client. 
         """
         message = "You need to be an Intern to access this view."    
         return render(self.request, "403.html", {'message': message})
