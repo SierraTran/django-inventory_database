@@ -190,3 +190,8 @@ LOGOUT_REDIRECT_URL = "../login"
 # If the user closes the browser, the session will expire and the user will
 # have to log in again.
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Message storage for the messages framework
+# https://docs.djangoproject.com/en/5.1/ref/settings/#message-storage
+# This setting handles both sessions and cookies
+MESSAGE_STORAGE = "django.contrib.messages.storage.fallback.FallbackStorage"
