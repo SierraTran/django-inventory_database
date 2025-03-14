@@ -40,7 +40,7 @@
         <p>To go back to the home page, click the Hayes letterhead at the top-left corner of this page.</p>
         {% if not request.user.is_authenticated %}
         <p>
-            Are you <a href="{% url 'login' %}">logged in</a>?
+            Are you <a href="{% url 'authentication:login' %}">logged in</a>?
         </p>
         {% endif %}
     </div>
