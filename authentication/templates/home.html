@@ -41,6 +41,6 @@
             <button type="submit">Log out</button>
         </form>
     {% else %}
-        <p>Please <a href="{% url 'login' %}">log in</a> to see the database.</p>
+        <p>Please <a href="{% url 'authentication:login' %}">log in</a> to see the database.</p>
     {% endif %}
 {% endblock %}
