@@ -1,5 +1,7 @@
 {% load static %}
 
+{# TODO: Use confirm_base_template.html #}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,9 +16,8 @@
 
 <body>
     <form method="post" class="card"> {% csrf_token %}
-        <h3>
-            Are you sure you want to delete "{{ object }}"?
-        </h3>
+        <h3>Are you sure you want to delete</h3>
+        <h3>"{{ object }}"?</h3>
         {{ form }}
         <div class="buttons">
             <input type="submit" name="Cancel" id="cancel" value="Cancel" />
