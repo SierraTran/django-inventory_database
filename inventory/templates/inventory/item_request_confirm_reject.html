@@ -2,16 +2,15 @@
 {% load static %}
 
 {% block other_stylesheets %}
-{# TODO: Stylesheet #}
+<link rel="stylesheet" href="{% static "item_confirm_delete.css" %}" /> {# This template just shares the same style as the "item_confirm_delete.html" template. #}
 {% endblock other_stylesheets %}
 
 {% block title %}Item Request | Confirm Rejection{% endblock title %}
 
 {% block content %}
 <form method="post" class="card"> {% csrf_token %}
-    <h3>
-        Are you sure you want to reject "{{ object }}"?
-    </h3>
+    <h3>Are you sure you want to reject</h3>
+    <h3>"{{ object }}"?</h3>
     {{ form }}
     <div class="buttons">
         <input type="submit" name="Cancel" id="cancel" value="Cancel" />
