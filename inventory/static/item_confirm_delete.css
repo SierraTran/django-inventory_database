@@ -12,6 +12,7 @@ form {
     border: 2px solid black;
     padding: 1em 3em 2em 3em;
     width: 85%;
+    max-width: 1200px;
     margin: 0 auto;
     background-color: rgb(220, 220, 220)
 }
