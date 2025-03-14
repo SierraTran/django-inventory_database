@@ -4,8 +4,21 @@ body {
     font-family: arial, sans-serif;
 }
 
-p {
+p, ul {
     text-align: center;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 16px auto;
+    background: rgba(255, 100, 100, 0.5);
+}
+
+ul, form {
+    width: 60vw;
+    max-width: 600px;
+    min-width: 350px;
 }
 
 fieldset {
@@ -23,9 +36,6 @@ label {
 
 form {
     background-color: rgb(200, 200, 200);
-    width: 60vw;
-    max-width: 600px;
-    min-width: 350px;
     margin: 0 auto;
     padding-bottom: 1.5em;
     padding-top: 1em;
