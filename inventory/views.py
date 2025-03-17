@@ -84,7 +84,7 @@ class ItemView(LoginRequiredMixin, ListView):
         """
         Retrieves the list of items to be displayed in alphanumerical order by manufacturer, model, and part number.
 
-
+        # TODO: More details about what method does
 
         Returns:
             QuerySet: a queryset containing all items.
@@ -239,7 +239,7 @@ class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
         """
         Verifies if the user is in the 'Superuser' group.
 
-        This method checks the first group the current user belongs to. If the group exists and its name is 
+        This method checks the first group the current user belongs to. If the group exists and its name is
         'Superuser', it returns True; otherwise, it returns False.
 
         Returns:
@@ -271,7 +271,8 @@ class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
         Returns:
             HttpResponse: The HTTP response object.
         """
-        # NOTE: Might break the code?
+        # NOTE: Might break the code? I changed the field name from `created_by` to `last_modified_by`.
+        # BUG: If things go wrong here, it's because the field name is `last_modified_by` not `created_by`
         form.instance.last_modified_by = self.request.user
         return super().form_valid(form)
 
@@ -292,9 +293,9 @@ class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
         template_name (str): The name of the template used to render the view.
 
     Methods:
-        test_func(): Verifies if the user is in the 'Technician' group.
-        handle_no_permission(): Renders the 403 page with a message explaining the error.
-        form_valid(): Overrides form_valid to pass current user to save method
+        `test_func()`: Verifies if the user is in the 'Technician' group.
+        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
+        `form_valid()`: Overrides form_valid to pass current user to save method
     """
 
     model = Item
@@ -334,9 +335,11 @@ class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
         return render(self.request, "403.html", {"message": message})
 
     def form_valid(self, form):
-        # TODO; Update docstring
         """
         Overrides the form_valid function of the base class (`CreateView`) to pass the current user to the save method.
+
+        This method sets the `created_by` field of the new Item object to the current user before calling the base class's
+        `form_valid` method with the updated form.
 
         Args:
             form (ModelForm): The form that handles the data for updating the Item object.
@@ -422,9 +425,10 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
         return super().form_valid(form)
 
     def save(self, *args, **kwargs):
-        # TODO: Update docstring?
         """
         Saves the updated item with additional keyword arguments.
+
+        This method updates `kwargs` to include the current user before delegating the save operation to the base class.
 
         Args:
             *args: Additional positional arguments.
@@ -496,9 +500,11 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
         return render(self.request, "403.html", {"message": message})
 
     def form_valid(self, form):
-        # TODO: Update docstring
         """
         Overrides form_valid function of the `UpdateView` base class to pass the current user to the save method.
+
+        This method sets the `last_modified_by` field of the updated Item object to the current user. Then, it calls
+        the base class's `form_valid` method with the updated form.
 
         Args:
             form (ModelForm): The form that handles the data for updating the Item object.
@@ -584,7 +590,8 @@ class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
         Returns:
             HttpResponse: The HTTP response object.
         """
-        form.instance.updated_by = self.request.user
+        # BUG: if things go wrong here, it's because the field name is `last_modified_by` not `updated_by`
+        form.instance.last_modified_by = self.request.user
         return super().form_valid(form)
 
     def save(self, *args, **kwargs):
@@ -635,14 +642,16 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
     def get_fail_url(self):
         """
         Returns the URL to redirect to if the deletion is canceled.
-        
+
         This method uses reverse_lazy to resolve the failure URL with the primary key (pk) of the object
         being processed and returns it.
 
         Returns:
             str: The URL to redirect to.
         """
-        return reverse_lazy("inventory:item_detail", kwargs={"pk": self.get_object().pk})
+        return reverse_lazy(
+            "inventory:item_detail", kwargs={"pk": self.get_object().pk}
+        )
 
     fail_url = property(get_fail_url)
 
@@ -650,7 +659,7 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
         """
         Verifies if the user is in the "Superuser" or "Technician" group.
 
-        This method checks the first group the current user belongs to. If the group exists and its name is 
+        This method checks the first group the current user belongs to. If the group exists and its name is
         'Superuser' or 'Technican', it returns True; otherwise, it returns False.
 
         Returns:
@@ -670,9 +679,13 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
         return render(self.request, "403.html", {"message": message})
 
     def post(self, request, *args, **kwargs):
-        # TODO: Update docstring
         """
         Handles POST requests to delete the item or cancel the deletion.
+
+        This method first checks which button was pressed in the form. If the "Cancel" button was pressed, the user is
+        redirected back to the Item Detail page (the failure URL). If the "Confirm" button was pressed (the else case),
+        the item is deleted. If there are other objects that reference the item, an IntegrityError is caught and an error
+        message is displayed after the user is redirected to the item Detail page.
 
         Args:
             request (HttpRequest): The HTTP request object containing metadata about the request.
@@ -683,8 +696,7 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
             HttpResponse: The HTTP response object.
         """
         if "Cancel" in request.POST:
-            url = self.fail_url
-            return redirect(url)
+            return redirect(self.fail_url)
         else:
             try:
                 return super(ItemDeleteView, self).post(request, *args, **kwargs)
@@ -773,7 +785,7 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
         """
         Verifies if the user is in the "Superuser" or "Technician" group.
 
-        This method checks the first group the current user belongs to. If the group exists and its name is 
+        This method checks the first group the current user belongs to. If the group exists and its name is
         'Superuser' and 'Technician', it returns True; otherwise, it returns False.
 
         Returns:
@@ -785,7 +797,7 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
     def form_valid(self, form) -> HttpResponseRedirect:
         """
         Processes the uploaded Excel file from the form, extracts item data from each row,
-        and creates Item objects in the database. Empty cells will have a default value set 
+        and creates Item objects in the database. Empty cells will have a default value set
         for them in the database.
 
         Args:
@@ -838,7 +850,7 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
         """
         Saves the item with the current user included in the keyword arguments.
 
-        This method retrieves the current user object from the request, adds it to the `kwargs` under 
+        This method retrieves the current user object from the request, adds it to the `kwargs` under
         the key "user" and calls the base class's `save` method with the provided arguments
 
         Args:
@@ -884,7 +896,7 @@ class ItemRequestView(UserPassesTestMixin, ListView):
         """
         Checks if the user belongs to the "Superuser" or "Technician" group.
 
-        This method checks the first group the current user belongs to. If the group exists and its name is 
+        This method checks the first group the current user belongs to. If the group exists and its name is
         'Superuser' and 'Technician', it returns True; otherwise, it returns False.
 
         Returns:
@@ -940,7 +952,7 @@ class ItemRequestDetailView(UserPassesTestMixin, DetailView):
         """
         Verifies if the user is in the "Technician" or "Superuser" group.
 
-        This method checks the first group the current user belongs to. If the group exists and its name is 
+        This method checks the first group the current user belongs to. If the group exists and its name is
         'Technician' or 'Superuser', it returns True; otherwise, it returns False.
 
         Returns:
@@ -1071,7 +1083,7 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
         """
         context = super().get_context_data(**kwargs)
         item_id = self.request.GET.get("item_id")
-        context["item"] = get_object_or_404(Item, item_id=item_id)
+        context["item"] = get_object_or_404(Item, pk=item_id)
         return context
 
 
@@ -1148,7 +1160,9 @@ class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
         Returns:
             str: The resolved URL for redirction.
         """
-        return reverse_lazy("inventory:item_request_detail", kwargs={"pk": self.get_object().pk})
+        return reverse_lazy(
+            "inventory:item_request_detail", kwargs={"pk": self.get_object().pk}
+        )
 
     fail_url = property(get_fail_url)
 
@@ -1171,8 +1185,8 @@ class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
         """
         Handles POST requests to set the item request's status to "Accepted" or cancel the operation.
 
-        This method checks the submitted form data to determine if the operation should be canceled (redirecting 
-        to the failure URL) or if the item request's status should be updated to "Accepted". If the item request's 
+        This method checks the submitted form data to determine if the operation should be canceled (redirecting
+        to the failure URL) or if the item request's status should be updated to "Accepted". If the item request's
         status is updated, the object will be saved and the user wil be redirected to the item request's detail page.
 
         Arguments:
@@ -1608,6 +1622,7 @@ class SearchUsedItemsView(LoginRequiredMixin, ListView):
 # Views for the PurchaseOrderItem model ###########################################################
 ###################################################################################################
 class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
+    # OPTIMIZE: Add initial data to the formset based on the GET parameters.
     """
     Renders a view to allow users to create purchase orders using a formset.
 
@@ -1655,6 +1670,35 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
         message = "You need to be a Superuser to access this view."
         return render(self.request, "403.html", {"message": message})
 
+    def get_initial(self):
+        """
+        Returns the initial data to use for the formset.
+
+        This method retrieves initial data from the GET parameters and returns it as a list of dictionaries,
+        each representing the initial data for one form in the formset.
+
+        Returns:
+            list: A list of dictionaries containing the initial data for the formset.
+        """
+        initial_data = []
+        manufacturer = self.request.GET.get("manufacturer", "")
+        model_part_num = self.request.GET.get("model_part_num", "")
+        quantity_ordered = self.request.GET.get("quantity_ordered", 1)
+        description = self.request.GET.get("description", "")
+        unit_price = self.request.GET.get("unit_price", 0.00)
+
+        initial_data.append(
+            {
+                "manufacturer": manufacturer,
+                "model_part_num": model_part_num,
+                "quantity_ordered": quantity_ordered,
+                "description": description,
+                "unit_price": unit_price,
+            }
+        )
+
+        return initial_data
+
     def get_context_data(self, **kwargs):
         """
         Adds the formset and query parameters to the context data.
@@ -1675,7 +1719,8 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
             context["formset"] = PurchaseOrderItemFormSet(self.request.POST)
         else:
             context["formset"] = PurchaseOrderItemFormSet(
-                queryset=PurchaseOrderItem.objects.none()
+                initial=self.get_initial(),
+                queryset=PurchaseOrderItem.objects.none(),
             )
         return context
 
