@@ -15,3 +15,8 @@ class Notification(models.Model):
     
     def __str__(self):
         return f'{self.timestamp} | For {self.user}: "{self.message}"'
+    
+    def mark_as_read(notification_id):
+        notification = Notification.objects.get(id=notification_id)
+        notification.is_read = True
+        notification.save()
