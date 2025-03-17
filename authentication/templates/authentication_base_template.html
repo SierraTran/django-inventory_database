@@ -8,8 +8,25 @@
     <link rel="shortcut icon" href="https://hayesinstruments.com/HayesLogo.ico">
     <link rel="stylesheet" href={% static "authentication_base.css" %} />
     {% block other_stylesheets %}{% endblock other_stylesheets %}
-    <title>{% block title %}{% endblock %}</title>
+    <title>{% block title %}{% endblock %} | Inventory Database</title>
     <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch("/inventory_database/notifications/unread_count/")
+                .then(response => {
+                    if (!response.ok) { {# BUG: This always throws an error. I just need the number of unread notifications. #}
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const badge = document.getElementById("notification-badge");
+                    badge.textContent = data.unread_count;
+                    badge.style.display = data.unread_count > 0 ? "inline" : "none";
+                })
+                .catch(error => {
+                    console.error("Error fetching notifications:", error);
+                });
+        });
         function openNav() {
             document.getElementById("sidenav").style.width = "250px";
         }
@@ -30,7 +47,9 @@
             <h1 class="username">{{ request.user.username }}</h1>
             <hr class="sidenav-divider">
             <a href="javascript:void(0)" class="close-button" onclick="closeNav()">&times;</a>
-            <a href="{% url "authentication:notifications" %}">Notifications</a>
+            <a href="{% url "authentication:notifications" %}">
+                Notifications <span id="notification-badge" class="badge">{{ unread_notifications_count }}</span>
+            </a>
             <form name="logout" action="{% url 'logout' %}" method="post"> {% csrf_token %}
                 <a onclick="logout.submit()">Log Out</a>
             </form>   

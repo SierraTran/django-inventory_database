@@ -24,12 +24,12 @@ This module defines class-based views for displaying the home page, login page, 
 """
 
 from typing import Any
-from django import forms
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
 from django.contrib import messages
 
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User, Group
@@ -37,7 +37,6 @@ from django.contrib.auth.views import LoginView
 
 from django.urls import reverse, reverse_lazy
 
-from django.views.generic import View
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -66,6 +65,14 @@ def home(request):
     return render(request, "home.html", context)
 
 
+def unread_notifications_count(request):
+    if request.user.is_authenticated:
+        unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
+        return JsonResponse({'unread_notifications_count': unread_count})
+    else: 
+        return JsonResponse({'unread_notifications_count': 0})
+
+
 class DatabaseLoginView(LoginView):
     """
     Class-based view to handle the login logic and render the login page.
@@ -91,7 +98,7 @@ class DatabaseLoginView(LoginView):
         the default behavior. 
 
         Args:
-            form (AuthenticationForm): _description_
+            form (AuthenticationForm): The form object that was submitted.
         """
         username = self.request.POST.get("username")
         password = self.request.POST.get("password")
@@ -107,7 +114,6 @@ class DatabaseLoginView(LoginView):
     
     
 class NotificationsView(LoginRequiredMixin, ListView):
-    # TODO: Update docstring to explain login_url and redirect_field_name
     """
     Class-based view to list all notifications for the currently logged-in user.
 
@@ -117,11 +123,11 @@ class NotificationsView(LoginRequiredMixin, ListView):
     (See module docstring for more details on the inherited classes)
 
     Attributes:
-        login_url (str): 
-        redirect_field_name (str):  
-        model (Notification): The model that this view will display.
-        template_name (str): The name of the template to use for rendering the view.
-        context_object_name (str): The name of the context variable to use for the list of notifications.
+        `login_url (str)`: The URL to the login page (resolved using reverse_lazy).
+        `redirect_field_name (str)`: The query parameter for the URL the user will be redirected to after logging in.
+        `model (Notification)`: The model that this view will display.
+        `template_name (str)`: The name of the template to use for rendering the view.
+        `context_object_name (str)`: The name of the context variable to use for the list of notifications.
         
     Methods:
         get_queryset(): Retrieves all notifications for the currently logged-in user.
@@ -133,9 +139,11 @@ class NotificationsView(LoginRequiredMixin, ListView):
     context_object_name = "notifications_list"
     
     def get_queryset(self):
-        # TODO: Update docstring to explain what the method does in detail
         """
         Retrieves all notifications for the currently logged-in user.
+        
+        This method retrieves the current user from the request object and filters the notifications by the user
+        in reverse chronological order. The notifications are then returned as a QuerySet.
 
         Returns:
             QuerySet: The QuerySet of Notifications for the current user.
@@ -143,10 +151,9 @@ class NotificationsView(LoginRequiredMixin, ListView):
         current_user = self.request.user
         current_user_notifications = Notification.objects.filter(user=current_user).order_by("-timestamp")
         return current_user_notifications
-    
+
 
 class UsersView(UserPassesTestMixin, ListView):
-    # TODO: Update docstring to explain methods
     """
     Displays a list of users.
 
@@ -157,7 +164,8 @@ class UsersView(UserPassesTestMixin, ListView):
 
     Methods:
         `test_func()`: Verifies if the user is in the "Superuser" group.
-        `handle_no_permission()`: 
+        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
+        `get_queryset()`: Retrieves all users from the database in alphanumerical order by username, last name, and first name.
     """
 
     model = User
@@ -189,7 +197,7 @@ class UsersView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         """
-        Retrieves all users from the database.
+        Retrieves all users from the database in alphanumerical order by username, last name, and first name.
 
         Returns:
             QuerySet: The queryset containing all users in the database.
@@ -201,6 +209,7 @@ class UserDetailsView(UserPassesTestMixin, DetailView):
     # TODO: Update docstring
     """
     Displays the details of a specific user.
+    Users must be in the "Superusr" group to access this view.
 
     Inherits functionality from:
         - UserPassesTestMixin
@@ -300,7 +309,7 @@ class CreateUserView(UserPassesTestMixin, CreateView):
             **kwargs: Additional keyword arguments.
 
         Returns:
-            dict: The context data for the template.
+            dict: The updated context data for the template.
         """
         context = super().get_context_data(**kwargs)
         context["user"] = self.request.user
@@ -340,9 +349,11 @@ class CreateUserView(UserPassesTestMixin, CreateView):
         return render(self.request, "403.html", {"message": message})
 
     def form_valid(self, form):
-        # TODO: Update docstring
         """
         Handles the form submission and adds the user to the specified group.
+        
+        This method hashes the password before saving the user to the database. It then retrieves the group name
+        from the POST request and adds the user to the specified group. The response after form submission is returned.
 
         Args:
             form (ModelForm): The submitted form.
@@ -367,6 +378,10 @@ class UpdateUserView(UserPassesTestMixin, UpdateView):
         model (User): The model that the view will operate on.
         fields (list[str]): The fields to be displayed in the form.
         template_name (str): The tempalte that will be used to render the page.
+        
+    Methods:
+        `test_func()`: Verifies if the user is in the "Superuser" group.
+        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
     """
 
     model = User
@@ -401,15 +416,24 @@ class UpdateUserView(UserPassesTestMixin, UpdateView):
         message = "You need to be a Superuser to access this view."
         return render(self.request, "403.html", {"message": message})
 
-    def get_context_data(self, **kwargs):
-        # TODO: Docstring
-        context = super().get_context_data(**kwargs)        
-        return context
+    # BUG: If anything goes wrong here, it's because I commented the function out.
+    # def get_context_data(self, **kwargs):
+    #     # TODO: Docstring
+    #     """_summary_
+
+    #     Returns:
+    #         _type_: _description_
+    #     """
+    #     context = super().get_context_data(**kwargs)        
+    #     return context
     
     def get_success_url(self):
-        # TODO: Update docstring
         """
         Redirects back to the updated user's details upon success.
+        
+        This method uses the `reverse` function to resolve the URL to the updated user's page and returns it. 
+        The object is the user that was updated, and pk is the primary key of the user. It is passed as a keyword
+        argument so the URL to the correct user's page is generated.
 
         Returns:
             str: The URL to the updated user's page.
@@ -417,6 +441,7 @@ class UpdateUserView(UserPassesTestMixin, UpdateView):
         return reverse("authentication:user_details", kwargs={"pk": self.object.pk})
 
     def form_valid(self, form):
+        # TODO: Docstring
         return super().form_valid(form)
 
 

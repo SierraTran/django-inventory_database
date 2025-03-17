@@ -5,16 +5,14 @@
 
 {% endblock other_stylesheets %}
 
-{% block title %}{% endblock title %}
+{% block title %}Notifications{% endblock title %}
 
-{% block page-title %}{% endblock page-title %}
+{% block page-title %}Notifications{% endblock page-title %}
 
 {% block content %}
-{# TODO: Notifications Page #}
-This is the Notifications page.
 {% if notifications_list %}
-I don't know how to display the notifications yet.
 {# TODO: Clickable rows to notification details? #}
+{# TODO: Button for marking notifications as read #}
 {# TODO: Button for deleting notifications #}
 <table>
     <tr>
@@ -31,6 +29,6 @@ I don't know how to display the notifications yet.
     {% endfor %}
 </table>
 {% else %}
-There are no notifications.
+<p>There are no notifications.</p>
 {% endif %}
 {% endblock content %}
