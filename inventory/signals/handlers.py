@@ -1,3 +1,7 @@
+# TODO: Module docstring
+"""_summary_
+"""
+
 from django.db import transaction
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
@@ -8,11 +12,12 @@ from inventory.models import Item, ItemHistory, ItemRequest, UsedItem
 from authentication.models import Notification
 
 
-# Regardless of being used or not, `**kwargs` needs to be included in the other parameters
+# NOTE: Regardless of being used or not, `sender` and `**kwargs` parameters need to be included in the other signal handlers to avoid errors.
 
 
 @receiver(post_save, sender=Item)
 def create_or_update_item_history(sender, instance, created, **kwargs):
+    # TODO: More details on how function works.
     """
     Creates an ItemHistory record when an item has been created or updated.
 
@@ -57,6 +62,7 @@ def handle_related_records(sender, instance, **kwargs):
 # TODO: Signals that create notifications
 @receiver(post_save, sender=ItemRequest)
 def send_item_request_notification(sender, instance, created, **kwargs):
+    # NOTE: Although the function doesn't use the `sender` and `**kwargs` parameters, they need to be included to avoid errors.
     """
     Creates a notification for Technicians if their item request has been accepted or rejected.
 
