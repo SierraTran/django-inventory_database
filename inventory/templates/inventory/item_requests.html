@@ -5,12 +5,11 @@
 <link rel="stylesheet" href="{% static "item_requests.css" %}" />
 {% endblock other_stylesheets %}
 
-{% block title %}Item Requests | Inventory Database{% endblock title %}
+{% block title %}Item Requests {% endblock title %}
 
 {% block page-title %}Item Requests{% endblock page-title %}
 
 {% block content %}
-{# TODO: Item Requests Page #}
 {% if item_requests_list %}
 <div class="grid">
     <div class="field-name">Date & Time</div>
@@ -52,8 +51,7 @@
             style="background-color:rgba(100, 255, 100, 0.5)"
             {% else %}
             style="background-color:rgba(255, 100, 100, 0.5)"
-            {% endif %}
-            
+            {% endif %}            
         >{{ item_request.status }}</span></div>
     </a>
     {% endif %}

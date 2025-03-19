@@ -5,12 +5,11 @@
 <link rel="stylesheet" href="{% static "item_history.css" %}" />
 {% endblock other_stylesheets %}
 
-{% block title %}Item History | {{ item }} | Iventory Database{% endblock title %}
+{% block title %}Item History | {{ item }}{% endblock title %}
 
 {% block page-title %}{{ item }} - Item History{% endblock page-title %}
 
 {% block content %}
-{# TODO: Center and format back button #}
 <button type="button" onclick="window.location.href='{% url "inventory:item_detail" item.id %}'">Back to Item Details</button>
 <table>
     <thead>
