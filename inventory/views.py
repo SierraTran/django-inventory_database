@@ -84,7 +84,7 @@ class ItemView(LoginRequiredMixin, ListView):
         """
         Retrieves the list of items to be displayed in alphanumerical order by manufacturer, model, and part number.
 
-        # TODO: More details about what method does
+        This method fetches all items from the database and orders them alphanumerically by manufacturer, model, and part number.
 
         Returns:
             QuerySet: a queryset containing all items.
@@ -128,7 +128,7 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
             **kwargs: Additional keyword arguments passed to the parent method.
 
         Returns:
-            dict: The context data, updated to inlcude the user's group under the key "user_group".
+            dict: The context data, updated to include the user's group under the key "user_group".
         """
         context = super().get_context_data(**kwargs)
         context["user_group"] = self.request.user.groups.first()
@@ -259,11 +259,11 @@ class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
         return render(self.request, "403.html", {"message": message})
 
     def form_valid(self, form):
-        # TODO: More details about the method
         """
         Overrides the form_valid function of the base class (`CreateView`) to pass the current user to the save method.
 
-        This method sets the
+        This method sets the `last_modified_by` field of the new Item object to the current user before calling the base class's
+        `form_valid` method with the updated form.
 
         Args:
             form (ModelForm): The form that handles the data for updating the Item object.
@@ -411,9 +411,11 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
         return render(self.request, "403.html", {"message": message})
 
     def form_valid(self, form):
-        # TODO: Update docstring
         """
-        Overrides the form_valid function of the base class (`UpdateView`) to pass the current user to the save method.
+        Overrides the form_valid function of the base class `UpdateView` to pass the current user to the save method.
+        
+        This method sets the `last_modified_by` field of the updated Item object to the current user. Then, it calls 
+        the base class's `form_valid` method with the updated form.
 
         Args:
             form (ModelForm): The form that handles the data for updating the Item object.
@@ -530,7 +532,6 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
 
 
 class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
-    # TODO: Update docstring
     """
     Class-based view for updating the quantity of an existing item as an Intern.
     This view requires the user to be in the "Intern" group.
@@ -548,7 +549,7 @@ class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
     Methods:
         `test_func()`: Verifies if the user is in the "Intern" group.
         `handle_no_permission()`: Renders the 403 page with a message explaining the error.
-        `form_valid()`:
+        `form_valid()`: Overrides the `form_valid` function of the base class `UpdateView` to pass the current user to the save method.
         `save()`: Saves the item with the current user included in the keyword arguments.
     """
 
@@ -580,9 +581,11 @@ class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
         return render(self.request, "403.html", {"message": message})
 
     def form_valid(self, form):
-        # TODO: Update docstring?
         """
-        Overrides the form_valid function of the base class (`UpdateView`) to pass the current user to the save method.
+        Overrides the form_valid function of the base class `UpdateView` to pass the current user to the save method.
+        
+        This method sets the `last_modified_by` field of the updated Item object to the current user. Then, it calls
+        the base class's `form_valid` method with the updated form.
 
         Args:
             form (ModelForm): The form that handles the data for updating the Item object.
@@ -1181,13 +1184,13 @@ class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        # NOTE: Although this function doesn't use *args or **kwargs, they need to be inlcuded to avoid errors.
+        # NOTE: Although this function doesn't use *args or **kwargs, they need to be included to avoid errors.
         """
         Handles POST requests to set the item request's status to "Accepted" or cancel the operation.
 
         This method checks the submitted form data to determine if the operation should be canceled (redirecting
         to the failure URL) or if the item request's status should be updated to "Accepted". If the item request's
-        status is updated, the object will be saved and the user wil be redirected to the item request's detail page.
+        status is updated, the object will be saved and the user will be redirected to the item request's detail page.
 
         Arguments:
             request (HttpRequest): The HTTP request object containing POST data.
@@ -1299,19 +1302,19 @@ class ItemRequestRejectView(UserPassesTestMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        # NOTE: Although this function doesn't use *args or **kwargs, they need to be inlcuded to avoid errors.
+        # NOTE: Although this function doesn't use *args or **kwargs, they need to be included to avoid errors.
         """
         Handles POST requests to set the item request's status to "Rejected" or cancel the operation.
 
         This method checks the submitted form data to determine if the operation should be canceled (redirecting to the failure URL)
         or if the item request's status should be updated to "Rejected". If the item request's status is updated, the object will be saved
-        and the user wil be redirected to the item request's detail page.
+        and the user will be redirected to the item request's detail page.
 
         Arguments:
             request (HttpRequest): The HTTP request object containing POST data.
 
         Returns:
-            HttpResponseredirect: A redirect response after canceling or confirming the status change.
+            HttpResponseRedirect: A redirect response after canceling or confirming the status change.
         """
         if "Cancel" in request.POST:
             return redirect(self.fail_url)
