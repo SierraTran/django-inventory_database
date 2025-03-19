@@ -3,6 +3,68 @@
 
 {% block other_stylesheets %}
 <link rel="stylesheet" href="{% static "purchase_order_form.css" %}" />
+<script>
+    function toggleFieldset(fieldset, deleteCheckbox) {
+        const inputs = fieldset.querySelectorAll('input, select, textarea');
+    
+        inputs.forEach(function (input) {
+            if (input !== deleteCheckbox) {
+                input.disabled = deleteCheckbox.checked;
+            }
+        });
+    }
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        const formsets = document.querySelectorAll('form fieldset');
+    
+        formsets.forEach(function (fieldset) {
+            const deleteCheckbox = fieldset.querySelector('.field.delete input[type="checkbox"]');
+    
+            deleteCheckbox.addEventListener('change', function () {
+                toggleFieldset(fieldset, deleteCheckbox);
+            });
+        });
+    });
+    
+    function addItem() {
+        const formContainer = document.querySelector("#form-container");
+        const itemForms = document.querySelectorAll(".item-form");
+        const totalForms = document.querySelector("#id_form-TOTAL_FORMS");
+        const formNum = itemForms.length;
+        const newForm = itemForms[0].cloneNode(true);
+        const formRegex = RegExp(`form-(\\d){1}-`, 'g');
+    
+        {# Update the 'name' and 'id' attributes for the new forms fields #}
+        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`);
+    
+        {# Clear all input values in the cloned form #}
+        const inputs = newForm.querySelectorAll("input, select, textarea");
+        inputs.forEach(input => {
+            if (input.type === "checkbox" || input.type === "radio") {
+                input.checked = false; 
+            } else if (input.type === "number") {
+                input.value = 0;
+            } else {
+                input.value = ""; 
+            }                
+        });
+    
+        {# Remove any error messages or specific classes, if applicable #}
+        newForm.classList.remove("error"); 
+        const errorMessages = newForm.querySelectorAll(".error-message");
+        errorMessages.forEach(error => error.remove());
+    
+        {# Insert the new form into the container #}    
+        formContainer.insertBefore(newForm, document.querySelector(".buttons"));
+    
+        {# Reinitialize specific event listeners for the new form #}
+        const deleteCheckbox = newForm.querySelector('.field.delete input[type="checkbox"]');
+        deleteCheckbox.addEventListener('change', function () {toggleFieldset(newForm, deleteCheckbox)});
+    
+        {# Update the TOTAL_FORMS value in the mamagememt form #}
+        totalForms.setAttribute('value', `${formNum + 1}`);
+    }
+    </script>
 {% endblock other_stylesheets %}
 
 {% block title %}Purchase Order Items Form{% endblock title %}
@@ -10,7 +72,8 @@
 {% block page-title %}Purchase Order Items Form{% endblock page-title %}
 
 {% block content %}
-<p>This new window has been provided so you can fill out this form while referring to the database for information.</p>
+<p>This new window was provided for filling out this form while referring to the database for information.</p>
+<p>Clicking the "Order More" button opens a new form and won't add to the form that's already open.</p>
 <form id="form-container" method="post"> {% csrf_token %}
     {{ formset.management_form }}
     {% for form in formset %}
@@ -102,44 +165,5 @@
     </div>
 </form>
 
-<script>
-function toggleFieldset(fieldset, deleteCheckbox) {
-    const inputs = fieldset.querySelectorAll('input, select, textarea');
 
-    inputs.forEach(function (input) {
-        if (input !== deleteCheckbox) {
-            input.disabled = deleteCheckbox.checked;
-        }
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    const formsets = document.querySelectorAll('form fieldset');
-
-    formsets.forEach(function (fieldset) {
-        const deleteCheckbox = fieldset.querySelector('.field.delete input[type="checkbox"]');
-
-        deleteCheckbox.addEventListener('change', function () {
-            toggleFieldset(fieldset, deleteCheckbox);
-        });
-    });
-});
-
-function addItem() {
-    const formContainer = document.querySelector("#form-container");
-    const itemForms = document.querySelectorAll(".item-form");
-    const totalForms = document.querySelector("#id_form-TOTAL_FORMS");
-    const formNum = itemForms.length;
-    const newForm = itemForms[0].cloneNode(true);
-    const formRegex = RegExp(`form-(\\d){1}-`, 'g');
-
-    newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`);
-    formContainer.insertBefore(newForm, document.querySelector(".buttons"));
-
-    const deleteCheckbox = newForm.querySelector('.field.delete input[type="checkbox"]');
-    deleteCheckbox.addEventListener('change', function () {toggleFieldset(newForm, deleteCheckbox)});
-
-    totalForms.setAttribute('value', `${formNum + 1}`);
-}
-</script>
 {% endblock content %}  

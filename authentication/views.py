@@ -415,17 +415,6 @@ class UpdateUserView(UserPassesTestMixin, UpdateView):
         """
         message = "You need to be a Superuser to access this view."
         return render(self.request, "403.html", {"message": message})
-
-    # BUG: If anything goes wrong here, it's because I commented the function out.
-    # def get_context_data(self, **kwargs):
-    #     # TODO: Docstring
-    #     """_summary_
-
-    #     Returns:
-    #         _type_: _description_
-    #     """
-    #     context = super().get_context_data(**kwargs)        
-    #     return context
     
     def get_success_url(self):
         """
@@ -446,9 +435,9 @@ class UpdateUserView(UserPassesTestMixin, UpdateView):
 
 
 class DeleteUserView(UserPassesTestMixin, DeleteView):
-    # TODO: Update docstring
     """
     Handles the deletion of a user.
+    Users must be in the "Superuser" group to access this view.
     
     Inherits functionality from:
         - UserPassesTestMixin
@@ -508,9 +497,12 @@ class DeleteUserView(UserPassesTestMixin, DeleteView):
         return render(self.request, "403.html", {"message": message})
 
     def post(self, request, *args, **kwargs):
-        # TODO: Update docstring
         """
         Handles the POST request for deleting a user.
+        
+        This method checks if the "Cancel" button was clicked when the form was submitted. If the button was clicked, 
+        the current user is redirected back to the user detail page, which is the failure URL. If the "Confirm" button was 
+        clicked (the else case), the base class's `post` method is called to process the deletion. 
 
         Args:
             request (HttpRequest): The HTTP request object.
@@ -521,7 +513,6 @@ class DeleteUserView(UserPassesTestMixin, DeleteView):
             HttpResponse: The response after handling the POST request.
         """
         if "Cancel" in request.POST:
-            url = self.fail_url
-            return redirect(url)
+            return redirect(self.fail_url)
         else:
             return super(DeleteUserView, self).post(request, *args, **kwargs)
