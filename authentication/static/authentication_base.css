@@ -54,7 +54,7 @@ span:hover, p>a:hover {
 }
 
 /* When you mouse over the navigation links, change their color */
-.sidenav a:hover {
+.sidenav a:hover, .badge:hover {
     color: #f1f1f1;
 }
 
@@ -87,4 +87,14 @@ span:hover, p>a:hover {
 hr.sidenav-divider {
     border: 1px solid #818181;
     width: 85%;
+}
+
+.badge {
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    padding: 5px;
+    font-size: 10px;
+    vertical-align: middle;
+    
 }

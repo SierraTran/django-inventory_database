@@ -1,3 +1,5 @@
+# TODO: Module docstring
+
 from django import forms
 from django.forms import modelformset_factory
 from django.contrib.auth.models import User, Group
@@ -8,6 +10,7 @@ class ImportFileForm(forms.Form):
     file = forms.FileField()
     
 class UsedItemForm(forms.ModelForm):
+    # TODO: Class docstring
     class Meta:
         model = UsedItem
         fields = [
@@ -18,6 +21,7 @@ class UsedItemForm(forms.ModelForm):
         ]
         
     def __init__(self, *args, **kwargs):
+        # TODO: Method docstring
         super(UsedItemForm, self).__init__(*args, **kwargs)
         
         self.fields["item"].queryset = Item.objects.order_by("manufacturer", "model", "part_number")
@@ -54,6 +58,7 @@ class ItemRequestForm(forms.ModelForm):
         ]
         
     def __init__(self, *args, **kwargs):
+        # TODO: Method docstring
         super(UsedItemForm, self).__init__(*args, **kwargs)
 
         self.fields["model_part_num"].label = "Model / Part #:"
@@ -62,6 +67,7 @@ class ItemRequestForm(forms.ModelForm):
 
 
 class PurchaseOrderItemForm(forms.ModelForm):
+    # TODO: Class docstring
     class Meta:
         model = PurchaseOrderItem
         fields = [
@@ -74,7 +80,8 @@ class PurchaseOrderItemForm(forms.ModelForm):
             "unit_price",
         ]
 
-    def __init__(self, *args, **kwargs):        
+    def __init__(self, *args, **kwargs):
+        # TODO: Method docstring        
         super(PurchaseOrderItemForm, self).__init__(*args, **kwargs)
 
         self.fields["model_part_num"].label = "Model / Part #"
