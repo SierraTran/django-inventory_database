@@ -7,12 +7,6 @@ def load_initial_data(apps, schema_editor):
     Group = apps.get_model("auth", "Group")
     Permission = apps.get_model("auth", "Permission")
 
-    # User groups
-    superuser_group = Group.objects.create(name="Superuser")
-    technician_group = Group.objects.create(name="Technician")
-    intern_group = Group.objects.create(name="Intern")
-    viewer_group = Group.objects.create(name="Viewer")
-
     # Permissions for the User model
     add_user_permission = Permission.objects.get(codename="add_user")
     change_user_permission = Permission.objects.get(codename="change_user")
@@ -49,40 +43,51 @@ def load_initial_data(apps, schema_editor):
     delete_purchaseorderitem_permission = Permission.objects.get(codename="delete_purchaseorderitem")
     view_purchaseorderitem_permission = Permission.objects.get(codename="view_purchaseorderitem")
 
-    # Assign permissions to groups
-    superuser_group.permissions.add(
-        add_user_permission, change_user_permission, delete_user_permission, view_user_permission,
-        view_notification_permission,
-        add_item_permission, change_item_permission, delete_item_permission, view_item_permission,
-        view_itemhistory_permission,
-        view_itemrequest_permission,
-        add_useditem_permission, change_useditem_permission, delete_useditem_permission, view_useditem_permission,
-        add_purchaseorderitem_permission, change_purchaseorderitem_permission, delete_purchaseorderitem_permission, view_purchaseorderitem_permission,
-    )
-    technician_group.permissions.add(
-        view_notification_permission,
-        add_item_permission, change_item_permission, delete_item_permission, view_item_permission,
-        view_itemhistory_permission,
-        add_itemrequest_permission, change_itemrequest_permission, delete_itemrequest_permission, view_itemrequest_permission,
-        add_useditem_permission, change_useditem_permission, delete_useditem_permission, view_useditem_permission,
-        # No PurchaseOrderItem permissions
-    )
-    intern_group.permissions.add(
-        view_notification_permission,
-        change_item_permission, view_item_permission,
-        view_itemhistory_permission,
-        # No ItemRequest permissions
-        # No UsedItem permissions
-        # No PurchaseOrderItem permissions
-    )
-    viewer_group.permissions.add(
-        view_notification_permission,
-        view_item_permission,
-        view_itemhistory_permission,
-        # No ItemRequest permissions
-        # No UsedItem permissions
-        # No PurchaseOrderItem permissions
-    )
+    # Create user groups and assign permissions to groups
+    if not Group.objects.filter(name="Superuser").exists():
+        superuser_group = Group.objects.create(name="Superuser")
+        superuser_group.permissions.add(
+            add_user_permission, change_user_permission, delete_user_permission, view_user_permission,
+            view_notification_permission,
+            add_item_permission, change_item_permission, delete_item_permission, view_item_permission,
+            view_itemhistory_permission,
+            view_itemrequest_permission,
+            add_useditem_permission, change_useditem_permission, delete_useditem_permission, view_useditem_permission,
+            add_purchaseorderitem_permission, change_purchaseorderitem_permission, delete_purchaseorderitem_permission, view_purchaseorderitem_permission,
+        )
+        
+    if not Group.objects.filter(name="Technician").exists():
+        technician_group = Group.objects.create(name="Technician")
+        technician_group.permissions.add(
+            view_notification_permission,
+            add_item_permission, change_item_permission, delete_item_permission, view_item_permission,
+            view_itemhistory_permission,
+            add_itemrequest_permission, change_itemrequest_permission, delete_itemrequest_permission, view_itemrequest_permission,
+            add_useditem_permission, change_useditem_permission, delete_useditem_permission, view_useditem_permission,
+            # No PurchaseOrderItem permissions
+        )
+        
+    if not Group.objects.filter(name="Intern").exists():
+        intern_group = Group.objects.create(name="Intern")
+        intern_group.permissions.add(
+            view_notification_permission,
+            change_item_permission, view_item_permission,
+            view_itemhistory_permission,
+            # No ItemRequest permissions
+            # No UsedItem permissions
+            # No PurchaseOrderItem permissions
+        )
+        
+    if not Group.objects.filter(name="Viewer").exists():
+        viewer_group = Group.objects.create(name="Viewer")
+        viewer_group.permissions.add(
+            view_notification_permission,
+            view_item_permission,
+            view_itemhistory_permission,
+            # No ItemRequest permissions
+            # No UsedItem permissions
+            # No PurchaseOrderItem permissions
+        )
 
 
 class Migration(migrations.Migration):
