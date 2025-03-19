@@ -2,12 +2,17 @@
 
 {# TODO: Styling #}
 
+{% block other_stylesheets %}{% endblock other_stylesheets %}
+
+{% block title %}Import Item Data{% endblock title %}
+
+{% block page-title %}Import Item Data{% endblock page-title %}
+
 {% block content %}
-<h1>Import Item Data</h1>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Upload</button>
   </form>
-  <p>Loading time depends on the size of the file. 
+  <p>Loading time depends on the size of the file.</p>
 {% endblock %}
