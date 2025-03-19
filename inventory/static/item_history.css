@@ -1,6 +1,21 @@
-table {
+table, .button-container {
     margin: 0 auto;
     width: 85%;
+}
+
+.button-container {
+    max-width: 900px;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+}
+
+.button-container > button, input {
+    width: 40%;
+    height: 2em;
+}
+
+table {
     border-spacing: 10px;
 }
 
@@ -21,4 +36,3 @@ tr td {
 .timestamp {
     width: 20%;
 }
-
