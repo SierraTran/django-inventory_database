@@ -26,19 +26,21 @@ This module defines class-based views for displaying and managing items, item hi
 """
 
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import IntegrityError
 from django.views.generic import TemplateView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, FormView, DeleteView
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 
 from haystack.query import SearchQuerySet
 
 from openpyxl import load_workbook
+
+from inventory_database.mixins import SuperuserOrTechnicianRequiredMixin, SuperuserRequiredMixin, TechnicianRequiredMixin, InternRequiredMixin
 
 from .forms import ImportFileForm, PurchaseOrderItemFormSet
 
@@ -200,13 +202,13 @@ class ItemHistoryView(LoginRequiredMixin, ListView):
         return context
 
 
-class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
+class ItemCreateSuperuserView(SuperuserRequiredMixin, CreateView):
     """
     Class-based view for creating a new item.
-    Only users in the 'Superuser' group can proceed. All other users will be shown a 403 page explaining why they can't access the view.
+    Only users in the "Superuser" group have access to this view. 
 
     Inherits functionality from:
-        - UserPassesTestMixin
+        - SuperuserRequiredMixin
         - CreateView
     (See module docstring for more details on the inherited classes)
 
@@ -216,8 +218,6 @@ class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
         template_name (str): The name of the template used to render the view.
 
     Methods:
-        `test_func()`: Verifies if the user is in the 'Superuser' group.
-        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
         `form_valid()`: Sets the `last_modified_by` field of the created Item as the current user.
     """
 
@@ -234,29 +234,6 @@ class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
         "unit_price",
     ]
     template_name = "item_create_form.html"
-
-    def test_func(self) -> bool:
-        """
-        Verifies if the user is in the 'Superuser' group.
-
-        This method checks the first group the current user belongs to. If the group exists and its name is
-        'Superuser', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the 'Superuser' group, False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name == "Superuser"
-
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object with the rendered 403 page.
-        """
-        message = "You need to be a Superuser to access this view."
-        return render(self.request, "403.html", {"message": message})
 
     def form_valid(self, form):
         """
@@ -277,13 +254,13 @@ class ItemCreateSuperuserView(UserPassesTestMixin, CreateView):
         return super().form_valid(form)
 
 
-class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
+class ItemCreateTechnicianView(TechnicianRequiredMixin, CreateView):
     """
     Class-based view for creating a new item.
     This view requires the user to be in the 'Technician' group.
 
     Inherits functionality from:
-        - UserPassesTestMixin
+        - TechnicianRequiredMixin
         - CreateView
     (See module docstring for more details on the inherited classes)
 
@@ -293,8 +270,6 @@ class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
         template_name (str): The name of the template used to render the view.
 
     Methods:
-        `test_func()`: Verifies if the user is in the 'Technician' group.
-        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
         `form_valid()`: Overrides form_valid to pass current user to save method
     """
 
@@ -310,29 +285,6 @@ class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
         "unit_price",
     ]
     template_name = "item_create_form.html"
-
-    def test_func(self) -> bool:
-        """
-        Verifies if the user is in the 'Technician' group.
-
-        This method checks the first group the current user belongs to.
-        If the group exists and its name is 'Technician', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the 'Technician' group, False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name == "Technician"
-
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object that renders the 403 page.
-        """
-        message = "You need to be a Technician to access this view."
-        return render(self.request, "403.html", {"message": message})
 
     def form_valid(self, form):
         """
@@ -351,13 +303,13 @@ class ItemCreateTechnicianView(UserPassesTestMixin, CreateView):
         return super().form_valid(form)
 
 
-class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
+class ItemUpdateSuperuserView(SuperuserRequiredMixin, UpdateView):
     """
     Class-based view for updating an existing item as a Superuser.
     This view requires the user to be in the "Superuser" group.
 
     Inherits functionality from:
-        - UserPassesTestMixin
+        - SuperuserRequiredMixin
         - UpdateView
     (See module docstring for more details on the inherited classes)
 
@@ -367,10 +319,8 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
         template_name (str): The name of the template used to render the view.
 
     Methods:
-        test_func(): Verifies if the user is in the "Superuser" group.
-        handle_no_permission(): Renders the 403 page with a message explaining the error.
-        form_valid(): Passes the current user to the save method.
-        save(): Saves the updated item with additional keyword arguments.
+        `form_valid()`: Passes the current user to the save method.
+        `save()`: Saves the updated item with additional keyword arguments.
     """
 
     model = Item
@@ -386,29 +336,6 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
         "unit_price",
     ]
     template_name = "item_update_form.html"
-
-    def test_func(self) -> bool:
-        """
-        Verifies if the user is in the "Superuser" group.
-
-        This method checks the first group the current user belongs to.
-        If the group exists and its name is 'Superuser', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the "Superuser" group, False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name == "Superuser"
-
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object that's returned to the client.
-        """
-        message = "You need to be a Superuser to access this view."
-        return render(self.request, "403.html", {"message": message})
 
     def form_valid(self, form):
         """
@@ -443,13 +370,13 @@ class ItemUpdateSuperuserView(UserPassesTestMixin, UpdateView):
         return super().save(*args, **kwargs)
 
 
-class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
+class ItemUpdateTechnicianView(TechnicianRequiredMixin, UpdateView):
     """
     Class-based view for updating an existing item as a Technician.
     This view requires the user to be in the "Technician" group.
 
     Inherits functionality from:
-        - UserPassesTestMixin
+        - TechnicianRequiredMixin
         - UpdateView
     (See module docstring for more details on the inherited classes)
 
@@ -459,10 +386,8 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
         template_name (str): The name of the template used to render the view.
 
     Methods:
-        test_func(): Verifies if the user is in the "Technician" group.
-        handle_no_permission(): Renders the 403 page with a message explaining the error.
-        form_valid(): Passes the current user to the save method.
-        save():
+        `form_valid()`: Overrides form_valid function of the `UpdateView` base class to pass the current user to the save method.
+        `save()`: Saves the current user as an argument for the save function of the `UpdateView` base class.
     """
 
     model = Item
@@ -477,29 +402,6 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
         "unit_price",
     ]
     template_name = "item_update_form.html"
-
-    def test_func(self) -> bool:
-        """
-        Verifies if the user is in the "Technician" group.
-
-        This method checks the first group the current user belongs to.
-        If the group exists and its name is 'Technician', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the "Technician" group, False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name == "Technician"
-
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object that's returned to the client.
-        """
-        message = "You need to be a Technician to access this view."
-        return render(self.request, "403.html", {"message": message})
 
     def form_valid(self, form):
         """
@@ -531,13 +433,13 @@ class ItemUpdateTechnicianView(UserPassesTestMixin, UpdateView):
         return super().save(*args, **kwargs)
 
 
-class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
+class ItemUpdateInternView(InternRequiredMixin, UpdateView):
     """
     Class-based view for updating the quantity of an existing item as an Intern.
     This view requires the user to be in the "Intern" group.
 
     Inherits functionality from:
-        - UserPassesTestMixin
+        - InternRequiredMixin
         - UpdateView
     (See module docstring for more details on the inherited classes)
 
@@ -547,8 +449,6 @@ class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
         template_name (str): The name of the template used to render the view.
 
     Methods:
-        `test_func()`: Verifies if the user is in the "Intern" group.
-        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
         `form_valid()`: Overrides the `form_valid` function of the base class `UpdateView` to pass the current user to the save method.
         `save()`: Saves the item with the current user included in the keyword arguments.
     """
@@ -556,29 +456,6 @@ class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
     model = Item
     fields = ["quantity"]
     template_name = "item_update_form.html"
-
-    def test_func(self) -> bool:
-        """
-        Verifies if the user is in the "Intern" group.
-
-        This method checks the first group the current user belongs to.
-        If the group exists and its name is 'Intern', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the "Intern" group, False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name == "Intern"
-
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object that's returned to the client.
-        """
-        message = "You need to be an Intern to access this view."
-        return render(self.request, "403.html", {"message": message})
 
     def form_valid(self, form):
         """
@@ -615,13 +492,13 @@ class ItemUpdateInternView(UserPassesTestMixin, UpdateView):
         return super().save(*args, **kwargs)
 
 
-class ItemDeleteView(UserPassesTestMixin, DeleteView):
+class ItemDeleteView(SuperuserOrTechnicianRequiredMixin, DeleteView):
     """
     Class-based view for deleting an existing item.
     This view requires the user to be in the "Superuser" or "Technician" group.
 
     Inherits functionality from:
-        - UserPassesTestMixin
+        - SuperuserOrTechnicianRequiredMixin
         - DeleteView
     (See module docstring for more details on the inherited classes)
 
@@ -633,8 +510,6 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
 
     Methods:
         `get_fail_url()`: Returns the URL to redirect to if the deletion is canceled.
-        `test_func()`: Verifies if the user is in the "Superuser" or "Technician" group.
-        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
         `post()`: Handles POST requests to delete the item or cancel the deletion.
     """
 
@@ -657,29 +532,6 @@ class ItemDeleteView(UserPassesTestMixin, DeleteView):
         )
 
     fail_url = property(get_fail_url)
-
-    def test_func(self) -> bool:
-        """
-        Verifies if the user is in the "Superuser" or "Technician" group.
-
-        This method checks the first group the current user belongs to. If the group exists and its name is
-        'Superuser' or 'Technican', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the "Superuser" or "Technician" group, False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name in ["Superuser", "Technician"]
-
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object that's returned to the client.
-        """
-        message = "You need to be a Technician or Superuser to access this view."
-        return render(self.request, "403.html", {"message": message})
 
     def post(self, request, *args, **kwargs):
         """
@@ -760,12 +612,13 @@ class SearchItemsView(LoginRequiredMixin, ListView):
         return results
 
 
-class ImportItemDataView(UserPassesTestMixin, FormView):
+class ImportItemDataView(SuperuserOrTechnicianRequiredMixin, FormView):
     """
     Renders a view to allow users to import items from an .xlsx file to the database.
+    Users must be in the "Superuser" or Technician" group to access this view.
 
     Inherits functionality from:
-        - UserPassesTestMixin
+        - SuperuserOrTechnicianRequiredMixin
         - FormView
     (See module docstring for more details on the inherited classes)
 
@@ -775,7 +628,6 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
         success_url (str): The URL to redirect to after the form is successfully processed (resolved using reverse_lazy).
 
     Methods:
-        `test_func()`: Verifies if the user is in the "Superuser" or "Technician" group.
         `form_valid(form)`: Processes data from an uploaded Excel file to the database.
         `save()`: Saves the item with the current user included in the keyword arguments.
     """
@@ -783,19 +635,6 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
     form_class = ImportFileForm
     template_name = "import_item_data.html"
     success_url = reverse_lazy("inventory:items")
-
-    def test_func(self) -> bool:
-        """
-        Verifies if the user is in the "Superuser" or "Technician" group.
-
-        This method checks the first group the current user belongs to. If the group exists and its name is
-        'Superuser' and 'Technician', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the "Superuser" or "Technician" group, False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name in ["Superuser", "Technician"]
 
     def form_valid(self, form) -> HttpResponseRedirect:
         """
@@ -870,13 +709,13 @@ class ImportItemDataView(UserPassesTestMixin, FormView):
 ###################################################################################################
 # Views for the ItemRequest Model #################################################################
 ###################################################################################################
-class ItemRequestView(UserPassesTestMixin, ListView):
+class ItemRequestView(SuperuserOrTechnicianRequiredMixin, ListView):
     """
     Class-based view for displaying item requests.
     Only users belonging to the "Technician" or "Superuser" groups are allowed to access this view.
 
     Inherits functionality from:
-        - UserPassesTestMixin
+        - SuperuserOrTechnicianRequiredMixin
         - ListView
     (See module docstring for more details on the inherited classes)
 
@@ -886,37 +725,12 @@ class ItemRequestView(UserPassesTestMixin, ListView):
         context_object_name (str): The context variable name for the list of item requests.
 
     Methods:
-        `test_func()`: Checks if the user belongs to the "Technician" or "Superuser" group.
-        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
         `get_queryset()`: Returns the queryset of all item requests.
     """
 
     model = ItemRequest
     template_name = "item_requests.html"
     context_object_name = "item_requests_list"
-
-    def test_func(self) -> bool:
-        """
-        Checks if the user belongs to the "Superuser" or "Technician" group.
-
-        This method checks the first group the current user belongs to. If the group exists and its name is
-        'Superuser' and 'Technician', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the "Superuser" or "Technician" group, False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name in ["Superuser", "Technician"]
-
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object that's returned to the client.
-        """
-        message = "You need to be a Technician or Superuser to access this view."
-        return render(self.request, "403.html", {"message": message})
 
     def get_queryset(self):
         """
@@ -928,13 +742,13 @@ class ItemRequestView(UserPassesTestMixin, ListView):
         return ItemRequest.objects.all()
 
 
-class ItemRequestDetailView(UserPassesTestMixin, DetailView):
+class ItemRequestDetailView(SuperuserOrTechnicianRequiredMixin, DetailView):
     """
     Class-based view for displaying the details of a ItemRequest.
     Users must be in the "Technician" or "Superuser" group to access this view.
 
     Inherits functionality from:
-        - UserPassesTestMixin
+        - SuperuserOrTechnicianRequiredMixin
         - DetailView
     (See module docstring for more details on the inherited classes)
 
@@ -943,37 +757,12 @@ class ItemRequestDetailView(UserPassesTestMixin, DetailView):
         template_name (str): The template that will be used to render the view.
 
     Methods:
-        `test_func()`: Verifies if the user is in the "Technician" or "Superuser" group.
-        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
         `get_context_data()`:  Adds the name of the current user's group to the context.
     """
 
     model = ItemRequest
     template_name = "item_request_detail.html"
-
-    def test_func(self) -> bool:
-        """
-        Verifies if the user is in the "Technician" or "Superuser" group.
-
-        This method checks the first group the current user belongs to. If the group exists and its name is
-        'Technician' or 'Superuser', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the "Technician" or "Superuser" group. False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name in ["Technician", "Superuser"]
-
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object that's returned to the client.
-        """
-        message = "You need to be a Technician or Superuser to access this view."
-        return render(self.request, "403.html", {"message": message})
-
+    
     def get_context_data(self, **kwargs):
         """
         Adds the name of the current user's group to the context.
@@ -993,14 +782,14 @@ class ItemRequestDetailView(UserPassesTestMixin, DetailView):
         return context
 
 
-class ItemRequestCreateView(UserPassesTestMixin, CreateView):
+class ItemRequestCreateView(TechnicianRequiredMixin, CreateView):
     """
     Class-based view for creating an item request.
     This view requires the user to be in the "Technician" group.
 
     Inherits functionality from:
-        - UserPassesTestMixin
-        - DetailView
+        - TechnicianRequiredMixin
+        - CreateView
     (See module docstring for more details on the inherited classes)
 
     Attributes:
@@ -1009,8 +798,6 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
         template_name (str): The name of the template used to render the view.
 
     Methods:
-        `test_func()`: Verifies if the user is in the "Technician" group.
-        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
         `get_initial()`: Retrieves initial item data from the GET parameters and the request.
         `get_context_data()`: Adds the specific item to the context data.
     """
@@ -1025,29 +812,6 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
         "requested_by",
     ]
     template_name = "item_request_form.html"
-
-    def test_func(self) -> bool:
-        """
-        Verifies if the user is in the "Technician" group.
-
-        This method checks the first group the current user belongs to.
-        If the group exists and its name is 'Technician', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the "Technician" group, False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name == "Technician"
-
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object that's returned to the client.
-        """
-        message = "You need to be a Technician to access this view."
-        return render(self.request, "403.html", {"message": message})
 
     def get_initial(self):
         """
@@ -1090,13 +854,13 @@ class ItemRequestCreateView(UserPassesTestMixin, CreateView):
         return context
 
 
-class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
+class ItemRequestAcceptView(SuperuserRequiredMixin, TemplateView):
     """
     Class-based view for confirming or canceling the acceptance of an item request.
-    Only users in the 'Superuser' group can access this view.
+    Only users in the "Superuser" group can access this view.
 
     Inherits functionality from:
-        - UserPassesTestMixin
+        - SuperuserRequiredMixin
         - TemplateView
     (See module docstring for more details on the inherited classes)
 
@@ -1106,8 +870,6 @@ class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
         fail_url (str): The URL to redirect to if the acceptance is canceled (resolved using the `get_fail_url` method).
 
     Methods:
-        `test_func()`: Verifies if the user is in the "Superuser" group.
-        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
         `get_object()`: Retrieves the specific ItemRequest object for the view.
         `get_fail_url()`: Returns the URL to redirect to if the acceptance is canceled.
         `get_context_data()`: Adds the specific item request to the context data.
@@ -1116,29 +878,6 @@ class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
 
     model = ItemRequest
     template_name = "item_request_confirm_accept.html"
-
-    def test_func(self) -> bool:
-        """
-        Verifies if the user is in the "Superuser" group.
-
-        This method checks the first group the current user belongs to. If the group exists and its name
-        is 'Superuser', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the "Superuser" group. False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name == "Superuser"
-
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object that's returned to the client.
-        """
-        message = "You need to be a Superuser to access this view."
-        return render(self.request, "403.html", {"message": message})
 
     def get_object(self):
         """
@@ -1207,13 +946,13 @@ class ItemRequestAcceptView(UserPassesTestMixin, TemplateView):
             return redirect(item_request.get_absolute_url())
 
 
-class ItemRequestRejectView(UserPassesTestMixin, TemplateView):
+class ItemRequestRejectView(SuperuserRequiredMixin, TemplateView):
     """
     Class-based view for confirming or canceling the acceptance of an item request.
     Only users in the 'Superuser' group can access this view.
 
     Inherits functionality from:
-        - UserPassesTestMixin
+        - SuperuserRequiredMixin
         - TemplateView
     (See module docstring for more details on the inherited classes)
 
@@ -1223,7 +962,6 @@ class ItemRequestRejectView(UserPassesTestMixin, TemplateView):
         fail_url (str): The URL to redirect to if the rejection is canceled (resolved using the `get_fail_url` method).
 
     Methods:
-        `test_func()`: Verifies if the user is in the "Superuser" group.
         `get_object()`: Retrieves the specific item request for the view.
         `get_fail_url()`: Returns the URL to redirect if the deletion is canceled.
         `get_context_data()`: Adds the specific item request to the context data.
@@ -1232,29 +970,6 @@ class ItemRequestRejectView(UserPassesTestMixin, TemplateView):
 
     model = ItemRequest
     template_name = "item_request_confirm_reject.html"
-
-    def test_func(self) -> bool:
-        """
-        Verifies if the user is in the "Superuser" group.
-
-        This method checks the first group the current user belongs to.
-        If the group exists and its name is 'Superuser', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the "Superuser" group. False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name == "Superuser"
-
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object that's returned to the client.
-        """
-        message = "You need to be a Superuser to access this view."
-        return render(self.request, "403.html", {"message": message})
 
     def get_object(self):
         """
@@ -1411,13 +1126,13 @@ class UsedItemDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class UsedItemCreateView(UserPassesTestMixin, CreateView):
+class UsedItemCreateView(SuperuserOrTechnicianRequiredMixin, CreateView):
     """
     Class-based view for displaying the page to create a Used Item.
     Only users in the "Superuser" and "Technician" group have access to this view.
 
     Inherits functionality from:
-        - UserPassesTestMixin
+        - SuperuserOrTechnicianRequiredMixin
         - CreateView
     (See module docstring for more details on the inherited classes)
 
@@ -1427,8 +1142,6 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
         template_name (str): The template that will be used to render the view.
 
     Methods:
-        `test_func()`: Verifies if the user belongs to the "Superuser" or "Technician" group.
-        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
         `get_initial()`: Adds the specific item to the initial data to be used in the form.
         `get_context_data()`: Adds the item and initial data for the form to the context.
         `dispatch()`: Checks if the item's quantity is greater than 0 before allowing access to the view.
@@ -1438,29 +1151,6 @@ class UsedItemCreateView(UserPassesTestMixin, CreateView):
     model = UsedItem
     fields = "__all__"
     template_name = "item_use_form.html"
-
-    def test_func(self) -> bool:
-        """
-        Verifies if the user belongs to the "Superuser" or "Technician" group.
-
-        This method checks the first group the current user belongs to.
-        If the group exists and its name is 'Superuser' and 'Technician', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the "Superuser" or "Technician" group, False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name in ["Superuser", "Technician"]
-
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object that's returned to the client.
-        """
-        message = "You need to be a Superuser or Technician to access this view."
-        return render(self.request, "403.html", {"message": message})
 
     def get_initial(self):
         """
@@ -1624,13 +1314,13 @@ class SearchUsedItemsView(LoginRequiredMixin, ListView):
 ###################################################################################################
 # Views for the PurchaseOrderItem model ###########################################################
 ###################################################################################################
-class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
-    # OPTIMIZE: Add initial data to the formset based on the GET parameters.
+class PurchaseOrderItemsFormView(SuperuserRequiredMixin, FormView):
     """
     Renders a view to allow users to create purchase orders using a formset.
+    Users must be in the "Superuser" group to access this view.
 
     Inherits functionality from:
-        - UserPassesTestMixin
+        - SuperuserRequiredMixin
         - FormView
     (See module docstring for more details on the inherited classes)
 
@@ -1640,8 +1330,6 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
         success_url (str): The URL to redirect to upon successful form submission.
 
     Methods:
-        `test_func()`: Verifies if the user is in the 'Superuser' group.
-        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
         `get_context_data()`: Adds the formset to the context data.
         `form_valid()`: Processes the formset data and writes it to an Excel file for download.
     """
@@ -1649,29 +1337,6 @@ class PurchaseOrderItemsFormView(UserPassesTestMixin, FormView):
     form_class = PurchaseOrderItemFormSet
     template_name = "purchase_order_form.html"
     success_url = reverse_lazy("inventory:items")
-
-    def test_func(self) -> bool:
-        """
-        Verifies if the user is in the 'Superuser' group.
-
-        This method checks the first group the current user belongs to.
-        If the group exists and its name is 'Superuser', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the 'Superuser' group, False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name == "Superuser"
-
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object that's returned to the client.
-        """
-        message = "You need to be a Superuser to access this view."
-        return render(self.request, "403.html", {"message": message})
 
     def get_initial(self):
         """

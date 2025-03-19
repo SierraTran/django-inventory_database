@@ -31,7 +31,7 @@ from django.contrib import messages
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.views import LoginView
 
@@ -42,6 +42,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from .models import User, Notification
+from inventory_database.mixins import SuperuserRequiredMixin
 
 
 # Create your views here.
@@ -132,6 +133,7 @@ class NotificationsView(LoginRequiredMixin, ListView):
     Methods:
         get_queryset(): Retrieves all notifications for the currently logged-in user.
     """
+    
     login_url = reverse_lazy("login")
     redirect_field_name = "next"
     model = Notification
@@ -153,9 +155,15 @@ class NotificationsView(LoginRequiredMixin, ListView):
         return current_user_notifications
 
 
-class UsersView(UserPassesTestMixin, ListView):
+class UsersView(SuperuserRequiredMixin, ListView):
     """
     Displays a list of users.
+    Users must be in the "Superuser" group to access this view.
+    
+    Inherits functionality from:
+        - SuperuserRequiredMixin
+        - ListView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
         model (User): The model that the view will operate on.
@@ -163,37 +171,12 @@ class UsersView(UserPassesTestMixin, ListView):
         context_object_name (str): The context variable name for the list of users.
 
     Methods:
-        `test_func()`: Verifies if the user is in the "Superuser" group.
-        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
         `get_queryset()`: Retrieves all users from the database in alphanumerical order by username, last name, and first name.
     """
 
     model = User
     template_name = "users.html"
     context_object_name = "users_list"
-
-    def test_func(self) -> bool:
-        """
-        Verifies if the user is in the "Superuser" group.
-        
-        This method checks the first group the current user belongs to. If the group exists and its name is 
-        'Superuser', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the "Superuser" group, False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name == "Superuser"
-    
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object with the rendered 403 page.
-        """
-        message = "You need to be a Superuser to access this view."
-        return render(self.request, "403.html", {"message": message})
 
     def get_queryset(self):
         """
@@ -205,14 +188,13 @@ class UsersView(UserPassesTestMixin, ListView):
         return User.objects.all().order_by("username", "last_name", "first_name")
 
 
-class UserDetailsView(UserPassesTestMixin, DetailView):
-    # TODO: Update docstring
+class UserDetailsView(SuperuserRequiredMixin, DetailView):
     """
     Displays the details of a specific user.
-    Users must be in the "Superusr" group to access this view.
+    Users must be in the "Superuser" group to access this view.
 
     Inherits functionality from:
-        - UserPassesTestMixin
+        - SuperuserRequiredMixin
         - DetailView
     (See module docstring for more details on the inherited classes)
 
@@ -221,42 +203,20 @@ class UserDetailsView(UserPassesTestMixin, DetailView):
         template_name (str): The template that will be used to render the page.
 
     Methods: 
-        `test_func()`: Verifies is the user is in the "Superuser" group.
-        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
-        `get_context_data()`: 
+        `get_context_data()`: Retrieves additional context data for the template.
     """
 
     model = User
     template_name = "user_detail.html"
 
-    def test_func(self) -> bool:
-        """
-        Verifies if the user is in the "Superuser" group.
-        
-        This method checks the first group the current user belongs to. If the group exists and its name is 
-        'Superuser', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the "Superuser" group, False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name == "Superuser"
-    
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object with the rendered 403 page.
-        """
-        message = "You need to be a Superuser to access this view."
-        return render(self.request, "403.html", {"message": message})
-
     def get_context_data(self, **kwargs) -> dict[str, Any]:
-        # TODO: Update docstring
-        # TODO: Update method. Only superusers can access the view, so there may be no need to handle the case where there's no group.
         """
         Retrieves additional context data for the template.
+        
+        This method first calls the base class's `get_context_data` method to retrieve the base context data.
+        Then, it retrieves the user object and checks if the user belongs to any groups. If the user belongs to a group,
+        the group name is saved to the context dictionary under the key "user_group_name". If the user does not belong to 
+        any groups, the group name is set to "No Group". The updated context data is then returned.
 
         Args:
             **kwargs: Additional keyword arguments.
@@ -273,13 +233,13 @@ class UserDetailsView(UserPassesTestMixin, DetailView):
         return context
 
 
-class CreateUserView(UserPassesTestMixin, CreateView):
+class CreateUserView(SuperuserRequiredMixin, CreateView):
     """
     Handles the creation of a new user.
     Users must be in the "Superuser" group to access this view.
 
     Inherits functionality from:
-        - UserPassesTestMixin
+        - SuperuserRequiredMixin
         - CreateView
     (See module docstring for more details on the inherited classes)
 
@@ -291,8 +251,6 @@ class CreateUserView(UserPassesTestMixin, CreateView):
     Methods:
         `get_context_data()`: Retrieves additional context data for the template.
         `get_success_url()`: Returns the URL to redirect to after a successful form submission.
-        `test_func()`: Verifies if the user is in the "Superuser" group.
-        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
         `form_valid()`: Handles the form submission and adds the user to the specified group.
     """
 
@@ -301,9 +259,12 @@ class CreateUserView(UserPassesTestMixin, CreateView):
     template_name = "user_create_form.html"
 
     def get_context_data(self, **kwargs):
-        # TODO: Update docstring
         """
         Retrieves additional context data for the template.
+        
+        This method first calls the base class's `get_context_data` method to retrieve the base context data.
+        Then, it saves the current user and all groups to the context dictionary under the keys "user" and "groups" respectively.
+        The updated context data is then returned.
 
         Args:
             **kwargs: Additional keyword arguments.
@@ -324,29 +285,6 @@ class CreateUserView(UserPassesTestMixin, CreateView):
             str: The URL to redirect to.
         """
         return reverse_lazy("authentication:user_details", kwargs={"pk": self.object.pk})
-
-    def test_func(self) -> bool:
-        """
-        Verifies if the user is in the "Superuser" group.
-        
-        This method checks the first group the current user belongs to. If the group exists and its name is 
-        'Superuser', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the "Superuser" group, False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name == "Superuser"
-    
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object with the rendered 403 page.
-        """
-        message = "You need to be a Superuser to access this view."
-        return render(self.request, "403.html", {"message": message})
 
     def form_valid(self, form):
         """
@@ -369,10 +307,15 @@ class CreateUserView(UserPassesTestMixin, CreateView):
         return response    
 
 
-class UpdateUserView(UserPassesTestMixin, UpdateView):
-    # TODO: Update docstring
+class UpdateUserView(SuperuserRequiredMixin, UpdateView):
     """
     Handles updates for an existing user.
+    Users must be in the "Superuser" group to access this view.
+    
+    Inherits functionality from:
+        - SuperuserRequiredMixin
+        - UpdateView
+    (See module docstring for more details on the inherited classes)
 
     Attributes:
         model (User): The model that the view will operate on.
@@ -380,8 +323,7 @@ class UpdateUserView(UserPassesTestMixin, UpdateView):
         template_name (str): The tempalte that will be used to render the page.
         
     Methods:
-        `test_func()`: Verifies if the user is in the "Superuser" group.
-        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
+        `get_success_url()`: Redirects back to the updated user's details upon success.
     """
 
     model = User
@@ -392,29 +334,6 @@ class UpdateUserView(UserPassesTestMixin, UpdateView):
         "email", 
     ]
     template_name = "user_update_form.html"
-
-    def test_func(self) -> bool:
-        """
-        Verifies if the user is in the "Superuser" group.
-        
-        This method checks the first group the current user belongs to. If the group exists and its name is 
-        'Superuser', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the "Superuser" group, False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name == "Superuser"
-    
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object with the rendered 403 page.
-        """
-        message = "You need to be a Superuser to access this view."
-        return render(self.request, "403.html", {"message": message})
     
     def get_success_url(self):
         """
@@ -429,18 +348,14 @@ class UpdateUserView(UserPassesTestMixin, UpdateView):
         """
         return reverse("authentication:user_details", kwargs={"pk": self.object.pk})
 
-    def form_valid(self, form):
-        # TODO: Docstring
-        return super().form_valid(form)
 
-
-class DeleteUserView(UserPassesTestMixin, DeleteView):
+class DeleteUserView(SuperuserRequiredMixin, DeleteView):
     """
     Handles the deletion of a user.
     Users must be in the "Superuser" group to access this view.
     
     Inherits functionality from:
-        - UserPassesTestMixin
+        - SuperuserRequiredMixin
         - CreateView
     (See module docstring for more details on the inherited classes)
 
@@ -451,8 +366,6 @@ class DeleteUserView(UserPassesTestMixin, DeleteView):
         
     Methods:
         `get_fail_url()`: Returns the URL to redirect to if the deletion is canceled.
-        `test_func()`: Verifies if the user is in the "Superuser" group.
-        `handle_no_permission()`: Renders the 403 page with a message explaining the error.
         `post()`: Handles the POST request for deleting a user.
     """
 
@@ -472,29 +385,6 @@ class DeleteUserView(UserPassesTestMixin, DeleteView):
         return reverse_lazy("authentication:user_details", kwargs={"pk": self.get_object().pk})
 
     fail_url = property(get_fail_url)
-
-    def test_func(self) -> bool:
-        """
-        Verifies if the user is in the "Superuser" group.
-        
-        This method checks the first group the current user belongs to. If the group exists and its name is 
-        'Superuser', it returns True; otherwise, it returns False.
-
-        Returns:
-            bool: True if the user is in the "Superuser" group, False otherwise.
-        """
-        user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name == "Superuser"
-    
-    def handle_no_permission(self):
-        """
-        Renders the 403 page with a message explaining the error.
-
-        Returns:
-            HttpResponse: The HTTP response object with the rendered 403 page.
-        """
-        message = "You need to be a Superuser to access this view."
-        return render(self.request, "403.html", {"message": message})
 
     def post(self, request, *args, **kwargs):
         """
