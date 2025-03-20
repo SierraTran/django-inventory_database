@@ -4,7 +4,7 @@ from .models import Notification
 
 
 class NotificationAdmin(admin.ModelAdmin):
-    ordering = ["timestamp"]
+    ordering = ["-timestamp"]
     
     
 # Register your models here.
