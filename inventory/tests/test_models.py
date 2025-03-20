@@ -33,7 +33,7 @@ class ItemModelTests(TestCase):
             part_number="Test Part Number",
         )
         
-        cls.technician_group = Group.objects.create(name="Technician")
+        cls.technician_group = Group.objects.get(name="Technician")
         
         cls.user = User.objects.create_user(username="testuser", password="hayes4800")
         cls.user.groups.add(cls.technician_group)
