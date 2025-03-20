@@ -64,7 +64,7 @@ class SuperuserOrTechnicianRequiredMixin(UserPassesTestMixin):
             bool: True if the user is in the "Superuser" or "Technician" group, False otherwise.
         """
         user_group = self.request.user.groups.first()
-        return user_group is not None and user_group.name == "Superuser"
+        return user_group is not None and user_group.name in ["Superuser", "Technician"]
     
     def handle_no_permission(self):
         """
