@@ -24,7 +24,7 @@ class ItemViewTests(TestCase):
         ]        
         Item.objects.bulk_create(items)
         
-        cls.technician_group = Group.objects.create(name="Technician")
+        cls.technician_group = Group.objects.get(name="Technician")
         
         cls.user = User.objects.create_user(username="testuser", password="hayes4800")
         cls.user.groups.add(cls.technician_group)
@@ -77,10 +77,10 @@ class ItemDetailViewTests(TestCase):
         )
         
          # Create necessary groups
-        cls.viewer_group = Group.objects.create(name="Viewer")
-        cls.intern_group = Group.objects.create(name="Intern")
-        cls.technician_group = Group.objects.create(name="Technician")
-        cls.superuser_group = Group.objects.create(name="Superuser")
+        cls.viewer_group = Group.objects.get(name="Viewer")
+        cls.intern_group = Group.objects.get(name="Intern")
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.superuser_group = Group.objects.get(name="Superuser")
 
         # Create users and assign them to groups
         cls.viewer = User.objects.create_user(username="testviewer", password="hayes4800")
@@ -192,4 +192,5 @@ class ItemDetailViewTests(TestCase):
         # Superuser doesn't have a request more button        
         self.assertNotContains(response, '<button type="button" id="request-more"')
         
-        
+
+     
