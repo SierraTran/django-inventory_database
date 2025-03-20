@@ -14,6 +14,8 @@ def load_initial_data(apps, schema_editor):
     view_user_permission = Permission.objects.get(codename="view_user")
 
     # Permissions for the Notification model
+    change_notification_permission = Permission.objects.get(codename="change_notification")
+    delete_notification_permission = Permission.objects.get(codename="delete_notification")
     view_notification_permission = Permission.objects.get(codename="view_notification")
 
     # Permissions for the Item model
@@ -48,7 +50,7 @@ def load_initial_data(apps, schema_editor):
         superuser_group = Group.objects.create(name="Superuser")
         superuser_group.permissions.add(
             add_user_permission, change_user_permission, delete_user_permission, view_user_permission,
-            view_notification_permission,
+            change_notification_permission, delete_notification_permission, view_notification_permission,
             add_item_permission, change_item_permission, delete_item_permission, view_item_permission,
             view_itemhistory_permission,
             view_itemrequest_permission,
@@ -59,7 +61,7 @@ def load_initial_data(apps, schema_editor):
     if not Group.objects.filter(name="Technician").exists():
         technician_group = Group.objects.create(name="Technician")
         technician_group.permissions.add(
-            view_notification_permission,
+            change_notification_permission, delete_notification_permission, view_notification_permission,
             add_item_permission, change_item_permission, delete_item_permission, view_item_permission,
             view_itemhistory_permission,
             add_itemrequest_permission, change_itemrequest_permission, delete_itemrequest_permission, view_itemrequest_permission,
@@ -70,7 +72,7 @@ def load_initial_data(apps, schema_editor):
     if not Group.objects.filter(name="Intern").exists():
         intern_group = Group.objects.create(name="Intern")
         intern_group.permissions.add(
-            view_notification_permission,
+            change_notification_permission, delete_notification_permission, view_notification_permission,
             change_item_permission, view_item_permission,
             view_itemhistory_permission,
             # No ItemRequest permissions
@@ -81,7 +83,7 @@ def load_initial_data(apps, schema_editor):
     if not Group.objects.filter(name="Viewer").exists():
         viewer_group = Group.objects.create(name="Viewer")
         viewer_group.permissions.add(
-            view_notification_permission,
+            change_notification_permission, delete_notification_permission, view_notification_permission,
             view_item_permission,
             view_itemhistory_permission,
             # No ItemRequest permissions
