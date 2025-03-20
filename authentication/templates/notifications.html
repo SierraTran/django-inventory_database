@@ -8,46 +8,44 @@
 {% block title %}Notifications{% endblock title %}
 
 {% block other_scripts %}  
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+        $(document).ready(function() {
+            $(".delete_notification").on("submit", function(event) {
+                event.preventDefault(); // Prevent default form submission behavior
 
-document.addEventListener("DOMContentLoaded", function() {
-    document.querySelectorAll("input[type=checkbox]").forEach((checkbox) => {
-        checkbox.addEventListener("change", function () {
-            const notificationId = this.value; // Get the notification ID from the checkbox value
-            const isRead = this.checked; // Check if the checkbox is checked
+                // Find the parent form of the clicked button
+                const form = $(this).closest("form");
+                const notificationId = form.attr("id").split("_")[2] // ["delete", "form", "{{ notification.id }}"]
 
-            fetch(`/notifications/${notificationId}/toggle_read/`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value, // CSRF token
-                },
-                body: JSON.stringify({ is_read: isRead }), // Send the read status in the request body
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log(data.message); // Optional: Handle the response (e.g., show a success message)
-            })
-            .catch(error => {
-                console.error('Error:', error); // Handle errors
+                $.ajax({
+                    url: "notifications/" + notificationId + "/delete/", //URL of the Django view that handles the request 
+                    type: "POST",
+                    data: {
+                        "notification_id": notificationId,
+                        "csrfmiddlewaretoken": form.find("input[name='csrfmiddlewaretoken']").val(),
+                    },
+                    success: function(response) {
+                        $(`#notification-${notificationId}`).remove(); // Remove the deleted notification row
+                        $("#responseMessage").text(response.message || "Notification deleted successfully.");
+                    },
+                    error: function() {
+                        $("#responseMessage").text("An error occurred while deleting the notification.");
+                    }
+                })
             });
         });
-    });
-});
-
+</script>
 {% endblock other_scripts %}
 
 {% block page-title %}Notifications{% endblock page-title %}
+
 
 {% block content %}
 {% if notifications_list %}
 {# TODO: Button for marking notifications as read #}
 {# TODO: Button for deleting notifications #}
-<form id="notifications-form" > {% csrf_token %}
+<div id="responseMessage"></div>
 <table>
     <tr>
         <th>Read</th>
@@ -56,22 +54,27 @@ document.addEventListener("DOMContentLoaded", function() {
         <th>Message</th>
     </tr>
     {% for notification in notifications_list %}
-    <tr {% if not notification.is_read %}style="font-weight: bold;"{% endif %}>
-        <td>
-            {% if notification.is_read %}{% endif %}
-            <button 
-                type="button" 
-                {% if notification.is_read %}checked{% endif %}>
-                Mark as Read
-        </button>
-        </td>
+    <tr id="notification-{{ notification.id }}" {% if not notification.is_read %}style="font-weight: bold;"{% endif %}>
         <td>{{ notification.timestamp }}</td>
         <td>{{ notification.subject }}</td>
         <td>{{ notification.message|safe }}</td>
+        <td>            
+            {% if notification.is_read %}
+                <button type="button">Mark as Unread</button>
+            {% else %}
+                <button type="button">Mark as Read</button>
+            {% endif %}                    
+        </td>
+        <td>
+            <form id="delete_form_{{ notification.id }}">
+                {% csrf_token %}
+                <button type="submit" class="delete-notification">Delete</button>
+            </form>
+        </td>
     </tr>
     {% endfor %}
 </table>
-</form>
+
 {% else %}
 <p>There are no notifications.</p>
 {% endif %}
