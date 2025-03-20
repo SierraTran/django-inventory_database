@@ -77,7 +77,7 @@ class Migration(migrations.Migration):
             name='ItemRequest',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('manufacturer', models.CharField(blank=True, max_length=100, validators=[django.core.validators.RegexValidator('^[a-zA-Z0-9\\s]+$')])),
+                ('manufacturer', models.CharField(blank=True, max_length=100)),
                 ('model_part_num', models.CharField(blank=True, max_length=100)),
                 ('quantity_requested', models.IntegerField(validators=[django.core.validators.MinValueValidator(0)])),
                 ('description', models.TextField(blank=True)),
