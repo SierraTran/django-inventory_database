@@ -7,43 +7,49 @@ def load_initial_data(apps, schema_editor):
     Group = apps.get_model("auth", "Group")
     Permission = apps.get_model("auth", "Permission")
 
+    def get_permission(codename):
+        try:
+            return Permission.objects.get(codename=codename)
+        except Permission.DoesNotExist:
+            return None
+
     # Permissions for the User model
-    add_user_permission = Permission.objects.get(codename="add_user")
-    change_user_permission = Permission.objects.get(codename="change_user")
-    delete_user_permission = Permission.objects.get(codename="delete_user")
-    view_user_permission = Permission.objects.get(codename="view_user")
+    add_user_permission = get_permission("add_user")
+    change_user_permission = get_permission("change_user")
+    delete_user_permission = get_permission("delete_user")
+    view_user_permission = get_permission("view_user")
 
     # Permissions for the Notification model
-    change_notification_permission = Permission.objects.get(codename="change_notification")
-    delete_notification_permission = Permission.objects.get(codename="delete_notification")
-    view_notification_permission = Permission.objects.get(codename="view_notification")
+    change_notification_permission = get_permission("change_notification")
+    delete_notification_permission = get_permission("delete_notification")
+    view_notification_permission = get_permission("view_notification")
 
     # Permissions for the Item model
-    add_item_permission = Permission.objects.get(codename="add_item")
-    change_item_permission = Permission.objects.get(codename="change_item")
-    delete_item_permission = Permission.objects.get(codename="delete_item")
-    view_item_permission = Permission.objects.get(codename="view_item")
+    add_item_permission = get_permission("add_item")
+    change_item_permission = get_permission("change_item")
+    delete_item_permission = get_permission("delete_item")
+    view_item_permission = get_permission("view_item")
 
     # Permissions for the ItemHistory model
-    view_itemhistory_permission = Permission.objects.get(codename="view_itemhistory")
+    view_itemhistory_permission = get_permission("view_itemhistory")
 
     # Permissions for the ItemRequest model
-    add_itemrequest_permission = Permission.objects.get(codename="add_itemrequest")
-    change_itemrequest_permission = Permission.objects.get(codename="change_itemrequest")
-    delete_itemrequest_permission = Permission.objects.get(codename="delete_itemrequest")
-    view_itemrequest_permission = Permission.objects.get(codename="view_itemrequest")
+    add_itemrequest_permission = get_permission("add_itemrequest")
+    change_itemrequest_permission = get_permission("change_itemrequest")
+    delete_itemrequest_permission = get_permission("delete_itemrequest")
+    view_itemrequest_permission = get_permission("view_itemrequest")
 
     # Permissions for the UsedItem model
-    add_useditem_permission = Permission.objects.get(codename="add_useditem")
-    change_useditem_permission = Permission.objects.get(codename="change_useditem")
-    delete_useditem_permission = Permission.objects.get(codename="delete_useditem")
-    view_useditem_permission = Permission.objects.get(codename="view_useditem")
+    add_useditem_permission = get_permission("add_useditem")
+    change_useditem_permission = get_permission("change_useditem")
+    delete_useditem_permission = get_permission("delete_useditem")
+    view_useditem_permission = get_permission("view_useditem")
 
     # Permissions for the PurchaseOrderItem model
-    add_purchaseorderitem_permission = Permission.objects.get(codename="add_purchaseorderitem")
-    change_purchaseorderitem_permission = Permission.objects.get(codename="change_purchaseorderitem")
-    delete_purchaseorderitem_permission = Permission.objects.get(codename="delete_purchaseorderitem")
-    view_purchaseorderitem_permission = Permission.objects.get(codename="view_purchaseorderitem")
+    add_purchaseorderitem_permission = get_permission("add_purchaseorderitem")
+    change_purchaseorderitem_permission = get_permission("change_purchaseorderitem")
+    delete_purchaseorderitem_permission = get_permission("delete_purchaseorderitem")
+    view_purchaseorderitem_permission = get_permission("view_purchaseorderitem")
 
     # Create user groups and assign permissions to groups
     if not Group.objects.filter(name="Superuser").exists():
