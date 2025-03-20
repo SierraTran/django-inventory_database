@@ -1,4 +1,4 @@
-"""
+""" # TODO: Update module docstring
 This module defines class-based views for displaying and managing items, item history, used items, item requests, and purchase order forms.
 
 ### Mixins
@@ -76,7 +76,7 @@ class ItemView(LoginRequiredMixin, ListView):
         `get_queryset()`: Retrieves the list of items to be displayed in alphanumeric order.
     """
 
-    login_url = reverse_lazy("login")
+    login_url = reverse_lazy("authentication:login")
     redirect_field_name = "next"
     model = Item
     template_name = "items.html"
@@ -114,7 +114,7 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
         `get_context_data()`: Adds the user's group to the context data.
     """
 
-    login_url = reverse_lazy("login")
+    login_url = reverse_lazy("authentication:login")
     redirect_field_name = "next"
     model = Item
     template_name = "item_detail.html"
@@ -159,7 +159,7 @@ class ItemHistoryView(LoginRequiredMixin, ListView):
         `get_context_data()`: Adds the specific item to the context data.
     """
 
-    login_url = reverse_lazy("login")
+    login_url = reverse_lazy("authentication:login")
     redirect_field_name = "next"
     model = ItemHistory
     template_name = "item_history.html"
@@ -584,7 +584,7 @@ class SearchItemsView(LoginRequiredMixin, ListView):
         get_queryset(): Retrieves the search results based on the query.
     """
 
-    login_url = reverse_lazy("login")
+    login_url = reverse_lazy("authentication:login")
     redirect_field_name = "next"
     model = Item
     template_name = "search/item_search.html"
@@ -739,7 +739,7 @@ class ItemRequestView(SuperuserOrTechnicianRequiredMixin, ListView):
         Returns:
             QuerySet: The queryset containing all item requests.
         """
-        return ItemRequest.objects.all()
+        return ItemRequest.objects.all().order_by("-timestamp")
 
 
 class ItemRequestDetailView(SuperuserOrTechnicianRequiredMixin, DetailView):
@@ -1064,7 +1064,7 @@ class UsedItemView(LoginRequiredMixin, ListView):
         `get_queryset()`: Retrieves all UsedItems from the database in order of their work order and item.
     """
 
-    login_url = reverse_lazy("login")
+    login_url = reverse_lazy("authentication:login")
     redirect_field_name = "next"
     model = UsedItem
     template_name = "used_items.html"
@@ -1102,7 +1102,7 @@ class UsedItemDetailView(LoginRequiredMixin, DetailView):
         `get_queryset()`: Adds the specific used item to the context data.
     """
 
-    login_url = reverse_lazy("login")
+    login_url = reverse_lazy("authentication:login")
     redirect_field_name = "next"
     model = UsedItem
     template_name = "used_item_detail.html"
@@ -1282,7 +1282,7 @@ class SearchUsedItemsView(LoginRequiredMixin, ListView):
         `get_queryset()`: Retrieves the search results based on the query.
     """
 
-    login_url = reverse_lazy("login")
+    login_url = reverse_lazy("authentication:login")
     redirect_field_name = "next"
     model = UsedItem
     template_name = "search/used_item_search.html"

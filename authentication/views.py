@@ -1,4 +1,4 @@
-"""
+""" # TODO: Update module docstring
 This module defines class-based views for displaying the home page, login page, notifications, users, and user details.
 
 ### Mixins
@@ -23,13 +23,15 @@ This module defines class-based views for displaying the home page, login page, 
         Confirms and processes object deletions.
 """
 
+import json
 from typing import Any
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 
 from django.contrib import messages
 
 from django.contrib.auth import authenticate
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User, Group
@@ -37,6 +39,7 @@ from django.contrib.auth.views import LoginView
 
 from django.urls import reverse, reverse_lazy
 
+from django.views.decorators.http import require_POST
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -86,6 +89,8 @@ class DatabaseLoginView(LoginView):
         `form_invalid()`: Overrides the base class's `form_invalid` method and extends the behavior to display custom error messages.
     """
     
+    template_name = "registration/login.html"
+    
     def form_invalid(self, form):
         """
         Overrides the base class's `form_invalid` method and extends the behavior to display custom error messages.
@@ -134,7 +139,7 @@ class NotificationsView(LoginRequiredMixin, ListView):
         get_queryset(): Retrieves all notifications for the currently logged-in user.
     """
     
-    login_url = reverse_lazy("login")
+    login_url = reverse_lazy("authentication:login")
     redirect_field_name = "next"
     model = Notification
     template_name = "notifications.html"
@@ -153,6 +158,19 @@ class NotificationsView(LoginRequiredMixin, ListView):
         current_user = self.request.user
         current_user_notifications = Notification.objects.filter(user=current_user).order_by("-timestamp")
         return current_user_notifications
+    
+    
+def delete_notification(request):
+    if request.method == "POST":
+        notification_id = request.POST.get("notification_id")
+        try:
+            notification_to_delete = get_object_or_404(Notification, id=notification_id)
+            notification_to_delete.delete()
+            return JsonResponse({"message": "The notification has been deleted."})
+        except Exception as e:
+            return JsonResponse({"message": f"An error occurred: {str(e)}"}, status=500)
+    return JsonResponse({"message": "Invalid request"}, status=400)
+
 
 
 class UsersView(SuperuserRequiredMixin, ListView):
@@ -233,7 +251,7 @@ class UserDetailsView(SuperuserRequiredMixin, DetailView):
         return context
 
 
-class CreateUserView(SuperuserRequiredMixin, CreateView):
+class UserCreateView(SuperuserRequiredMixin, CreateView):
     """
     Handles the creation of a new user.
     Users must be in the "Superuser" group to access this view.
@@ -307,7 +325,7 @@ class CreateUserView(SuperuserRequiredMixin, CreateView):
         return response    
 
 
-class UpdateUserView(SuperuserRequiredMixin, UpdateView):
+class UserUpdateView(SuperuserRequiredMixin, UpdateView):
     """
     Handles updates for an existing user.
     Users must be in the "Superuser" group to access this view.
@@ -349,7 +367,7 @@ class UpdateUserView(SuperuserRequiredMixin, UpdateView):
         return reverse("authentication:user_details", kwargs={"pk": self.object.pk})
 
 
-class DeleteUserView(SuperuserRequiredMixin, DeleteView):
+class UserDeleteView(SuperuserRequiredMixin, DeleteView):
     """
     Handles the deletion of a user.
     Users must be in the "Superuser" group to access this view.
@@ -405,4 +423,4 @@ class DeleteUserView(SuperuserRequiredMixin, DeleteView):
         if "Cancel" in request.POST:
             return redirect(self.fail_url)
         else:
-            return super(DeleteUserView, self).post(request, *args, **kwargs)
+            return super(UserDeleteView, self).post(request, *args, **kwargs)
