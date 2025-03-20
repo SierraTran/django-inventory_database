@@ -180,13 +180,11 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# The login redirect url "../../"
 # will bring the user back to "/inventory_database/"
-LOGIN_REDIRECT_URL = "../../"
+LOGIN_REDIRECT_URL = "/inventory_database/"
 
-# The logout redirect url "../login"
 # will bring the user back to the login page ("/inventory_database/accounts/login/")
-LOGOUT_REDIRECT_URL = "../login"
+LOGOUT_REDIRECT_URL = "/inventory_database/accounts/login/"
 
 # If the user closes the browser, the session will expire and the user will
 # have to log in again.
