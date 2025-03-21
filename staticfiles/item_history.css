@@ -1,7 +1,22 @@
-table {
+table, .button-container {
     margin: 0 auto;
-    width: 75%;
+    width: 85%;
+}
+
+.button-container {
     max-width: 900px;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+}
+
+.button-container > button, input {
+    width: 40%;
+    height: 2em;
+}
+
+table {
+    border-spacing: 10px;
 }
 
 tr th {
@@ -10,12 +25,14 @@ tr th {
 
 tr td {
     border-top: 1px solid black;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
-col.timestamp {
-    width: 25%;
+.action {
+    width: 7%;
 }
 
-tr:nth-child(even) {
-    background-color: hotpink;
+.timestamp {
+    width: 20%;
 }

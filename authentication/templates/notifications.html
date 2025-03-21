@@ -7,37 +7,6 @@
 
 {% block title %}Notifications{% endblock title %}
 
-{% block other_scripts %}  
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-        $(document).ready(function() {
-            $(".delete_notification").on("submit", function(event) {
-                event.preventDefault(); // Prevent default form submission behavior
-
-                // Find the parent form of the clicked button
-                const form = $(this).closest("form");
-                const notificationId = form.attr("id").split("_")[2] // ["delete", "form", "{{ notification.id }}"]
-
-                $.ajax({
-                    url: "notifications/" + notificationId + "/delete/", //URL of the Django view that handles the request 
-                    type: "POST",
-                    data: {
-                        "notification_id": notificationId,
-                        "csrfmiddlewaretoken": form.find("input[name='csrfmiddlewaretoken']").val(),
-                    },
-                    success: function(response) {
-                        $(`#notification-${notificationId}`).remove(); // Remove the deleted notification row
-                        $("#responseMessage").text(response.message || "Notification deleted successfully.");
-                    },
-                    error: function() {
-                        $("#responseMessage").text("An error occurred while deleting the notification.");
-                    }
-                })
-            });
-        });
-</script>
-{% endblock other_scripts %}
-
 {% block page-title %}Notifications{% endblock page-title %}
 
 
@@ -58,18 +27,17 @@
         <td>{{ notification.timestamp }}</td>
         <td>{{ notification.subject }}</td>
         <td>{{ notification.message|safe }}</td>
-        <td>            
+        <td>
+            <button type="button">           
             {% if notification.is_read %}
-                <button type="button">Mark as Unread</button>
+                Mark as Unread
             {% else %}
-                <button type="button">Mark as Read</button>
-            {% endif %}                    
+                Mark as Read
+            {% endif %}             
+            </button>       
         </td>
         <td>
-            <form id="delete_form_{{ notification.id }}">
-                {% csrf_token %}
-                <button type="submit" class="delete-notification">Delete</button>
-            </form>
+            <button type="button" onclick="window.location.href='{% url "authentication:notification_confirm_delete" notification.id %}'"></button>
         </td>
     </tr>
     {% endfor %}

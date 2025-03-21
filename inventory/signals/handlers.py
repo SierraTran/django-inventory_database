@@ -1,12 +1,15 @@
-# TODO: Module docstring
-"""_summary_
+"""
+This module contains signal handlers for the Inventory app.
+
+### Imported Signals
+    - post_save: Sent after a model's `save` method is called.
+    - pre_delete: Sent just before a model's `delete` method is called.
 """
 
 from django.db import transaction
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-from django.contrib.auth.models import User, Group
-from django.urls import reverse
+from django.contrib.auth.models import Group
 from django.utils.html import escape
 from inventory.models import Item, ItemHistory, ItemRequest, UsedItem
 from authentication.models import Notification
@@ -17,9 +20,12 @@ from authentication.models import Notification
 
 @receiver(post_save, sender=Item)
 def create_or_update_item_history(sender, instance, created, **kwargs):
-    # TODO: More details on how function works.
     """
     Creates an ItemHistory record when an item has been created or updated.
+    
+    This method first checks if the item has been created or updated. If the item has been created, the action is set to "create".
+    If the item has been updated, the action is set to "update". The changes are then recorded in a newly created ItemHistory record.
+    Records with the "update" action will have the fields that have been changed and their old values recorded in the `changes` field.
 
     Arguments:
         sender (Item): The model class that sent the signal.
@@ -27,6 +33,7 @@ def create_or_update_item_history(sender, instance, created, **kwargs):
         created (bool): True if the action done onto the item is "create", False if otherwise.
         **kwargs: Additional keyword arguments sent by the signal.
     """
+    
     action = "create" if created else "update"
     changes = "Created and added to the database."
     if not created:
@@ -49,7 +56,7 @@ def create_or_update_item_history(sender, instance, created, **kwargs):
 @receiver(pre_delete, sender=Item)
 def handle_related_records(sender, instance, **kwargs):
     """
-    Deletes records related to the item being deleted before its own deletion.
+    Deletes all records related to the item being deleted before its own deletion.
 
     Arguments:
         sender (Item): The model class that sent the signal.
@@ -59,12 +66,14 @@ def handle_related_records(sender, instance, **kwargs):
     ItemHistory.objects.filter(item=instance).delete()
     UsedItem.objects.filter(item=instance).delete()
     
-# TODO: Signals that create notifications
+# NOTE: The following signal handlers create notifications for users when certain events happen in they system.
 @receiver(post_save, sender=ItemRequest)
 def send_item_request_notification(sender, instance, created, **kwargs):
-    # NOTE: Although the function doesn't use the `sender` and `**kwargs` parameters, they need to be included to avoid errors.
     """
     Creates a notification for Technicians if their item request has been accepted or rejected.
+    
+    This method checks if the item request is created or not. If it is, no notification is needed.
+    If the item request is not created, a notification is created for the user that requested the item.
 
     Args:
         sender (ItemRequest): The model class that sent the signal.
@@ -76,11 +85,12 @@ def send_item_request_notification(sender, instance, created, **kwargs):
         # No notification is needed for an item request being created (at least not yet).
         return
     else: 
+        # Display the new status of the item request in the subject of the notification.
         subject = escape(f"Item Request {instance.status}")
         
-        item_request_url = reverse("inventory:item_request_detail", kwargs={"pk": instance.pk})
-        linked_item_request = f'<a href="{item_request_url}">Your Item Request for {instance.manufacturer}, {instance.model_part_num}</a>'
-        
+        # Create a link to the item request to include in the message.
+        linked_item_request = f'<a href="{instance.get_absolute_url()}">Your Item Request for {instance.manufacturer}, {instance.model_part_num}</a>'        
+        # Explain the new status of the item request and include its link in the message.
         message = escape(f"{linked_item_request} has been {str(instance.status).lower()}.")
     with transaction.atomic():
         Notification.objects.create(
@@ -103,10 +113,8 @@ def send_low_stock_notification(sender, instance, **kwargs):
     """
     if instance.low_stock:
         subject = "Low Stock Alert"
-        
-        item_url = reverse("inventory:item_detail", kwargs={"pk": instance.pk})
-        linked_item = f'<a href="{item_url}">{instance}</a>'
-        
+
+        linked_item = f'<a href="{instance.get_absolute_url}">{instance}</a>'        
         message = f"{linked_item} is low in stock. {instance.quantity} left."
         
         superuser_group = Group.objects.get(name="Superuser")

@@ -33,7 +33,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.views import LoginView
 
@@ -160,17 +160,68 @@ class NotificationsView(LoginRequiredMixin, ListView):
         return current_user_notifications
     
     
-def delete_notification(request):
-    if request.method == "POST":
-        notification_id = request.POST.get("notification_id")
-        try:
-            notification_to_delete = get_object_or_404(Notification, id=notification_id)
-            notification_to_delete.delete()
-            return JsonResponse({"message": "The notification has been deleted."})
-        except Exception as e:
-            return JsonResponse({"message": f"An error occurred: {str(e)}"}, status=500)
-    return JsonResponse({"message": "Invalid request"}, status=400)
+class NotificationDeleteView(UserPassesTestMixin, DeleteView):
+    """
+    Handles the deletion of a notification.
+    
+    
+    Inherits functionality from:
+        - UserPassesTestMixin
+        - CreateView
+    (See module docstring for more details on the inherited classes)
 
+    Attributes:
+        model (Notification): The model that the view will operate on.
+        success_url (str): The URL to redirect to after a successful deletion (resolved using `reverse_lazy`).
+        fail_url (str): The URL to redirect to if the deletion is canceled (resolved using the `get_fail_url` method).
+        
+    Methods:
+        `get_fail_url()`: Returns the URL to redirect to if the deletion is canceled.
+        `post()`: Handles the POST request for deleting a user.
+    """
+
+    model = Notification
+    success_url = reverse_lazy("authentication:notifications")
+    
+    def test_func(self):
+        user = self.request.user
+        notification_id = self.request.get("notification_id")
+        notif_for = Notification.objects.get(id=notification_id)
+
+    def get_fail_url(self):
+        """
+        Returns the URL to redirect to if the deletion is canceled.
+        
+        This method uses reverse_lazy to resolve the failure URL with the primary key (pk) of the object
+        being processed and returns it.
+
+        Returns:
+            str: The URL to redirect to.
+        """
+        return reverse_lazy("authentication:notifications")
+
+    fail_url = property(get_fail_url)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Handles the POST request for deleting a notification.
+        
+        This method checks if the "Cancel" button was clicked when the form was submitted. If the button was clicked, 
+        the current user is redirected back to the notifications page, which is the failure URL. If the "Confirm" button was 
+        clicked (the else case), the base class's `post` method is called to process the deletion. 
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            HttpResponse: The response after handling the POST request.
+        """
+        if "Cancel" in request.POST:
+            return redirect(self.fail_url)
+        else:
+            return super(NotificationDeleteView, self).post(request, *args, **kwargs)
 
 
 class UsersView(SuperuserRequiredMixin, ListView):

@@ -55,29 +55,39 @@ def format_row(worksheet, row):
     worksheet[f"J{row}"].style = custom_accounting_style
 
     # Border formatting
-    worksheet[f"B{row}"].border = cell_border
-    worksheet[f"C{row}"].border = cell_border
-    worksheet[f"D{row}"].border = cell_border
-    worksheet[f"E{row}"].border = cell_border
-    worksheet[f"F{row}"].border = cell_border
-    worksheet[f"G{row}"].border = cell_border
-    worksheet[f"H{row}"].border = cell_border
-    worksheet[f"I{row}"].border = cell_border
-    worksheet[f"J{row}"].border = cell_border
-    worksheet[f"K{row}"].border = cell_border
-    worksheet[f"M{row}"].border = cell_border
-    worksheet[f"N{row}"].border = cell_border
-    worksheet[f"O{row}"].border = cell_border
+    for letter in ["B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "M", "N", "O"]:
+        worksheet[f"{letter}{row}"].border = cell_border
+        
+    # worksheet[f"B{row}"].border = cell_border
+    # worksheet[f"C{row}"].border = cell_border
+    # worksheet[f"D{row}"].border = cell_border
+    # worksheet[f"E{row}"].border = cell_border
+    # worksheet[f"F{row}"].border = cell_border
+    # worksheet[f"G{row}"].border = cell_border
+    # worksheet[f"H{row}"].border = cell_border
+    # worksheet[f"I{row}"].border = cell_border
+    # worksheet[f"J{row}"].border = cell_border
+    # worksheet[f"K{row}"].border = cell_border
+    # worksheet[f"M{row}"].border = cell_border
+    # worksheet[f"N{row}"].border = cell_border
+    # worksheet[f"O{row}"].border = cell_border
 
     # Alignment formatting
-    worksheet[f"B{row}"].alignment = cell_vert_align
-    worksheet[f"C{row}"].alignment = cell_all_align
-    worksheet[f"D{row}"].alignment = cell_all_align
-    worksheet[f"E{row}"].alignment = cell_all_align
-    worksheet[f"G{row}"].alignment = cell_all_align
-    worksheet[f"H{row}"].alignment = cell_all_align
-    worksheet[f"I{row}"].alignment = cell_vert_align
-    worksheet[f"J{row}"].alignment = cell_all_align
+    for letter in ["B", "C", "D", "E", "G", "H", "I", "J"]:
+        align_format = cell_all_align
+        if letter in ["B", "I"]:
+            align_format = cell_vert_align
+        worksheet[f"{letter}{row}"].alignment = align_format
+        
+        
+    # worksheet[f"B{row}"].alignment = cell_vert_align
+    # worksheet[f"C{row}"].alignment = cell_all_align
+    # worksheet[f"D{row}"].alignment = cell_all_align
+    # worksheet[f"E{row}"].alignment = cell_all_align
+    # worksheet[f"G{row}"].alignment = cell_all_align
+    # worksheet[f"H{row}"].alignment = cell_all_align
+    # worksheet[f"I{row}"].alignment = cell_vert_align
+    # worksheet[f"J{row}"].alignment = cell_all_align
 
     # Formula for Total Price
     worksheet[f"J{row}"] = f"=+I{row}*D{row}"

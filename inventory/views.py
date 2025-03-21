@@ -1,11 +1,11 @@
-""" # TODO: Update module docstring
+"""
 This module defines class-based views for displaying and managing items, item history, used items, item requests, and purchase order forms.
 
 ### Mixins
     - LoginRequiredMixin:
         Restricts access to authenticated users. Unauthenticated users will be redirected to the login page. After logging in, they
         will be redirected back to the original destination preserved by the query parameter defined by `redirect_field_name`.
-    - UserPassesTestMixin:
+    - SuperuserOrTechnicianRequiredMixin, SuperuserRequiredMixin, TechnicianRequiredMixin, InternRequiredMixin:
         Restricts access based on user-specific conditions.
 
 ### Base Classes

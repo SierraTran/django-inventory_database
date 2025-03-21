@@ -1,0 +1,9 @@
+<form method="post" class="card"> {% csrf_token %}
+    <p>
+        Are you sure you want to delete "{{ object }}"?
+    </p>
+    {{ form }}
+    <input type="submit" name="Confirm" value="Confirm" />
+    <input type="submit" name="Cancel" value="Cancel" />
+    {% comment %} <button onclick="window.location.href='{% url "authentication:users" %}'">Cancel</button> {% endcomment %}
+</form>

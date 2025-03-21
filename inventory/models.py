@@ -1,6 +1,6 @@
 from django.db import models
-from django.core.validators import MinValueValidator, RegexValidator
-from django.contrib.auth.models import User, Group
+from django.core.validators import MinValueValidator
+from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils import timezone
 

@@ -1,18 +1,24 @@
 {% extends "inventory_base_template.html" %}
+{% load static %}
 
 {# TODO: Styling #}
 
-{% block other_stylesheets %}{% endblock other_stylesheets %}
+{% block other_stylesheets %}
+<link rel="stylesheets" href="{% static "import_item_data.css" %}" />
+{% endblock other_stylesheets %}
 
 {% block title %}Import Item Data{% endblock title %}
 
 {% block page-title %}Import Item Data{% endblock page-title %}
 
 {% block content %}
+
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Upload</button>
+    <p>Loading time depends on the size of the file. Larger files may need more time to load.</p>
   </form>
-  <p>Loading time depends on the size of the file.</p>
+
+  
 {% endblock %}

@@ -1,16 +1,40 @@
-# TODO: Module docstring
+"""
+This module contains the forms used in the inventory app.
+"""
 
 from django import forms
 from django.forms import modelformset_factory
-from django.contrib.auth.models import User, Group
 from .models import Item, UsedItem, ItemRequest, PurchaseOrderItem
 
 
 class ImportFileForm(forms.Form):
+    """
+    A form for importing an Excel file containing items to be added to the inventory.
+
+    Args:
+        forms (_type_): _description_
+    """
     file = forms.FileField()
-    
+
+
 class UsedItemForm(forms.ModelForm):
-    # TODO: Class docstring
+    """
+    A form for creating new `UsedItem` objects, used in the UsedItemCreateView.
+
+    Fields:
+        - item : ForeignKey
+            - The item that's been used
+        - work_order : IntergerField
+            - The work order in which the item was used
+        - datetime_used : DateTimeField
+            - The date and time in which the item was used
+        - used_by : ForeignKey
+            - The user that used the item
+            
+    Methods:
+        `__init__()`: Constructor method that initializes the form and sets the label for the `datetime_used` field to "Date & Time used:".
+    """
+
     class Meta:
         model = UsedItem
         fields = [
@@ -19,12 +43,20 @@ class UsedItemForm(forms.ModelForm):
             "datetime_used",
             "used_by",
         ]
-        
+
     def __init__(self, *args, **kwargs):
-        # TODO: Method docstring
-        super(UsedItemForm, self).__init__(*args, **kwargs)
+        """
+        Constructor method that initializes the form and sets the label for the `datetime_used` field to "Date & Time used:".
         
-        self.fields["item"].queryset = Item.objects.order_by("manufacturer", "model", "part_number")
+        Args:
+            *args: Additional positional arguments
+            **kwargs: Additional keyword arguments
+        """
+        super(UsedItemForm, self).__init__(*args, **kwargs)
+
+        self.fields["item"].queryset = Item.objects.order_by(
+            "manufacturer", "model", "part_number"
+        )
         self.fields["datetime_used"].label = "Date & Time used:"
 
 
@@ -34,16 +66,20 @@ class ItemRequestForm(forms.ModelForm):
 
     Fields:
         - manufacturer : CharField
-            The name of the manufacturer of the requested item.
+            - The name of the manufacturer of the requested item.
         - model_part_num : CharField
-            The model and/or part number of the requested item.
+            - The model and/or part number of the requested item.
         - quantity_requested : IntegerField
+            - The quantity of the item being requested
         - description : TextField
+            - The description of the item
         - unit_price : DecimalField
+            - The unit price of the requested item
         - requested_by : ForeignKey
+            - The user requesting the item
 
     Methods:
-        __init__(): Constructor method that initializes the form and sets the label for the `model_part_num` field tp "Model / Part #:".
+        __init__(): Constructor method that initializes the form and sets the label for the `model_part_num` field to "Model / Part #:".
     """
 
     class Meta:
@@ -56,18 +92,43 @@ class ItemRequestForm(forms.ModelForm):
             "unit_price",
             "requested_by",
         ]
-        
+
     def __init__(self, *args, **kwargs):
-        # TODO: Method docstring
+        """
+        Constructor method that initializes the form and sets the label for the `model_part_num` field to "Model / Part #:".
+        
+        Args:
+            *args: Additional positional arguments
+            **kwargs: Additional keyword arguments
+        """
         super(UsedItemForm, self).__init__(*args, **kwargs)
 
         self.fields["model_part_num"].label = "Model / Part #:"
-        
-        
 
 
 class PurchaseOrderItemForm(forms.ModelForm):
-    # TODO: Class docstring
+    """
+    A for for creating new `PurchaseOrderItem` objects, used in the PurchaseOrderItemCreateView.
+
+    Fields:
+        - manufacturer : CharField
+            - The name of the manufacturer of the item being ordered.
+        - model_part_num : CharField
+            - The model and/or part number of the item being ordered.
+        - quantity_ordered : IntegerField
+            - The quantity of the item being ordered.
+        - description : TextField
+            - The description of the item being ordered.
+        - serial_num : CharField
+            - The serial number of the item being ordered.
+        - property_num : CharField
+            - The property number of the item being ordered.
+        - unit_price : DecimalField
+            - The unit price of the item being ordered. 
+            
+    Methods:
+        `__init__()`: Constructor method that initializes the form and sets the labels for the `model_part_num`, `serial_num`, and `property_num` fields.
+    """
     class Meta:
         model = PurchaseOrderItem
         fields = [
@@ -81,14 +142,18 @@ class PurchaseOrderItemForm(forms.ModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
-        # TODO: Method docstring        
+        """
+        Constructor method that initializes the form and sets the labels for the `model_part_num`, `serial_num`, and `property_num` fields.
+        
+        Args:
+            *args: Additional positional arguments
+            **kwargs: Additional keyword arguments         
+        """
         super(PurchaseOrderItemForm, self).__init__(*args, **kwargs)
 
         self.fields["model_part_num"].label = "Model / Part #"
         self.fields["serial_num"].label = "Serial #"
         self.fields["property_num"].label = "Property #"
-
-            
 
 
 ItemRequestFormSet = modelformset_factory(

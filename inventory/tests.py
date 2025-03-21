@@ -140,7 +140,6 @@ from .models import Item, ItemHistory
         
 
 # class ItemHistoryModelTests(TestCase):
-#     # TODO: ItemHistory tests
 #     @classmethod
 #     @time_machine.travel(datetime.datetime(2025, 1, 1, 12, 0, 0, 0))
 #     def setUpTestData(cls):
@@ -184,12 +183,10 @@ from .models import Item, ItemHistory
 
 
 # class ItemRequestModelTests(TestCase):
-#     # TODO: ItemRequest tests
 #     def test_none():
 #         return
 
 
 # class UsedItemModelTests(TestCase):
-#     # TODO: UsedItem tests
 #     def test_none():
 #         return

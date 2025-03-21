@@ -57,7 +57,16 @@ class ItemViewTests(TestCase):
         # Assert that all items in the database are displayed and in the correct order
         self.assertEqual(len(response.context["items_list"]), Item.objects.count())
         self.assertEqual(list(response.context["items_list"]), expected_order)
-        
+
+
+class ItemHistoryViewTests(TestCase):
+    @classmethod
+    def setUpTestData(self):
+        """
+        Setup
+        """
+    
+    
         
 class ItemDetailViewTests(TestCase):
     @classmethod
