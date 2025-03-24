@@ -36,13 +36,49 @@
             {% endif %}             
             </button>       
         </td>
-        <td>
-            <button type="button" onclick="window.location.href='{% url "authentication:notification_confirm_delete" notification.id %}'"></button>
-        </td>
+        <td><form method="post" action="{% url 'authentication:notification_delete' notification.id %}" id="delete_notification_{{ notification.id }}"> {% csrf_token %}
+            {% comment %} <button type="button" onclick="window.location.href='{% url "authentication:notification_confirm_delete" notification.id %}'">Delete</button> {% endcomment %}
+            <input type="button" oclick="deleteNotification({{ notification.id }})" value="Delete">
+        </form></td>
     </tr>
     {% endfor %}
 </table>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Check if this cookie starts with the desired name
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+
+    function deleteNotification(notificationId) {
+        $.ajax({
+            type: $('#delete_notification_'+id).attr('method'),
+            url: $('#delete_notification_'+id).attr('action'),
+            data: $('#delete_notification_'+id).serialize(),
+            success: function (data) {
+                $('#notification-'+id).remove()
+            }
+            error: function(xhr, status, error) {
+                 $('#responseMessage').text('Error deleting notification.').css('color', 'red');
+
+            }
+        });
+    }
+
+</script>
 {% else %}
 <p>There are no notifications.</p>
 {% endif %}

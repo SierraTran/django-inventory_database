@@ -25,7 +25,7 @@ This module defines class-based views for displaying the home page, login page, 
 
 import json
 from typing import Any
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
 from django.contrib import messages
@@ -39,13 +39,17 @@ from django.contrib.auth.views import LoginView
 
 from django.urls import reverse, reverse_lazy
 
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from .models import User, Notification
 from inventory_database.mixins import SuperuserRequiredMixin
+
+import logging
+logger = logging.getLogger(__name__)
+
 
 
 # Create your views here.
@@ -159,6 +163,19 @@ class NotificationsView(LoginRequiredMixin, ListView):
         current_user_notifications = Notification.objects.filter(user=current_user).order_by("-timestamp")
         return current_user_notifications
     
+
+def delete_notification(request, notification_id):
+    # logger.debug(f"Request method: {request.method}, Notification ID: {notification_id}")
+    # if request.method == 'DELETE':
+    #     notification = get_object_or_404(Notification, id=notification_id)
+    #     notification.delete()
+    #     return JsonResponse({'success': True, 'message': 'Notification deleted successfully.'})
+    # return JsonResponse({'success': False, 'message': 'Invalid request method.'}, status=400)
+    notification = get_object_or_404(Notification, id=notification_id)
+    if request.method == 'POST':
+        notification.delete()
+    return HttpResponseRedirect(reverse_lazy("authentication:notifications"))
+
     
 class NotificationDeleteView(UserPassesTestMixin, DeleteView):
     """
@@ -186,7 +203,8 @@ class NotificationDeleteView(UserPassesTestMixin, DeleteView):
     def test_func(self):
         user = self.request.user
         notification_id = self.request.get("notification_id")
-        notif_for = Notification.objects.get(id=notification_id)
+        notif_for = Notification.objects.get(id=notification_id).user
+        return notif_for == user
 
     def get_fail_url(self):
         """
