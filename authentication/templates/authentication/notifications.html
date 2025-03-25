@@ -1,0 +1,46 @@
+{% extends "authentication_base_template.html" %}
+{% load static %}
+
+{% block other_stylesheets %}
+<link rel="stylesheet" href="{% static 'notifications.css' %}">
+{% endblock other_stylesheets %}
+
+{% block title %}Notifications{% endblock title %}
+
+{% block page-title %}Notifications{% endblock page-title %}
+
+
+{% block content %}
+{% if notifications_list %}
+{# TODO: Button for marking notifications as read #}
+<div id="responseMessage"></div>
+<table>
+    <tr>
+        <th>Date & Time</th>
+        <th>Subject</th>
+        <th>Message</th>
+    </tr>
+    {% for notification in notifications_list %}
+    <tr id="notification-{{ notification.id }}" {% if not notification.is_read %}style="font-weight: bold;"{% endif %}>
+        <td class="timestamp notification-{{notification.id}}">{{ notification.timestamp }}</td>
+        <td class="subject notification-{{notification.id}}">{{ notification.subject }}</td>
+        <td class="message notification-{{notification.id}}">{{ notification.message|safe }}</td>
+        <td class="mark-as-read-button notification-{{notification.id}}">
+            <button type="button" onclick="window.location.href='{% url "authentication:notification_update_form" notification.id %}'">           
+            {% if notification.is_read %}
+                Mark as Unread
+            {% else %}
+                Mark as Read
+            {% endif %}             
+            </button>       
+        </td>
+        <td class="delete-button notification-{{notification.id}}">
+            <button type="button" onclick="window.location.href='{% url "authentication:notification_confirm_delete" notification.id %}'">Delete</button>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>There are no notifications.</p>
+{% endif %}
+{% endblock content %}

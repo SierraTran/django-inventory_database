@@ -1,0 +1,50 @@
+{% extends "authentication_base_template.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block other_stylesheets %}
+<link rel="stylesheet" href="{% static "user_detail.css" %}" /> {# This template borrows the style of user_detail #}
+<style>
+    tr.is_read {
+        border-top: 3px solid rgb(225, 225, 225);
+    }
+
+    #id_is_read {
+        width: unset;
+        height: unset;
+    }
+</style>
+{% endblock other_stylesheets %}
+
+{% block title %}Update Notification{% endblock title %}
+
+{% block page-title %}Update Notification{% endblock page-title %}
+
+{% block content %}
+<form method="post"> {% csrf_token %}
+<table>
+    <tr>
+        <th>Date & Time</th>
+        <td>{{ notification.timestamp }}</td>
+    </tr>
+    <tr>
+        <th>Subject</th>
+        <td>{{ notification.subject }}</td>
+    </tr>
+    <tr>
+        <th>Message</th>
+        <td>{{ notification.message }}</td>
+    </tr>
+    {% for field in form %}
+    <tr class="{{ field.id_for_label|clean_id_for_label }}">
+        <th>{{ field.label_tag }}</th>
+        <td>{{ field }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<div class="buttons">
+    <button type="button" onclick="window.location.href='{% url "authentication:notifications" %}'">Cancel</button>
+    <input type="submit" value="Save" />
+</div>
+</form>
+{% endblock content %}
