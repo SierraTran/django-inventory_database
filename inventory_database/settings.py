@@ -35,28 +35,6 @@ ALLOWED_HOSTS = []
 runserver.default_port = '8000'
 runserver.default_addr = '127.0.0.1'
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
-        },
-        'authentication': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    },
-}
-
 
 # Application definition
 
@@ -92,7 +70,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [            
-            BASE_DIR / "authentication/templates",
+            BASE_DIR / "authentication/templates/authentication",
             BASE_DIR / "inventory/templates/inventory",
         ],
         "APP_DIRS": True,
@@ -172,9 +150,9 @@ LANGUAGE_CODE = "en-us"
 
 # Since this project is only going to be used by Hayes Instruments,
 # I used the EST timezone.
-DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+DATETIME_FORMAT = "%Y-%m-%d %I:%M:%S %p"
 
-TIME_ZONE = "EST"
+TIME_ZONE = 'America/New_York'
 
 USE_I18N = True
 
