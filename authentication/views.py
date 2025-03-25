@@ -162,25 +162,46 @@ class NotificationsView(LoginRequiredMixin, ListView):
         current_user = self.request.user
         current_user_notifications = Notification.objects.filter(user=current_user).order_by("-timestamp")
         return current_user_notifications
-    
 
-def delete_notification(request, notification_id):
-    # logger.debug(f"Request method: {request.method}, Notification ID: {notification_id}")
-    # if request.method == 'DELETE':
-    #     notification = get_object_or_404(Notification, id=notification_id)
-    #     notification.delete()
-    #     return JsonResponse({'success': True, 'message': 'Notification deleted successfully.'})
-    # return JsonResponse({'success': False, 'message': 'Invalid request method.'}, status=400)
-    notification = get_object_or_404(Notification, id=notification_id)
-    if request.method == 'POST':
-        notification.delete()
-    return HttpResponseRedirect(reverse_lazy("authentication:notifications"))
+
+class NotificationUpdateView(UserPassesTestMixin, UpdateView):
+    model = Notification
+    fields = ["is_read"]
+    template_name = "notification_update_form.html"
+    
+    def test_func(self):
+        #TODO: Docstring
+        user = self.request.user
+        notification_id = self.kwargs.get("pk")
+        notif_for = get_object_or_404(Notification, id=notification_id).user
+        return notif_for == user
+    
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        notification_id = self.kwargs.get("pk")
+        context["notification"] = get_object_or_404(Notification, id=notification_id)
+        return context
+    
+    
+    def get_success_url(self):
+        #TODO: Docstring
+        """
+        Redirects back to the updated user's details upon success.
+        
+        This method uses the `reverse` function to resolve the URL to the updated user's page and returns it. 
+        The object is the user that was updated, and pk is the primary key of the user. It is passed as a keyword
+        argument so the URL to the correct user's page is generated.
+
+        Returns:
+            str: The URL to the updated user's page.
+        """
+        return reverse("authentication:notifications")
 
     
 class NotificationDeleteView(UserPassesTestMixin, DeleteView):
     """
     Handles the deletion of a notification.
-    
+    Users are only able to delete notifications that are meant for them.     
     
     Inherits functionality from:
         - UserPassesTestMixin
@@ -193,6 +214,7 @@ class NotificationDeleteView(UserPassesTestMixin, DeleteView):
         fail_url (str): The URL to redirect to if the deletion is canceled (resolved using the `get_fail_url` method).
         
     Methods:
+        `test_func()`: #TODO: summary
         `get_fail_url()`: Returns the URL to redirect to if the deletion is canceled.
         `post()`: Handles the POST request for deleting a user.
     """
@@ -201,9 +223,10 @@ class NotificationDeleteView(UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy("authentication:notifications")
     
     def test_func(self):
+        #TODO: Docstring
         user = self.request.user
-        notification_id = self.request.get("notification_id")
-        notif_for = Notification.objects.get(id=notification_id).user
+        notification_id = self.kwargs.get("pk")
+        notif_for = get_object_or_404(Notification, id=notification_id).user
         return notif_for == user
 
     def get_fail_url(self):

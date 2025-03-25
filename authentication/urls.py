@@ -13,7 +13,16 @@ urlpatterns = [
         context_processors.unread_notifications_count,
         name="unread_notifications_count",
     ),
-    path('notifications/<int:notification_id>/delete', views.delete_notification, name='notification_delete'),
+    path(
+        "notifications/<int:pk>/update",
+        views.NotificationUpdateView.as_view(),
+        name="notification_update_form",
+    ),
+    path(
+        "notifications/<int:pk>/delete",
+        views.NotificationDeleteView.as_view(),
+        name="notification_confirm_delete",
+    ),
     path("new_user_form/", views.UserCreateView.as_view(), name="user_create_form"),
     path("users/", views.UsersView.as_view(), name="users"),
     path("users/<int:pk>", views.UserDetailsView.as_view(), name="user_details"),
