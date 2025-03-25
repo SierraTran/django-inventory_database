@@ -26,7 +26,7 @@ This module defines class-based views for displaying and managing items, item hi
 """
 
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db import IntegrityError
 from django.views.generic import TemplateView
 from django.views.generic.list import ListView
@@ -942,6 +942,7 @@ class ItemRequestAcceptView(SuperuserRequiredMixin, TemplateView):
         else:
             item_request = self.get_object()
             item_request.status = "Accepted"
+            item_request.status_changed_by = self.request.user
             item_request.save()
             return redirect(item_request.get_absolute_url())
 
@@ -1039,6 +1040,64 @@ class ItemRequestRejectView(SuperuserRequiredMixin, TemplateView):
             item_request.save()
             return redirect(item_request.get_absolute_url())
 
+
+class ItemRequestDeleteView(UserPassesTestMixin, DeleteView):
+    """_summary_
+
+    Args:
+        UserPassesTestMixin (_type_): _description_
+        DeleteView (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    model = ItemRequest
+    template_name = "item_request_confirm_delete.html"
+    success_url = reverse_lazy("inventory:item_requests")
+    
+    def test_func(self):
+        #TODO: Docstring
+        user = self.request.user
+        item_request_id = self.kwargs.get("pk")
+        request_from = get_object_or_404(ItemRequest, id=item_request_id).requested_by
+        return request_from == user
+    
+    def get_fail_url(self):
+        """
+        Returns the URL to redirect to if the deletion is canceled.
+
+        This method uses reverse_lazy to resolve the failure URL with the primary key (pk) of the object
+        being processed and returns it.
+
+        Returns:
+            str: The URL to redirect to.
+        """
+        return reverse_lazy("inventory:item_requests")
+
+    fail_url = property(get_fail_url)
+    
+    def post(self, request, *args, **kwargs):
+        """
+        Handles POST requests to delete the item or cancel the deletion.
+
+        This method first checks which button was pressed in the form. If the "Cancel" button was pressed, the user is
+        redirected back to the Notifications page (the failure URL). If the "Confirm" button was pressed (the else case),
+        the notification is deleted.
+
+        Args:
+            request (HttpRequest): The HTTP request object containing metadata about the request.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            HttpResponse: The HTTP response object.
+        """
+        if "Cancel" in request.POST:
+            return redirect(self.fail_url)
+        else:
+            return super(ItemRequestDeleteView, self).post(request, *args, **kwargs)
+    
+    
 
 ###################################################################################################
 # Views for the UsedItem Model ####################################################################

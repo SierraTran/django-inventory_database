@@ -28,12 +28,13 @@ urlpatterns = [
     path("item_requests/<int:pk>", views.ItemRequestDetailView.as_view(), name="item_request_detail"),
     path("item_requests/<int:pk>/accept", views.ItemRequestAcceptView.as_view(), name="item_request_confirm_accept"),
     path("item_requests/<int:pk>/reject", views.ItemRequestRejectView.as_view(), name="item_request_confirm_reject"),
+    path("item_requests/<int:pk>/delete", views.ItemRequestDeleteView.as_view(), name="item_request_confirm_delete"),
     
     # urls for the UseItem model
     path("used_items/", views.UsedItemView.as_view(), name="used_items"),
     path("used_items/<int:pk>/", views.UsedItemDetailView.as_view(), name="used_item_detail"),
     path("used_items/search/", views.SearchUsedItemsView.as_view(), name="search_used_items"),
     
-    # 
+    # url for the PurchaseOrderForm
     path("purchase_order_form/", views.PurchaseOrderItemsFormView.as_view(), name="purchase_order_form")
 ]

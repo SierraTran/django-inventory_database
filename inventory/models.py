@@ -137,10 +137,18 @@ class ItemRequest(models.Model):
         decimal_places=2, max_digits=14, validators=[MinValueValidator(0.00)]
     )
     requested_by = models.ForeignKey(
-        User, on_delete=models.CASCADE, limit_choices_to={"groups__name": "Technician"}
+        User, on_delete=models.CASCADE, limit_choices_to={"groups__name": "Technician"}, related_name="requested_by_user"
     )
     timestamp = models.DateTimeField(auto_now_add=True)
     status = StatusField(db_index=True, default="Pending")
+    status_changed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        limit_choices_to={"groups__name": "Superuser"},
+        default=None,
+        related_name="status_changed_by_user"
+    )
 
     def get_absolute_url(self):
         return reverse("inventory:item_request_detail", kwargs={"pk": self.pk})
