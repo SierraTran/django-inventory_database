@@ -13,7 +13,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             fetch("/inventory_database/notifications/unread_count/")
                 .then(response => {
-                    if (!response.ok) { {# BUG: This always throws an error. I just need the number of unread notifications. #}
+                    if (!response.ok) { {# BUG: This always throws an error. I just need the number of unread notifications. AttributeError: 'dict' object has no attribute 'headers' #}
                         throw new Error(`HTTP error! Status: ${response.status}`);
                     }
                     return response.json();

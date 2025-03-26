@@ -33,7 +33,7 @@
     </tr>
     <tr>
         <th>Message</th>
-        <td>{{ notification.message }}</td>
+        <td>{{ notification.message|safe }}</td>
     </tr>
     {% for field in form %}
     <tr class="{{ field.id_for_label|clean_id_for_label }}">

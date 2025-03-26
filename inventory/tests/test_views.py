@@ -8,6 +8,11 @@ from inventory.models import Item, ItemHistory
 
 
 # Create your tests here.
+
+
+###################################################################################################
+# Tests for the Views for the Item Model ##########################################################
+###################################################################################################
 class ItemViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -55,19 +60,10 @@ class ItemViewTests(TestCase):
         self.assertTemplateUsed(response, "items.html")
         
         # Assert that all items in the database are displayed and in the correct order
-        self.assertEqual(len(response.context["items_list"]), Item.objects.count())
+        self.assertEqual(len(response.context["items_list"]), Item.objects.count(), "There should be 6 total items.")
         self.assertEqual(list(response.context["items_list"]), expected_order)
 
-
-class ItemHistoryViewTests(TestCase):
-    @classmethod
-    def setUpTestData(self):
-        """
-        Setup
-        """
     
-    
-        
 class ItemDetailViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -152,8 +148,7 @@ class ItemDetailViewTests(TestCase):
         self.assertContains(response, '<button type="button" id="history"')
         self.assertContains(response, '<button type="button" id="update"')
         
-        # Intern doesn't have use, request more, order more, or delete buttons
-        
+        # Intern doesn't have use, request more, order more, or delete buttons        
         self.assertNotContains(response, '<button type="button" id="use"')
         self.assertNotContains(response, '<button type="button" id="request-more"')
         self.assertNotContains(response, '<button type="button" id="order-more"')
@@ -199,7 +194,109 @@ class ItemDetailViewTests(TestCase):
         self.assertContains(response, '<button type="button" class="delete" id="delete"')
         
         # Superuser doesn't have a request more button        
-        self.assertNotContains(response, '<button type="button" id="request-more"')
-        
+        self.assertNotContains(response, '<button type="button" id="request-more"', "Superusers should not have a 'Request More' button.")
 
-     
+
+class ItemCreateSuperuserView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        # TODO: Set up for ItemCreateSuperuserView
+        
+        
+class ItemCreateTechnicianView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        # TODO: Set up for ItemCreateTechnicianView
+    
+
+###################################################################################################
+# Tests for the Views for the ItemHistory Model ###################################################
+###################################################################################################
+class ItemHistoryViewTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        # Assume all users have access to Item History and the button to go to its page.
+        # TODO: Set up for ItemHistoryViewTests
+        # [ ]: Add an existing item for the user to update
+        
+        cls.user = User.objects.create_user(username="testuser", password="password")
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.user.groups.add(cls.superuser_group)
+        
+        cls.client = Client()       
+        
+    def test_item_history_view_record_of_creation(self):
+        """
+        The ItemHistory view shows the record of an item's creation by a user
+        
+        For records showing no user associated with the creation, see the 
+        `test_history_action_create` test function in tests_models.py.
+        """
+        # User logs in
+        login = self.client.login(username="testuser", password="password")
+        self.assertTrue(login, "Login failed.")
+        
+        # User creates an Item
+        response = self.client.post(reverse("inventory:item_create_form_superuser"), {
+            "manufacturer": "Fluke",
+            "model": "N/A",
+            "part_or_unit": Item.PART,
+            "part_number": "1285578",
+            "description": "Power supply connector",
+            "location": "Closet",
+            "quantity": 3,
+            "min_quantity": 0,
+            "unit_price": 11.33,
+        })
+        
+        # Check for form erros
+        if response.context and 'form' in response.context:
+            self.assertFalse(response.context['form'].errors, f"Form errors: {response.context['form'].errors}")
+        
+        # Make sure the item was created successfully and redirects
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Item.objects.filter(part_number="1285578").exists(), "This item doesn't exist.")
+        
+        # Check Item History for record of creation        
+        item = Item.objects.filter(part_number="1285578").first()
+        item_history = ItemHistory.objects.filter(item=item).first()
+        
+        self.assertIsNotNone(item_history, "The item's history should exist.")
+        self.assertEqual(item_history.action, "create", "The action for this record should be 'create'.")
+        self.assertEqual(item_history.user, self.user, "The user responsible for the creation should be 'testuser'.")
+        
+    def test_item_history_view_record_of_update(self):
+        """
+        The ItemHistory view shows the record of an item's update by a user
+        """
+        # TODO: test_item_history_view_record_of_update
+        # User logs in
+        login = self.client.login(username="testuser", password="password")
+        self.assertTrue(login, "Login failed.")
+        
+        # Make sure the item from `setUpTestData` exists
+        # self.assertTrue(Item.objects.filter(part_number="1285578").exists(), "This item doesn't exist.")
+        
+        return 
+
+
+###################################################################################################
+# Tests for the Views for the ItemRequest Model ###################################################
+###################################################################################################
+class ItemRequestViewTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        # TODO: Set up for ItemRequestViewTests
+

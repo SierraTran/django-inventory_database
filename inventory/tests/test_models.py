@@ -190,6 +190,8 @@ class ItemModelTests(TestCase):
             None, 
             "The last_modofied_by field of the third item should be None."
         )
+        
+    
 
 
 class ItemHistoryModelTests(TestCase):

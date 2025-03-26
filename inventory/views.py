@@ -137,71 +137,6 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class ItemHistoryView(LoginRequiredMixin, ListView):
-    """
-    Class-based view for displaying the history of a specific item.
-    This view requires the user to be logged in.
-
-    Inherits functionality from:
-        - LoginRequiredMixin
-        - ListView
-    (See module docstring for more details on the inherited classes)
-
-    Attributes:
-        login_url (str): The URL to the login page (resolved using reverse_lazy).
-        redirect_field_name (str): The query parameter for the URL the user will be redirected to after logging in.
-        model (ItemHistory): The model that this view operates on.
-        template_name (str): The template used to render the history view.
-        context_object_name (str): The context variable name for the list of item history records.
-
-    Methods:
-        `get_queryset()`: Retrieves the history records for the specific item in reverse chronological order.
-        `get_context_data()`: Adds the specific item to the context data.
-    """
-
-    login_url = reverse_lazy("authentication:login")
-    redirect_field_name = "next"
-    model = ItemHistory
-    template_name = "item_history.html"
-    context_object_name = "item_history_list"
-
-    def get_queryset(self):
-        """
-        Retrieves the history records for the specific item in reverse chronological order.
-
-        This method extracts the ID of the item from the URL parameters, filters the `ItemHistory` objects to match
-        the given item ID, and orders the resulting queryset by the `timestamp` field in descending order (most
-        recent first).
-
-        Returns:
-            QuerySet: A queryset containing the history records for the specified item in reverse chronological order.
-        """
-        item_id = self.kwargs["pk"]
-        history = ItemHistory.objects.filter(item_id=item_id).order_by("-timestamp")
-        return history
-
-    def get_context_data(self, **kwargs):
-        """
-        Adds the specific item to the context data.
-
-        This method extracts the ID of the item from the URL parameters, calls the base class's
-        `get_context_data` method to get the base context, and then fetches the specific Item
-        object with the matching ID before including it in the context data.
-
-        If no Item object is found with the given ID, an `Http404` exception is raised.
-
-        Args:
-            **kwargs: Additional keyword arguments passed to the parent method.
-
-        Returns:
-            dict: The context data with the specific item added.
-        """
-        item_id = self.kwargs["pk"]
-        context = super().get_context_data(**kwargs)
-        context["item"] = get_object_or_404(Item, id=item_id)
-        return context
-
-
 class ItemCreateSuperuserView(SuperuserRequiredMixin, CreateView):
     """
     Class-based view for creating a new item.
@@ -705,6 +640,74 @@ class ImportItemDataView(SuperuserOrTechnicianRequiredMixin, FormView):
         kwargs["user"] = self.request.user
         return super().save(*args, **kwargs)
 
+
+###################################################################################################
+# Views for the ItemHistory Model #################################################################
+###################################################################################################
+class ItemHistoryView(LoginRequiredMixin, ListView):
+    """
+    Class-based view for displaying the history of a specific item.
+    This view requires the user to be logged in.
+
+    Inherits functionality from:
+        - LoginRequiredMixin
+        - ListView
+    (See module docstring for more details on the inherited classes)
+
+    Attributes:
+        login_url (str): The URL to the login page (resolved using reverse_lazy).
+        redirect_field_name (str): The query parameter for the URL the user will be redirected to after logging in.
+        model (ItemHistory): The model that this view operates on.
+        template_name (str): The template used to render the history view.
+        context_object_name (str): The context variable name for the list of item history records.
+
+    Methods:
+        `get_queryset()`: Retrieves the history records for the specific item in reverse chronological order.
+        `get_context_data()`: Adds the specific item to the context data.
+    """
+
+    login_url = reverse_lazy("authentication:login")
+    redirect_field_name = "next"
+    model = ItemHistory
+    template_name = "item_history.html"
+    context_object_name = "item_history_list"
+
+    def get_queryset(self):
+        """
+        Retrieves the history records for the specific item in reverse chronological order.
+
+        This method extracts the ID of the item from the URL parameters, filters the `ItemHistory` objects to match
+        the given item ID, and orders the resulting queryset by the `timestamp` field in descending order (most
+        recent first).
+
+        Returns:
+            QuerySet: A queryset containing the history records for the specified item in reverse chronological order.
+        """
+        item_id = self.kwargs["pk"]
+        history = ItemHistory.objects.filter(item_id=item_id).order_by("-timestamp")
+        return history
+
+    def get_context_data(self, **kwargs):
+        """
+        Adds the specific item to the context data.
+
+        This method extracts the ID of the item from the URL parameters, calls the base class's
+        `get_context_data` method to get the base context, and then fetches the specific Item
+        object with the matching ID before including it in the context data.
+
+        If no Item object is found with the given ID, an `Http404` exception is raised.
+
+        Args:
+            **kwargs: Additional keyword arguments passed to the parent method.
+
+        Returns:
+            dict: The context data with the specific item added.
+        """
+        item_id = self.kwargs["pk"]
+        context = super().get_context_data(**kwargs)
+        context["item"] = get_object_or_404(Item, id=item_id)
+        return context
+    
 
 ###################################################################################################
 # Views for the ItemRequest Model #################################################################

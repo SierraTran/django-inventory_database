@@ -1,0 +1,38 @@
+table, .button-container {
+    margin: 0 auto;
+    width: 85%;
+}
+
+.button-container {
+    max-width: 900px;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+}
+
+.button-container > button, input {
+    width: 40%;
+    height: 2em;
+}
+
+table {
+    border-spacing: 10px;
+}
+
+tr th {
+    text-align: left;
+}
+
+tr td {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.timestamp, .subject, .message {
+    border-top: 1px solid black;
+}
+
+.mark-as-read-button, .delete-button {
+    display: flex; 
+    flex-direction: column;
+}

@@ -1,15 +1,27 @@
-<form method="post" class="card"> {% csrf_token %}
-    <p>
-        Are you sure you want to delete "{{ object }}"?
-    </p>
-    {{ form }}
-    
-    <input type="submit" name="Cancel" value="Cancel" />
-    <input type="submit" name="Confirm" value="Confirm" />
-    {% comment %} <button onclick="window.location.href='{% url "authentication:notifications" %}'">Cancel</button> {% endcomment %}
-</form>
+<!DOCTYPE html>
+<html lang="en">
 
-{% comment %}
-TODO: Style / format
-{% endcomment %}
-    
+{% load static %}
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="shortcut icon" href="https://hayesinstruments.com/HayesLogo.ico" />
+    {% block other_stylesheets %}{% endblock other_stylesheets %}
+    <link rel="stylesheet" href="{% static 'confirm_delete.css' %}" />
+    <title>Notification - Confirm Deletion | Inventory Database</title>
+</head>
+
+<body>
+    <form method="post" class="card"> {% csrf_token %}
+        <h3>Are you sure you want to delete</h3>
+        <h3>"{{ object }}"?</h3>
+        {{ form }}
+        <div class="buttons">
+            <input type="submit" name="Cancel" id="cancel" value="Cancel" />
+            <input type="submit" name="Confirm" id="confirm" value="Confirm" />
+        </div>
+    </form>
+</body>
+
+</html>
