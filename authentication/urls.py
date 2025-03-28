@@ -7,7 +7,7 @@ app_name = "authentication"
 urlpatterns = [
     path("", views.home, name="home"),
     path("login/", views.DatabaseLoginView.as_view(), name="login"),
-    path("notifications", views.NotificationsView.as_view(), name="notifications"),
+    path("notifications", views.NotificationView.as_view(), name="notifications"),
     path(
         "notifications/unread_count/",
         context_processors.unread_notifications_count,

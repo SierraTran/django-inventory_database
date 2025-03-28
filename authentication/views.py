@@ -25,7 +25,7 @@ This module defines class-based views for displaying the home page, login page, 
 
 import json
 from typing import Any
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseForbidden, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
 from django.contrib import messages
@@ -123,7 +123,7 @@ class DatabaseLoginView(LoginView):
         return super().form_invalid(form)
     
     
-class NotificationsView(LoginRequiredMixin, ListView):
+class NotificationView(LoginRequiredMixin, ListView):
     """
     Class-based view to list all notifications for the currently logged-in user.
 
@@ -165,18 +165,52 @@ class NotificationsView(LoginRequiredMixin, ListView):
 
 
 class NotificationUpdateView(UserPassesTestMixin, UpdateView):
+    # QUESTION: Custom mixin for user notifications?
+    # TODO: Class docstring
+    """
+    
+
+    Args:
+        UserPassesTestMixin (_type_): _description_
+        UpdateView (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     model = Notification
     fields = ["is_read"]
     template_name = "notification_update_form.html"
     
     def test_func(self):
-        #TODO: Docstring
+        """
+        Verifies that the notification is for the current user. 
+        
+        This method first retrieves the current user from the request and saves it to the `user` variable. Then, it 
+        retrieves the primary key (pk) of the notification from the URL. After that, the `get_object_or_404` function is 
+        used to getch the notification from the database. If no Notification object is found with the given ID or primary 
+        key, an `Http404` exception is raised. If a Notification object is found, the user in the Notification's `user` 
+        field is saved to the `notif_for` variable and compared with the `user` variable to see if they are the same object.
+
+        Returns:
+            bool: True if the notification is for the current user. False otherwise.
+        """
         user = self.request.user
         notification_id = self.kwargs.get("pk")
         notif_for = get_object_or_404(Notification, id=notification_id).user
         return notif_for == user
     
+    def handle_no_permission(self):
+        """
+        Renders the 403 page with a message explaining the reason for the error.
+
+        Returns:
+            HttpResponse: The HTTP response object with the rendered 403 page.
+        """
+        message = "This notification is not addressed to you."
+        return HttpResponseForbidden(render((self.request, "403.html", {"message": message}))
+    
     def get_context_data(self, **kwargs) -> dict[str, Any]:
+        # TODO: Method docstring
         context = super().get_context_data(**kwargs)
         notification_id = self.kwargs.get("pk")
         context["notification"] = get_object_or_404(Notification, id=notification_id)
@@ -184,16 +218,13 @@ class NotificationUpdateView(UserPassesTestMixin, UpdateView):
     
     
     def get_success_url(self):
-        #TODO: Docstring
         """
-        Redirects back to the updated user's details upon success.
+        Redirects back to the Notifications page upon success.
         
-        This method uses the `reverse` function to resolve the URL to the updated user's page and returns it. 
-        The object is the user that was updated, and pk is the primary key of the user. It is passed as a keyword
-        argument so the URL to the correct user's page is generated.
+        This method uses the `reverse` function to resolve the URL to the Notifications page and returns it. 
 
         Returns:
-            str: The URL to the updated user's page.
+            str: The URL to the Notifications page.
         """
         return reverse("authentication:notifications")
 
@@ -214,7 +245,8 @@ class NotificationDeleteView(UserPassesTestMixin, DeleteView):
         fail_url (str): The URL to redirect to if the deletion is canceled (resolved using the `get_fail_url` method).
         
     Methods:
-        `test_func()`: #TODO: summary
+        `test_func()`: Verifies that the notification is for the current user. 
+        `handle_no_permission`: Renders the 403 page with a message explaining the reason for the error.
         `get_fail_url()`: Returns the URL to redirect to if the deletion is canceled.
         `post()`: Handles the POST request for deleting a user.
     """
@@ -223,11 +255,32 @@ class NotificationDeleteView(UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy("authentication:notifications")
     
     def test_func(self):
-        #TODO: Docstring
+        """
+        Verifies that the notification is for the current user. 
+        
+        This method first retrieves the current user from the request and saves it to the `user` variable. Then, it 
+        retrieves the primary key (pk) of the notification from the URL. After that, the `get_object_or_404` function is 
+        used to getch the notification from the database. If no Notification object is found with the given ID or primary 
+        key, an `Http404` exception is raised. If a Notification object is found, the user in the Notification's `user` 
+        field is saved to the `notif_for` variable and compared with the `user` variable to see if they are the same object.
+
+        Returns:
+            bool: True if the notification is for the current user. False otherwise.
+        """
         user = self.request.user
         notification_id = self.kwargs.get("pk")
         notif_for = get_object_or_404(Notification, id=notification_id).user
         return notif_for == user
+    
+    def handle_no_permission(self):
+        """
+        Renders the 403 page with a message explaining the reason for the error.
+
+        Returns:
+            HttpResponse: The HTTP response object with the rendered 403 page.
+        """
+        message = "This notification is not addressed to you."
+        return HttpResponseForbidden(render((self.request, "403.html", {"message": message}))
 
     def get_fail_url(self):
         """

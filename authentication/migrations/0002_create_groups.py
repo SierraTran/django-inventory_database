@@ -3,7 +3,7 @@ from django.conf import settings
 from django.db import migrations, models
 
 
-def load_initial_data(apps, schema_editor):
+def create_groups(apps, schema_editor):
     Group = apps.get_model("auth", "Group")
     Permission = apps.get_model("auth", "Permission")
 
@@ -104,9 +104,9 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("authentication", "0001_initial"),
-        ("inventory", "0001_initial"),
+        ("inventory", "0002_itemrequest_status_changed_by_and_more"),
     ]
 
     operations = [
-        migrations.RunPython(load_initial_data),
+        migrations.RunPython(create_groups),
     ]

@@ -192,8 +192,6 @@ class ItemModelTests(TestCase):
         )
         
     
-
-
 class ItemHistoryModelTests(TestCase):
     # TODO: ItemHistory tests
     # NOTE: Date and time is set to January 1, 2025 at 12:00 for testing purposes
@@ -263,13 +261,22 @@ class ItemHistoryModelTests(TestCase):
         )
 
 
-# class ItemRequestModelTests(TestCase):
-#     # TODO: ItemRequest tests
-#     def test_none():
-#         return
+class ItemRequestModelTests(TestCase):
+    # TODO: ItemRequest tests
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        # TODO: Set up for ItemRequestModelTests
+        return
 
 
-# class UsedItemModelTests(TestCase):
-#     # TODO: UsedItem tests
-#     def test_none():
-#         return
+class UsedItemModelTests(TestCase):
+    # TODO: UsedItem tests
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        # TODO: Set up for UsedItemModelTests
+        return

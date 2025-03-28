@@ -10,6 +10,7 @@
             https://docs.djangoproject.com/en/3.2/topics/auth/default/#django.contrib.auth.mixins.UserPassesTest)
 """
 
+from django.http import HttpResponseForbidden
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import render
 
@@ -36,13 +37,13 @@ class SuperuserRequiredMixin(UserPassesTestMixin):
     
     def handle_no_permission(self):
         """
-        Renders the 403 page with a message explaining the reasons for the error.
+        Renders the 403 page with a message explaining the reason for the error.
 
         Returns:
             HttpResponse: The HTTP response object with the rendered 403 page.
         """
         message = "You need to be a Superuser to access this view."
-        return render(self.request, "403.html", {"message": message})
+        return HttpResponseForbidden(render(self.request, "403.html", {"message": message}))
     
 
 class SuperuserOrTechnicianRequiredMixin(UserPassesTestMixin):
@@ -68,13 +69,13 @@ class SuperuserOrTechnicianRequiredMixin(UserPassesTestMixin):
     
     def handle_no_permission(self):
         """
-        Renders the 403 page with a message explaining the reasons for the error.
+        Renders the 403 page with a message explaining the reason for the error.
 
         Returns:
             HttpResponse: The HTTP response object with the rendered 403 page.
         """
         message = "You need to be a Superuser or Technician to access this view."
-        return render(self.request, "403.html", {"message": message})
+        return HttpResponseForbidden(render(self.request, "403.html", {"message": message}))
     
     
 class TechnicianRequiredMixin(UserPassesTestMixin):
@@ -100,13 +101,13 @@ class TechnicianRequiredMixin(UserPassesTestMixin):
     
     def handle_no_permission(self):
         """
-        Renders the 403 page with a message explaining the reasons for the error.
+        Renders the 403 page with a message explaining the reason for the error.
 
         Returns:
             HttpResponse: The HTTP response object with the rendered 403 page.
         """
         message = "You need to be a Technician to access this view."
-        return render(self.request, "403.html", {"message": message})
+        return HttpResponseForbidden(render(self.request, "403.html", {"message": message}))
     
     
 class InternRequiredMixin(UserPassesTestMixin):
@@ -132,11 +133,11 @@ class InternRequiredMixin(UserPassesTestMixin):
     
     def handle_no_permission(self):
         """
-        Renders the 403 page with a message explaining the reasons for the error.
+        Renders the 403 page with a message explaining the reason for the error.
 
         Returns:
             HttpResponse: The HTTP response object with the rendered 403 page.
         """
         message = "You need to be a Intern to access this view."
-        return render(self.request, "403.html", {"message": message})
+        return HttpResponseForbidden(render(self.request, "403.html", {"message": message}))
     
