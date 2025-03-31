@@ -1,6 +1,6 @@
 from django.test import Client, TestCase
 from django.urls import reverse
-import time_machine
+from freezegun import freeze_time
 import datetime
 
 from django.contrib.auth.models import User, Group
@@ -36,7 +36,7 @@ class ItemModelTests(TestCase):
         cls.technician_group = Group.objects.get(name="Technician")
 
         cls.user = User.objects.create_user(
-            username="testtechnician", password="hayes4800"
+            username="testtechnician", password="password"
         )
         cls.user.groups.add(cls.technician_group)
 
@@ -196,9 +196,7 @@ class ItemHistoryModelTests(TestCase):
     # TODO: ItemHistory tests
     # NOTE: Date and time is set to January 1, 2025 at 12:00 for testing purposes
     @classmethod
-    @time_machine.travel(
-        datetime.datetime(2025, 1, 1, 12, 0, 0, 0)
-    ) 
+    @freeze_time("2025-01-01 12:00:00")
     def setUpTestData(cls):
         """
         Set up for ItemHistoryModelTests
@@ -260,6 +258,12 @@ class ItemHistoryModelTests(TestCase):
             "Test MFG3, Test Model3 Test Part Number - create - 2025-01-01 12:00:00",
         )
 
+    def test_history_action_update(self):
+        """
+        Update each item and check their history records for updates
+        """
+        # TODO: test_history_action_update
+        
 
 class ItemRequestModelTests(TestCase):
     # TODO: ItemRequest tests
@@ -269,7 +273,7 @@ class ItemRequestModelTests(TestCase):
         Setup
         """
         # TODO: Set up for ItemRequestModelTests
-        return
+        
 
 
 class UsedItemModelTests(TestCase):
@@ -279,4 +283,4 @@ class UsedItemModelTests(TestCase):
         Setup
         """
         # TODO: Set up for UsedItemModelTests
-        return
+        

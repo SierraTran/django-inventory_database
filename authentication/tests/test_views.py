@@ -28,7 +28,7 @@ class NotificationViewTests(TestCase):
         
         cls.superuser_group = Group.objects.get(name="Superuser")
         
-        cls.user = User.objects.create_user(username="testuser", password="hayes4800")
+        cls.user = User.objects.create_user(username="testuser", password="password")
         cls.user.groups.add(cls.superuser_group)
         
         cls.client = Client()

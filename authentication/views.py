@@ -207,9 +207,9 @@ class NotificationUpdateView(UserPassesTestMixin, UpdateView):
             HttpResponse: The HTTP response object with the rendered 403 page.
         """
         message = "This notification is not addressed to you."
-        return HttpResponseForbidden(render((self.request, "403.html", {"message": message}))
+        return HttpResponseForbidden(render((self.request, "403.html", {"message": message})))
     
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
+    def get_context_data(self, **kwargs):
         # TODO: Method docstring
         context = super().get_context_data(**kwargs)
         notification_id = self.kwargs.get("pk")
@@ -280,7 +280,7 @@ class NotificationDeleteView(UserPassesTestMixin, DeleteView):
             HttpResponse: The HTTP response object with the rendered 403 page.
         """
         message = "This notification is not addressed to you."
-        return HttpResponseForbidden(render((self.request, "403.html", {"message": message}))
+        return HttpResponseForbidden(render((self.request, "403.html", {"message": message})))
 
     def get_fail_url(self):
         """

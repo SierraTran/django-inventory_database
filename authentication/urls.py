@@ -1,6 +1,5 @@
 from django.urls import path
-from . import views
-from . import context_processors
+from . import views, context_processors
 
 app_name = "authentication"
 
