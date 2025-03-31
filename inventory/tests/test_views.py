@@ -1199,6 +1199,9 @@ class UsedItemViewTests(TestCase):
         
         """
         # TODO: test_used_item_view_access_control
-
+        # [ ]: Superusers have access
+        # [ ]: Technicians have access
+        # [ ]: Interns don't have access
+        # [ ]: Viewers don't have access
 
 
