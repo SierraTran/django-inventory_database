@@ -7,11 +7,7 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("login/", views.DatabaseLoginView.as_view(), name="login"),
     path("notifications", views.NotificationView.as_view(), name="notifications"),
-    path(
-        "notifications/unread_count/",
-        context_processors.unread_notifications_count,
-        name="unread_notifications_count",
-    ),
+    path('notifications/unread_count/', views.unread_notifications_count_view, name='unread_notifications_count'),
     path(
         "notifications/<int:pk>/update",
         views.NotificationUpdateView.as_view(),

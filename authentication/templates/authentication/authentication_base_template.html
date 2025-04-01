@@ -49,7 +49,7 @@
             <h1 class="username">{{ request.user.username }}</h1>
             <hr class="sidenav-divider">
             <a href="javascript:void(0)" class="close-button" onclick="closeNav()">&times;</a>
-            <a href="{% url "authentication:notifications" %}">
+            <a href="{% url 'authentication:notifications' %}">
                 Notifications <span id="notification-badge" class="badge">{{ unread_notifications_count }}</span>
             </a>
             <form name="logout" action="{% url 'logout' %}" method="post"> {% csrf_token %}

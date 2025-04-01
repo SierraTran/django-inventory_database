@@ -73,12 +73,11 @@ def home(request):
     return render(request, "home.html", context)
 
 
-def unread_notifications_count(request):
+def unread_notifications_count_view(request):
     if request.user.is_authenticated:
         unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
-        return JsonResponse({'unread_notifications_count': unread_count})
-    else: 
-        return JsonResponse({'unread_notifications_count': 0})
+        return JsonResponse({'unread_count': unread_count})
+    return JsonResponse({'unread_count': 0})
 
 
 class DatabaseLoginView(LoginView):

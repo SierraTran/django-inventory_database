@@ -1,11 +1,12 @@
 from decimal import Decimal
-from django.test import Client, TestCase, tag
+from django.test import Client, RequestFactory, TestCase, tag
 from django.urls import reverse
 import time_machine
 import datetime
 
 from django.contrib.auth.models import User, Group
 from inventory.models import Item, ItemHistory
+from inventory.views import ItemView
 
 
 # Create your tests here.
@@ -29,6 +30,7 @@ class ItemViewTests(TestCase):
             Item(manufacturer="HP", model="Handles", part_or_unit=Item.PART, part_number="E3623A", quantity=2),
         ]        
         Item.objects.bulk_create(items)
+        cls.items_list_url = reverse("inventory:items")
         
         cls.technician_group = Group.objects.get(name="Technician")
         
@@ -36,7 +38,14 @@ class ItemViewTests(TestCase):
         cls.user.groups.add(cls.technician_group)
         
         cls.client = Client()
-        cls.items_list_url = reverse("inventory:items")
+        cls.factory = RequestFactory()
+        
+    # def test_item_view_get_queryset(self):
+    #     request = self.factory.get(self.items_list_url)
+    #     view = ItemView()
+    #     view.request = request
+    #     queryset = view.get_queryset()
+    #     self.assertTrue(queryset.exists(), "The queryset should return results")
         
     def test_item_view_GET_unauthenticated(self):
         """
@@ -53,18 +62,20 @@ class ItemViewTests(TestCase):
         The ItemView displays all items in the database for authenticated users.
         """
         self.client.login(username="testuser", password="password")
-        response = self.client.get(self.items_list_url, follow=True)
+        response = self.client.get(self.items_list_url)
         
-        expected_order = list(Item.objects.all().order_by("manufacturer", "model", "part_number"))
-        
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "items.html")
+        self.assertEqual(response.status_code, 200, "Authenticated user should get a 200 response.")
+        self.assertTemplateUsed(response, "items.html", "ItemView should use the correct template.")
+                
+        expected_items = Item.objects.all().order_by("manufacturer", "model", "part_number")
+        actual_items = response.context["items_list"]
         
         # Assert that all items in the database are displayed and in the correct order
-        self.assertEqual(len(response.context["items_list"]), Item.objects.count(), "There should be 6 total items.")
-        self.assertEqual(list(response.context["items_list"]), expected_order)
+        self.assertEqual(len(actual_items), Item.objects.count(), "The number of items in the context should match the database count.")
+        for i in range(0, len(actual_items)):
+            self.assertEqual(list(actual_items)[i], list(expected_items)[i])
 
-    
+
 class ItemDetailViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -312,13 +323,45 @@ class ItemCreateViewTests(TestCase):
         """
         Superusers cannot create items with the technician view
         """
-        # [ ]: test_item_create_as_superuser_with_technician_view
+        # TODO: test_item_create_as_superuser_with_technician_view
+        # [x]: User logs in
+        login = self.client.login(username="testsuperuser", password="password")
+        self.assertTrue(login, "Login failed.")
+        
+        # [x]: Attempt to create an item with the technician view
+        response = self.client.post(self.item_create_technician_url, {
+            "manufacturer": "Superuser",
+            "model": "Superuser\'s Item",
+            "part_or_unit": Item.UNIT,
+            # "part_number" is blank since it's a unit
+            "description": "Item created by the Superuser",
+            "location": "N/A",
+            "quantity": 1,
+            # Technicians cannot set the min_quantity
+            "unit_price": 0.01,
+        })
+        
+        # [x]: Check for form errors
+        if response.context and 'form' in response.context:
+            self.assertFalse(response.context['form'].errors, f"Form errors: {response.context['form'].errors}")
+        
+        # [ ]: Make sure the item doesn't exist in the database
         
     def test_item_create_as_technician_with_superuser_view(self):
         """
         Technicians cannot create items with the superuser view
         """
-        # [ ]: test_item_create_as_technician_with_superuser_view
+        # TODO: test_item_create_as_technician_with_superuser_view
+        # [x]: User logs in
+        login = self.client.login(username="testtechnician", password="password")
+        self.assertTrue(login, "Login failed.")
+        
+        # [ ]: Attempt to create an item with the superuser view
+        # [ ]: Check for form errors
+        if response.context and 'form' in response.context:
+            self.assertFalse(response.context['form'].errors, f"Form errors: {response.context['form'].errors}")
+            
+        # [ ]: Make sure the item doesn't exist in the database
 
     
     def test_item_create_as_technician_with_technician_view(self):
