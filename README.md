@@ -1,5 +1,13 @@
 # Inventory Database
 
+![Python Version](https://img.shields.io/badge/python-3.13.1-blue)
+![Django Version](https://img.shields.io/badge/django-4.2-green)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+![Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgithub.com%2Fbadges%2Fshields%2Fraw%2Fmaster%2Fpackage.json&query=%24.coverage&label=Coverage)
+
+
+
 This is a Django-based web application for managing an inventory database. The application allows users to browse, search, and manage items in the inventory. It also includes user authentication and authorization features.
 
 ## Table of Contents
@@ -11,14 +19,13 @@ This is a Django-based web application for managing an inventory database. The a
   - [Technologies Used](#technologies-used)
     - [Python](#python)
     - [Django](#django)
-      - [Haystack and Whoosh](#haystack-and-whoosh)
+    - [Haystack and Whoosh](#haystack-and-whoosh)
+    - [OpenPyXL](#openpyxl)
   - [Required Software](#required-software)
   - [Required Packages](#required-packages)
   - [Setup Instructions](#setup-instructions)
   - [Installation](#installation)
   - [Usage](#usage)
-  - [Running the Application](#running-the-application)
-  - [Running Tests](#running-tests)
   - [Contributing](#contributing)
   - [Author](#author)
   - [License](#license)
@@ -55,9 +62,14 @@ This is the web framework used to build the application.
 
 More info about [Django](https://www.djangoproject.com/)
 
-#### Haystack and Whoosh
+### Haystack and Whoosh
 
-For database searching, Haystack has been implemented with the Whoosh backend. Whoosh is easy to set up and well-suited for small applications, which makes it an ideal choice for this application. 
+For database searching, Haystack has been implemented with the Whoosh backend. Whoosh is easy to set up and well-suited for small applications, which makes it an ideal choice for this application.
+
+### OpenPyXL
+<!-- TODO: OpenPyXL -->
+<!-- [ ]: Brief explanation of the technology -->
+<!-- [ ]: Explain why it was chosen -->
 
 ## Required Software
 
@@ -72,6 +84,12 @@ The list of required software below will also be included in the `requirements.t
 - openpyxl
 - Whoosh
 
+<!-- TODO: Redo into "Installation and Setup Instructions -->
+<!-- [ ]: Step 1: Download the Application -->
+<!-- [ ]: Step 2: Extract the Files -->
+<!-- [ ]: Step 3: Install Python -->
+<!-- [ ]: Step 4: Install Required Software -->
+<!-- [ ]: Step 5: Start and Run the Application -->
 ## Setup Instructions
 
 1. Download the zip file.
@@ -121,17 +139,8 @@ The list of required software below will also be included in the `requirements.t
 - **Item Detail Page**: Shows detailed information about a specific item.
 - **User Management**: Superusers can create, view, and delete users.
 
-## Running the Application
-
-You can use the provided `app.bat` file to start the application easily. Just double-click the file, and it will handle the setup and start the server for you.
-
-## Running Tests
-
-To run the tests, use the following command:
-
-```bash
-python manage.py test
-```
+## Future Enhancements
+<!-- TODO: Future Enhancements -->
 
 ## Contributing
 
