@@ -183,8 +183,6 @@ class ItemCreateSuperuserView(SuperuserRequiredMixin, CreateView):
         Returns:
             HttpResponse: The HTTP response object.
         """
-        # NOTE: Might break the code? I changed the field name from `created_by` to `last_modified_by`.
-        # BUG: If things go wrong here, it's because the field name is `last_modified_by` not `created_by`
         form.instance.last_modified_by = self.request.user
         return super().form_valid(form)
 
@@ -405,7 +403,6 @@ class ItemUpdateInternView(InternRequiredMixin, UpdateView):
         Returns:
             HttpResponse: The HTTP response object.
         """
-        # BUG: if things go wrong here, it's because the field name is `last_modified_by` not `updated_by`
         form.instance.last_modified_by = self.request.user
         return super().form_valid(form)
 

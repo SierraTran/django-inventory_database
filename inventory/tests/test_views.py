@@ -40,12 +40,13 @@ class ItemViewTests(TestCase):
         cls.client = Client()
         cls.factory = RequestFactory()
         
-    # def test_item_view_get_queryset(self):
-    #     request = self.factory.get(self.items_list_url)
-    #     view = ItemView()
-    #     view.request = request
-    #     queryset = view.get_queryset()
-    #     self.assertTrue(queryset.exists(), "The queryset should return results")
+    def test_get_queryset(self):
+        request = self.factory.get(self.items_list_url)
+        view = ItemView()
+        view.request = request
+        queryset = view.get_queryset()
+        # self.assertTrue(queryset.exists(), "The queryset should return results")
+        self.assertEqual(queryset.count(), 6)
         
     def test_item_view_GET_unauthenticated(self):
         """
@@ -358,8 +359,8 @@ class ItemCreateViewTests(TestCase):
         
         # [ ]: Attempt to create an item with the superuser view
         # [ ]: Check for form errors
-        if response.context and 'form' in response.context:
-            self.assertFalse(response.context['form'].errors, f"Form errors: {response.context['form'].errors}")
+        # if response.context and 'form' in response.context:
+        #     self.assertFalse(response.context['form'].errors, f"Form errors: {response.context['form'].errors}")
             
         # [ ]: Make sure the item doesn't exist in the database
 

@@ -1,7 +1,6 @@
 from django.test import Client, TestCase
 from django.urls import reverse
 from freezegun import freeze_time
-import datetime
 
 from django.contrib.auth.models import User, Group
 from inventory.models import Item, ItemHistory
@@ -193,7 +192,6 @@ class ItemModelTests(TestCase):
         
     
 class ItemHistoryModelTests(TestCase):
-    # TODO: ItemHistory tests
     # NOTE: Date and time is set to January 1, 2025 at 12:00 for testing purposes
     @classmethod
     @freeze_time("2025-01-01 12:00:00")
@@ -259,10 +257,21 @@ class ItemHistoryModelTests(TestCase):
         )
 
     def test_history_action_update(self):
+        # TODO: test_history_action_update
         """
         Update each item and check their history records for updates
         """
-        # TODO: test_history_action_update
+        # [ ]: Update each item
+        # [ ]: Check history records for updates
+        
+        
+    def test_history_action_use(self):
+        # TODO: test_history_action_use
+        """
+        Use each item and check their history records for use
+        """
+        # [ ]: Use each item
+        # [ ]: Check history records for use
         
 
 class ItemRequestModelTests(TestCase):

@@ -1,12 +1,9 @@
 # Inventory Database
 
-![Python Version](https://img.shields.io/badge/python-3.13.1-blue)
-![Django Version](https://img.shields.io/badge/django-4.2-green)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-![Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgithub.com%2Fbadges%2Fshields%2Fraw%2Fmaster%2Fpackage.json&query=%24.coverage&label=Coverage)
-
-
+![Python Version](https://img.shields.io/badge/python-3.13.2-blue)
+![Django Version](https://img.shields.io/badge/django-5.1.5-green)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Static Badge](https://img.shields.io/badge/coverage-60%-CCFF00)
 
 This is a Django-based web application for managing an inventory database. The application allows users to browse, search, and manage items in the inventory. It also includes user authentication and authorization features.
 
@@ -43,10 +40,12 @@ This is a Django-based web application for managing an inventory database. The a
 
 ## User Roles
 
-- **Superuser**: Full access to all features, including user management and item creation.
-- **Technician**: Can create and update items, and request more items.
-- **Intern**: Limited access to update items.
-- **Viewer**: Can only view items and their details.
+| Role | Permissions |
+|------|-------------|
+| Superuser | Full access to all features, including user management and item creation. |
+| Technician | Can create, delete, and update items. Can create and delete their own item requests. |
+| Intern | Limited access to update items (only quantity). |
+| Viewer | Can only view items and their details. |
 
 ## Technologies Used
 
@@ -73,7 +72,7 @@ For database searching, Haystack has been implemented with the Whoosh backend. W
 
 ## Required Software
 
-- Python 3.13.1
+- Python 3.13.2
 
 ## Required Packages
 
@@ -141,6 +140,10 @@ The list of required software below will also be included in the `requirements.t
 
 ## Future Enhancements
 <!-- TODO: Future Enhancements -->
+<!-- [ ]: More seamless notification marking and deleting -->
+<!-- [ ]: Extensive help page and/or contextual help messages -->
+<!-- [ ]: "Shopping cart" feature for saving a list of items to purchase for purchase order forms -->
+<!-- [ ]: Export items in the inventory to an Excel File -->
 
 ## Contributing
 
