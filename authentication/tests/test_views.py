@@ -89,9 +89,6 @@ class NotificationViewTests(TestCase):
         
         self.client.login(username="testuser", password="password")
         
-        
-        
-        
     def test_notification_all_unread_notifs(self):
         # TODO: test_notification_all_unread_notifs
         """
@@ -121,4 +118,10 @@ class NotificationViewTests(TestCase):
         # [ ]: Log in and access the notification page
         # [ ]: Check for unread notifications (shown in bold) and read notifications (now shown in bold)
         # [ ]: Make sure the notification badge shows with the correct number of unread notifications
-    
+
+
+class NotificationUpdateViewTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        return super().setUpTestData()
+

@@ -64,6 +64,7 @@ def handle_related_records(sender, instance, **kwargs):
         **kwargs: Additional keyword arguments sent by the signal.
     """
     ItemHistory.objects.filter(item=instance).delete()
+    # QUESTION: Delete this line and make UsedItem not directly reference the item so it can stay in the database?
     UsedItem.objects.filter(item=instance).delete()
     
 # NOTE: The following signal handlers create notifications for users when certain events happen in they system.

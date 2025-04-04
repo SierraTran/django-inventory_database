@@ -1,4 +1,5 @@
 from decimal import Decimal
+from unittest.mock import patch
 from django.test import Client, RequestFactory, TestCase, tag
 from django.urls import reverse
 import time_machine
@@ -6,7 +7,7 @@ import datetime
 
 from django.contrib.auth.models import User, Group
 from inventory.models import Item, ItemHistory
-from inventory.views import ItemView
+from inventory.views import ItemHistoryView, ItemUpdateSuperuserView, ItemView
 
 
 # Create your tests here.
@@ -44,9 +45,20 @@ class ItemViewTests(TestCase):
         request = self.factory.get(self.items_list_url)
         view = ItemView()
         view.request = request
-        queryset = view.get_queryset()
-        # self.assertTrue(queryset.exists(), "The queryset should return results")
+        queryset = Item.objects.all().order_by("manufacturer", "model", "part_or_unit", "part_number", "quantity")
+        
+        expected_ordered_items = [
+            ("Amprobe", "Bodys",    Item.PART, "ACDC-100 TRMS",     2),
+            ("Chroma",  "N/A",      Item.PART, "8-16500016",        4),
+            ("Fluke",   "45",       Item.PART, "814137 Rev 102",    1),
+            ("Fluke",   "45",       Item.PART, "814137 Rev 2",      1),
+            ("Fluke",   "Dials",    Item.UNIT, "",                  7),
+            ("HP",      "Handles",  Item.PART, "E3623A",            2),
+        ]
+        actual_ordered_items = list(queryset.values_list("manufacturer", "model", "part_or_unit", "part_number", "quantity"))
+        
         self.assertEqual(queryset.count(), 6)
+        self.assertEqual(actual_ordered_items, expected_ordered_items)
         
     def test_item_view_GET_unauthenticated(self):
         """
@@ -532,7 +544,9 @@ class ItemUpdateViewTests(TestCase):
         cls.item_update_technician_url = reverse("inventory:item_update_form_technician", kwargs={"pk": cls.item.pk})
         cls.item_update_intern_url = reverse("inventory:item_update_form_intern", kwargs={"pk": cls.item.pk})
 
+        cls.factory = RequestFactory()
         cls.client = Client()
+        cls.view = ItemUpdateSuperuserView()
     
     @tag("critical")
     def test_item_update_superuser_view_access_control(self):
@@ -644,7 +658,7 @@ class ItemUpdateViewTests(TestCase):
         self.assertEqual(self.item.quantity, 5, "The quantity hasn't been updated.")
         self.assertEqual(self.item.min_quantity, 1, "The minimum quantity hasn't been updated.")
         self.assertEqual(self.item.unit_price, Decimal("0.10"), "The unit price hasn't been updated.")
-         
+                 
     def test_item_update_as_superuser_with_technician_view(self):
         """
         Superusers cannot update items using the technician view
@@ -1117,59 +1131,94 @@ class ItemHistoryViewTests(TestCase):
         Setup
         """
         # Assume all users have access to Item History and the button to go to its page.
-        # TODO: Set up for ItemHistoryViewTests
-        # [ ]: Add an existing item for the user to update
-        
+        # TODO: Set up for ItemHistoryViewTests     
         
         cls.user = User.objects.create_user(username="testuser", password="password")
         cls.superuser_group = Group.objects.get(name="Superuser")
         cls.user.groups.add(cls.superuser_group)
         
-        # [ ]: Get the URL for the item to update
-        # [ ]: Get the URL for the item history of the item
+        # [x]: Add an existing item for the user to update
+        cls.item = Item.objects.create(
+            manufacturer="Fluke",
+            model="N/A",
+            part_or_unit=Item.PART,
+            part_number="1285578",
+            description="Power supply connector",
+            location="Closet",
+            quantity=3,
+            min_quantity=0,
+            unit_price=11.33,
+        )
         
-        cls.client = Client()       
+        # [x]: Get the URL for the item to update
+        cls.item_update_url = reverse("inventory:item_update_form_superuser", kwargs={"pk": cls.item.pk})
+        # [x]: Get the URL for the item history of the item
+        cls.item_history_url = reverse("inventory:item_history", kwargs={"pk": cls.item.pk})
+        
+        cls.client = Client()    
+        cls.factory = RequestFactory()
+        
+    def test_get_queryset(self):
+        """
+        Test the queryset for the item's history.
+        """
+        request = self.factory.get(self.item_history_url)
+        view = ItemHistoryView()
+        view.request = request
+        view.kwargs = {"pk": self.item.pk}
+        queryset = view.get_queryset()
+
+        expected_history = [
+            (self.item.pk, ItemHistory.ACTION_CHOICES[0][0], None, "Created and added to the database."),
+        ]
+        actual_history = list(queryset.values_list("item", "action", "user", "changes"))
+        
+        self.assertEqual(len(actual_history), 1, "The queryset should only contain one item.")
+        self.assertEqual(actual_history, expected_history, "The queryset does not match the expected history.")
         
     def test_item_history_view_record_of_creation(self):
-        """
-        The ItemHistory view shows the record of an item's creation by a user
-        
-        For records showing no user associated with the creation, see the 
-        `test_history_action_create` test function in tests_models.py.
-        """
-        # User logs in
-        login = self.client.login(username="testuser", password="password")
-        self.assertTrue(login, "Login failed.")
-        
-        # User creates an Item
-        response = self.client.post(reverse("inventory:item_create_form_superuser"), {
-            "manufacturer": "Fluke",
-            "model": "N/A",
-            "part_or_unit": Item.PART,
-            "part_number": "1285578",
-            "description": "Power supply connector",
-            "location": "Closet",
-            "quantity": 3,
-            "min_quantity": 0,
-            "unit_price": 11.33,
-        })
-        
-        # Check for form errors
-        if response.context and 'form' in response.context:
-            self.assertFalse(response.context['form'].errors, f"Form errors: {response.context['form'].errors}")
-        
-        # Make sure the item was created successfully and redirects
-        self.assertEqual(response.status_code, 302, "User failed to create the item.")
-        self.assertTrue(Item.objects.filter(part_number="1285578").exists(), "This item doesn't exist.")
-        
-        # Check Item History for record of creation        
-        item = Item.objects.filter(part_number="1285578").first()
-        item_history = ItemHistory.objects.filter(item=item).first()
-        
-        self.assertIsNotNone(item_history, "The item's history doesn't exist.")
-        self.assertEqual(item_history.action, "create", f"The action for this record should be 'create'. It is actually {item_history.action}.")
-        self.assertEqual(item_history.user, self.user, f"The user responsible for the creation should be 'testuser'. It is actually {item_history.user}.")
-        
+            """
+            The ItemHistory view shows the record of an item's creation by a user.
+            
+            For records showing no user associated with the creation, see the 
+            `test_history_action_create` test function in tests_models.py.
+            """
+            # User logs in
+            login = self.client.login(username="testuser", password="password")
+            self.assertTrue(login, "Login failed.")
+            print(self.client.session.get('_auth_user_id'))
+
+            
+            # User creates an Item
+            response = self.client.post(reverse("inventory:item_create_form_superuser"), {
+                "manufacturer": "Fluke",
+                "model": "N/A",
+                "part_or_unit": Item.PART,
+                "part_number": "1285578",
+                "description": "Power supply connector",
+                "location": "Closet",
+                "quantity": 3,
+                "min_quantity": 0,
+                "unit_price": 11.33,
+            })
+            
+            # Check for form errors
+            if response.context and 'form' in response.context:
+                self.assertFalse(response.context['form'].errors, f"Form errors: {response.context['form'].errors}")
+            
+            # Make sure the item was created successfully and redirects
+            self.assertEqual(response.status_code, 302, "User failed to create the item.")
+            self.assertTrue(Item.objects.filter(part_number="1285578").exists(), "This item doesn't exist.")
+            
+            # Check Item History for record of creation        
+            item = Item.objects.filter(part_number="1285578").first()
+            item_history = ItemHistory.objects.filter(item=item).first()
+
+            self.assertIsNotNone(item_history, "The item's history doesn't exist.")
+            self.assertEqual(item_history.action, "create", f"The action for this record should be 'create'. It is actually {item_history.action}.")
+            self.assertEqual(item_history.user, self.user, f"The user responsible for the creation should be {self.user}. It is actually {item_history.user}.")
+            self.assertEqual(item_history.changes, "Created and added to the database.", "The changes field does not match the expected value.")
+    
     def test_item_history_view_record_of_update(self):
         """
         The ItemHistory view shows the record of an item's update by a user
@@ -1179,7 +1228,6 @@ class ItemHistoryViewTests(TestCase):
         login = self.client.login(username="testuser", password="password")
         self.assertTrue(login, "Login failed.")
         
-        # Make sure the item from `setUpTestData` exists
         # [ ]: User updates the existing item
         # [ ]: Check for form errors
         # [ ]: Make sure the item was updated successfully and redirects

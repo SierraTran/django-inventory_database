@@ -17,6 +17,9 @@ class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     
     def __str__(self):
+        # NOTE: The timestamp is stored in UTC in the database.
+        # The first line takes the timestamp and converts it to EST.
+        # This is because Django doesn't automatically convert the timestamp here.
         local_timestamp = timezone.localtime(self.timestamp) 
         formatted_timestamp = local_timestamp.strftime("%Y-%m-%d %I:%M:%S %p")
         return f'{formatted_timestamp} | For {self.user}: "{self.subject}"'

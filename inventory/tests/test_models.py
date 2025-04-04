@@ -1,10 +1,12 @@
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils import timezone
 from freezegun import freeze_time
 
 from django.contrib.auth.models import User, Group
 from inventory.models import Item, ItemHistory
 
+import datetime
 
 # Create your tests here.
 class ItemModelTests(TestCase):
@@ -190,11 +192,33 @@ class ItemModelTests(TestCase):
             "The last_modofied_by field of the third item should be None."
         )
         
+    def test___str__(self):
+        """
+        String representation is printed in the expected format.
+        """
+        self.assertEqual(
+            self.item1.__str__(), 
+            "Test MFG1, Test Model1", 
+            "The string representation does not match."
+        )
+        self.assertEqual(
+            self.item2.__str__(), 
+            "Test MFG2, Test Model2 ", 
+            "The string representation does not match."
+        )
+        self.assertEqual(
+            self.item3.__str__(), 
+            "Test MFG3, Test Model3 Test Part Number", 
+            "The string representation does not match."
+        )
+    
     
 class ItemHistoryModelTests(TestCase):
     # NOTE: Date and time is set to January 1, 2025 at 12:00 for testing purposes
+    aware_datetime = timezone.make_aware(datetime.datetime(2025, 1, 1, 12, 0, 0))
+    
     @classmethod
-    @freeze_time("2025-01-01 12:00:00")
+    @freeze_time(aware_datetime)
     def setUpTestData(cls):
         """
         Set up for ItemHistoryModelTests
@@ -235,7 +259,7 @@ class ItemHistoryModelTests(TestCase):
         )
         self.assertEqual(
             self.itemhistory1[0].__str__(),
-            "Test MFG1, Test Model1 - create - 2025-01-01 12:00:00",
+            "Test MFG1, Test Model1 - create - 2025-01-01 12:00:00 PM",
         )
         self.assertEqual(
             self.itemhistory2.__len__(), 
@@ -244,7 +268,7 @@ class ItemHistoryModelTests(TestCase):
         )
         self.assertEqual(
             self.itemhistory2[0].__str__(),
-            "Test MFG2, Test Model2  - create - 2025-01-01 12:00:00",
+            "Test MFG2, Test Model2  - create - 2025-01-01 12:00:00 PM",
         )
         self.assertEqual(
             self.itemhistory3.__len__(), 
@@ -253,7 +277,7 @@ class ItemHistoryModelTests(TestCase):
         )
         self.assertEqual(
             self.itemhistory3[0].__str__(),
-            "Test MFG3, Test Model3 Test Part Number - create - 2025-01-01 12:00:00",
+            "Test MFG3, Test Model3 Test Part Number - create - 2025-01-01 12:00:00 PM",
         )
 
     def test_history_action_update(self):
@@ -281,9 +305,7 @@ class ItemRequestModelTests(TestCase):
         """
         Setup
         """
-        # TODO: Set up for ItemRequestModelTests
-        
-        
+        # TODO: Set up for ItemRequestModelTests     
 
 
 class UsedItemModelTests(TestCase):

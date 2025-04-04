@@ -114,7 +114,9 @@ class ItemHistory(models.Model):
     changes = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.item} - {self.action} - {self.timestamp.strftime("%Y-%m-%d %H:%M:%S")}"
+        local_timestamp = timezone.localtime(self.timestamp) 
+        formatted_timestamp = local_timestamp.strftime("%Y-%m-%d %I:%M:%S %p")
+        return f"{self.item} - {self.action} - {formatted_timestamp}"
 
 
 class ItemRequest(models.Model):

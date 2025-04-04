@@ -1,18 +1,20 @@
 from django.test import Client, TestCase, tag
 from django.urls import reverse
-from django.utils.timezone import localtime
+from django.utils import timezone
 from freezegun import freeze_time
 
 from django.contrib.auth.models import User, Group
 from authentication.models import Notification
 
+import datetime
 
 # Create your tests here.
 
 class NotificationModelTests(TestCase):
-    # NOTE: Date and time is set to January 1, 2025 at 12:00 for testing purposes
+    # NOTE: Local date and time is set to January 1, 2025 at 12:00 for testing purposes
+    aware_datetime = timezone.make_aware(datetime.datetime(2025, 1, 1, 12, 0, 0))
     @classmethod
-    @freeze_time("2025-01-01 12:00:00")
+    @freeze_time(aware_datetime)
     def setUpTestData(cls):
         """
         Setup
@@ -26,22 +28,10 @@ class NotificationModelTests(TestCase):
             Notification(subject="Reminder", message="Don't forget to update your profile.", user=cls.user),
         ]
         Notification.objects.bulk_create(notifications)
-
-    def test___str__(self):
-        """
-        String representation is printed in expected format.s_read_default(self):
-        """
-        notification = Notification.objects.get(pk=1)
-        expected_timestamp = localtime(notification.timestamp).strftime("%Y-%m-%d %I:%M:%S %p")
-        self.assertEqual(
-            notification.__str__(),
-            f'{expected_timestamp} | For testuser: "Welcome!"',
-            "The string representation does not match."
-        )
         
     def test_notification_user_relationship(self):
         """
-        The notification is associated with the right user.
+        Test that the notification is associated with the right user.
         """
         notification = Notification.objects.get(pk=1)
         self.assertEqual(notification.user, self.user, "The notification user does not match.")
@@ -71,12 +61,14 @@ class NotificationModelTests(TestCase):
         """
         Test that the timestamp is set correctly.
         """
+        # NOTE: The timestamp is stored in UTC in the database.
         notification = Notification.objects.get(pk=1)
         self.assertEqual(
             notification.timestamp.strftime("%Y-%m-%d %I:%M:%S %p"),
-            "2025-01-01 12:00:00 PM",
+            "2025-01-01 05:00:00 PM",
             "The timestamp does not match the expected value."
         )
+    
     def test___str__(self):
         """
         String representation is printed in expected format. 
