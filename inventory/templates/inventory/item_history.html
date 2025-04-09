@@ -10,7 +10,9 @@
 {% block page-title %}{{ item }} - Item History{% endblock page-title %}
 
 {% block content %}
-<button type="button" onclick="window.location.href='{% url "inventory:item_detail" item.id %}'">Back to Item Details</button>
+<div class="button-container">
+    <button type="button" onclick="window.location.href='{% url 'inventory:item_detail' item.id %}'">Back to Item Details</button>
+</div>
 <table>
     <thead>
         <tr>
@@ -25,7 +27,7 @@
         <tr>
             <td class="col action">{{ history.get_action_display }}</td>
             <td class="col timestamp">{{ history.timestamp }}</td>
-            <td class="col user"><a href="{% url "authentication:user_details" history.user.id %}">{{ history.user }}</a></td>
+            <td class="col user"><a href="{% url 'authentication:user_details' history.user.id %}">{{ history.user }}</a></td>
             <td class="col changes">{{ history.changes|safe }}</td>
         </tr>
         {% endfor %}

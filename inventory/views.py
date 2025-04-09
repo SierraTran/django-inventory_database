@@ -223,7 +223,7 @@ class ItemCreateTechnicianView(TechnicianRequiredMixin, CreateView):
         """
         Overrides the form_valid function of the base class (`CreateView`) to pass the current user to the save method.
 
-        This method sets the `created_by` field of the new Item object to the current user before calling the base class's
+        This method sets the `last_modified_by` field of the new Item object to the current user before calling the base class's
         `form_valid` method with the updated form.
 
         Args:
@@ -231,8 +231,8 @@ class ItemCreateTechnicianView(TechnicianRequiredMixin, CreateView):
 
         Returns:
             HttpResponse: The HTTP response object.
-        """
-        form.instance.created_by = self.request.user
+        """        
+        form.instance.last_modified_by = self.request.user
         return super().form_valid(form)
 
 
@@ -1056,7 +1056,17 @@ class ItemRequestDeleteView(UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy("inventory:item_requests")
     
     def test_func(self):
-        #TODO: Docstring
+        """
+        Checks if the item request belongs to the user.
+        
+        This method retrieves the primary key (pk) from `kwargs` and then fetches the `ItemRequest` object with the matching primary key.
+        If no object is found, an `Http404` exception is raised. Then, it checks if the `requested_by` field of the `ItemRequest` object 
+        matches the current user. If it does, True is returned, indicating that the user is allowed to delete the item request. Otherwise, 
+        False is returned.
+
+        Returns:
+            bool: True if the user is the one who made the item request. False otherwise.
+        """
         user = self.request.user
         item_request_id = self.kwargs.get("pk")
         request_from = get_object_or_404(ItemRequest, id=item_request_id).requested_by
@@ -1208,7 +1218,7 @@ class UsedItemCreateView(SuperuserOrTechnicianRequiredMixin, CreateView):
     """
 
     model = UsedItem
-    fields = "__all__"
+    fields = ["item", "work_order", "used_by"]
     template_name = "item_use_form.html"
 
     def get_initial(self):
@@ -1306,6 +1316,7 @@ class UsedItemCreateView(SuperuserOrTechnicianRequiredMixin, CreateView):
         used_item = form.instance
         item = used_item.item
         item.quantity -= 1
+        item.last_modified_by = self.request.user
         item.save()
 
         used_item_url = reverse(

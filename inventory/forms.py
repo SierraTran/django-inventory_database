@@ -10,9 +10,6 @@ from .models import Item, UsedItem, ItemRequest, PurchaseOrderItem
 class ImportFileForm(forms.Form):
     """
     A form for importing an Excel file containing items to be added to the inventory.
-
-    Args:
-        forms (_type_): _description_
     """
     file = forms.FileField()
 

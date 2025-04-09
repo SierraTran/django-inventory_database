@@ -73,11 +73,11 @@ class Item(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        Overrides the save method in the Item model to set the modified_by field.
+        Overrides the save method in the Item model to set the last_modified_by field.
         """
         user = kwargs.pop("user", None)
         if user:
-            self.modified_by = user
+            self.last_modified_by = user
         super().save(*args, **kwargs)
 
     def __str__(self):

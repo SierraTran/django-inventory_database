@@ -3,7 +3,7 @@
 ![Python Version](https://img.shields.io/badge/python-3.13.2-blue)
 ![Django Version](https://img.shields.io/badge/django-5.1.5-green)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![Static Badge](https://img.shields.io/badge/coverage-60%-CCFF00)
+![Coverage](https://img.shields.io/badge/coverage-67%-A8FF00)
 
 This is a Django-based web application for managing an inventory database. The application allows users to browse, search, and manage items in the inventory. It also includes user authentication and authorization features.
 
@@ -20,8 +20,7 @@ This is a Django-based web application for managing an inventory database. The a
     - [OpenPyXL](#openpyxl)
   - [Required Software](#required-software)
   - [Required Packages](#required-packages)
-  - [Setup Instructions](#setup-instructions)
-  - [Installation](#installation)
+  - [Installation and Setup Instructions](#installation-and-setup-instructions)
   - [Usage](#usage)
   - [Contributing](#contributing)
   - [Author](#author)
@@ -29,14 +28,14 @@ This is a Django-based web application for managing an inventory database. The a
 
 ## Features
 
-- User authentication and authorization
-- Browse available items
-- Search items
-- View item details
-- Create, update, and delete items (based on user permissions)
-- Import item data
-- Manage item requests
-- Make purchase orders
+**User Authentication**: Secure login and role-based access control
+**User Management**: Create, view, and delete users (Superuser only)
+**Item Management**: Create, update, use, and delete for items
+**Item Browsing**: Look through items with the search bar
+**Item Requests**: Make requests for new or existing items
+**Data Import**: Import item data from Excel Files
+**Purchase Orders**: Make a list of items to write to a purchase order Excel file
+**Notifications**: Mark notifications as read or delete them
 
 ## User Roles
 
@@ -51,24 +50,27 @@ This is a Django-based web application for managing an inventory database. The a
 
 ### Python
 
-This is the main programming language for the project.
+This is the main programming language for the project. It is used for the backend logic, database interactions, and server-side scripting. Python is a versatile, easy-to-learn, and easy-to-use programming language that is widely used in web development.
 
 More info about [Python](https://www.python.org/)
 
 ### Django
 
-This is the web framework used to build the application.
+This is the web framework used to build the application. Django is a high-level Python web framework that encourages rapid development and clean, pragmatic design. It provides a robust set of features for building web applications, including an ORM (Object-Relational Mapping) system, authentication, and an admin interface.
 
 More info about [Django](https://www.djangoproject.com/)
 
 ### Haystack and Whoosh
 
-For database searching, Haystack has been implemented with the Whoosh backend. Whoosh is easy to set up and well-suited for small applications, which makes it an ideal choice for this application.
+For database searching, the Haystack search framework has been implemented with the Whoosh backend. Whoosh is easy to set up and well-suited for small applications, which makes it an ideal choice for this application.
+
+More info about [Haystack](https://django-haystack.readthedocs.io/en/master/) and [Whoosh](https://whoosh.readthedocs.io/en/latest/)
 
 ### OpenPyXL
-<!-- TODO: OpenPyXL -->
-<!-- [ ]: Brief explanation of the technology -->
-<!-- [ ]: Explain why it was chosen -->
+
+For writing to Excel files, OpenPyXL is used. It is a powerful library that allows for easy manipulation of Excel files in Python. This is mainly used for writing item data to an Excel file for purchase orders.
+
+More info about [OpenPyXL](https://openpyxl.readthedocs.io/en/stable/)
 
 ## Required Software
 
@@ -81,55 +83,30 @@ The list of required software below will also be included in the `requirements.t
 - Django
 - django-haystack
 - openpyxl
+- whitenoise
 - Whoosh
 
-<!-- TODO: Redo into "Installation and Setup Instructions -->
-<!-- [ ]: Step 1: Download the Application -->
-<!-- [ ]: Step 2: Extract the Files -->
-<!-- [ ]: Step 3: Install Python -->
-<!-- [ ]: Step 4: Install Required Software -->
-<!-- [ ]: Step 5: Start and Run the Application -->
-## Setup Instructions
+## Installation and Setup Instructions
 
-1. Download the zip file.
-2. Extract the files into another folder with a name that appropriately matches the application.
-3. Click the `app.bat` file.
+### Step 1: Download the Application
 
-## Installation
+1. Go to the [GitHub repository](https://github.com/SierraTran/django-inventory_database).
+2. Click the **Code** button and select **Download ZIP**.
 
-1. Clone the repository:
+### Step 2: Extract the Files
 
-    ```bash
-    git clone https://github.com/jimmyd/django-inventory_database.git
-    cd django-inventory_database
-    ```
+1. Locate the downloaded ZIP file (usually in your "Downloads" folder).
+2. Extract all the files to a location of your choice.
 
-2. Install the required packages:
+### Step 3: Install Required Software
 
-    ```bash
-    pip install -r requirements.txt
-    ```
+1. Download and install Python from the [official Python website](https://www.python.org/downloads/). At the time of writing this, the latest version of Python is 3.13.2.
+2. During installation, make sure to check the box that says **Add Python to PATH**.
 
-3. Apply the migrations:
+### Step 4: Start and Run the Application
 
-    ```bash
-    python manage.py makemigrations
-    python manage.py migrate
-    ```
-
-4. Create a superuser:
-
-    ```bash
-    python manage.py createsuperuser
-    ```
-
-5. Run the development server:
-
-    ```bash
-    python manage.py runserver
-    ```
-
-6. Open your web browser and go to `http://127.0.0.1:8000/`.
+1. Open the folder where you extracted the files.
+2. Double-click the app.bat file. This will automatically install all the required packages and set up the application for you.
 
 ## Usage
 
@@ -139,11 +116,14 @@ The list of required software below will also be included in the `requirements.t
 - **User Management**: Superusers can create, view, and delete users.
 
 ## Future Enhancements
-<!-- TODO: Future Enhancements -->
-<!-- [ ]: More seamless notification marking and deleting -->
-<!-- [ ]: Extensive help page and/or contextual help messages -->
-<!-- [ ]: "Shopping cart" feature for saving a list of items to purchase for purchase order forms -->
-<!-- [ ]: Export items in the inventory to an Excel File -->
+
+This list contains features that may possibly be added to the application in the future.
+
+- Allow all users access to *only* view the list of all users and their details
+- More seamless notification marking and deleting
+- Extensive help page and/or contextual help messages
+- "Shopping cart" feature for saving a list of items to purchase for purchase order form
+- Export items in the inventory to an Excel File
 
 ## Contributing
 

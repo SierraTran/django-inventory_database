@@ -29,11 +29,11 @@ MEDIA_URL = "/media/"
 SECRET_KEY = "django-insecure-lj(f3$%36ah0&x2j$uiksiz*hwk$$v+!y_k96k9&km_ym^m107"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 TEST_OUTPUT_VERBOSE = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 runserver.default_port = '8000'
 runserver.default_addr = '127.0.0.1'
 
@@ -64,6 +64,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = "inventory_database.urls"

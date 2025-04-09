@@ -222,61 +222,69 @@ class ItemHistoryModelTests(TestCase):
     def setUpTestData(cls):
         """
         Set up for ItemHistoryModelTests
-        """
-        cls.item1 = Item.objects.create(
+        """        
+        Item.objects.create(
             manufacturer="Test MFG1",
             model="Test Model1",
             part_or_unit=Item.UNIT,
             quantity=1,
             unit_price=100.00,
-        )
-        cls.item2 = Item.objects.create(
+        )        
+        Item.objects.create(
             manufacturer="Test MFG2",
             model="Test Model2",
             part_or_unit=Item.PART,
             quantity=5,
             min_quantity=10,
             unit_price=0.50,
-        )
-        cls.item3 = Item.objects.create(
+        )        
+        Item.objects.create(
             manufacturer="Test MFG3",
             model="Test Model3",
             part_or_unit=Item.PART,
             part_number="Test Part Number",
         )
-        cls.itemhistory1 = ItemHistory.objects.filter(item=cls.item1)
-        cls.itemhistory2 = ItemHistory.objects.filter(item=cls.item2)
-        cls.itemhistory3 = ItemHistory.objects.filter(item=cls.item3)
+        
+        cls.item1 = Item.objects.get(id=1)
+        cls.item2 = Item.objects.get(id=2)
+        cls.item3 = Item.objects.get(id=3)
+        
+        cls.item_history1 = ItemHistory.objects.filter(item=cls.item1)
+        cls.item_history2 = ItemHistory.objects.filter(item=cls.item2)
+        cls.item_history3 = ItemHistory.objects.filter(item=cls.item3)
+        
+        cls.user = User.objects.create_user(username="testuser", password="password")
+        cls.user.groups.add(Group.objects.get(name="Superuser"))
 
     def test_history_action_create(self):
         """
         Make sure each created item has a history record of being created.
         """
         self.assertEqual(
-            self.itemhistory1.__len__(), 
+            self.item_history1.__len__(), 
             1, 
             "The history of the first item should only have 1 record."
         )
         self.assertEqual(
-            self.itemhistory1[0].__str__(),
+            self.item_history1[0].__str__(),
             "Test MFG1, Test Model1 - create - 2025-01-01 12:00:00 PM",
         )
         self.assertEqual(
-            self.itemhistory2.__len__(), 
+            self.item_history2.__len__(), 
             1, 
             "The history of the second item should only have 1 record."
         )
         self.assertEqual(
-            self.itemhistory2[0].__str__(),
+            self.item_history2[0].__str__(),
             "Test MFG2, Test Model2  - create - 2025-01-01 12:00:00 PM",
         )
         self.assertEqual(
-            self.itemhistory3.__len__(), 
+            self.item_history3.__len__(), 
             1, 
             "The history of the third item should only have 1 record."
         )
         self.assertEqual(
-            self.itemhistory3[0].__str__(),
+            self.item_history3[0].__str__(),
             "Test MFG3, Test Model3 Test Part Number - create - 2025-01-01 12:00:00 PM",
         )
 
@@ -287,6 +295,14 @@ class ItemHistoryModelTests(TestCase):
         """
         # [ ]: Update each item
         # [ ]: Check history records for updates
+        
+        self.item1.manufacturer = "Fluke"
+        self.item1.save(user=self.user)
+
+        self.assertIsNotNone(self.item_history1, "The item's history doesn't exist.")
+        self.assertEqual(self.item_history1[1].action, "update", f"The action for this record should be 'update'. It is actually {self.item_history1[1].action}.")
+        self.assertEqual(self.item_history1[1].user, self.user, f"The user responsible for the creation should be {self.user}. It is actually {self.item_history1[1].user}.")
+        self.assertEqual(self.item_history1[1].changes, "manufacturer: 'Test MFG1' has been changed to 'Fluke'", "The changes field does not match the expected value.")
         
         
     def test_history_action_use(self):

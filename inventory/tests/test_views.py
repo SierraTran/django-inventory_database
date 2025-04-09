@@ -331,7 +331,7 @@ class ItemCreateViewTests(TestCase):
         # Make sure the item was created successfully and redirects
         self.assertEqual(response.status_code, 302)
         self.assertTrue(Item.objects.filter(model="Superuser\'s Item").exists(), "This item doesn't exist.")
-    
+            
     def test_item_create_as_superuser_with_technician_view(self):
         """
         Superusers cannot create items with the technician view
@@ -375,7 +375,6 @@ class ItemCreateViewTests(TestCase):
         #     self.assertFalse(response.context['form'].errors, f"Form errors: {response.context['form'].errors}")
             
         # [ ]: Make sure the item doesn't exist in the database
-
     
     def test_item_create_as_technician_with_technician_view(self):
         """
@@ -404,9 +403,8 @@ class ItemCreateViewTests(TestCase):
         # Make sure the item was created successfully and redirects
         self.assertEqual(response.status_code, 302)
         self.assertTrue(Item.objects.filter(model="Technician\'s Item").exists(), "This item doesn't exist.")
-    
-    def test_item_create_as_intern(self):
-        # [ ]: Split test_item_create_as_intern into two test functions
+            
+    def test_item_create_as_intern_with_superuser_view(self):
         """
         Make sure interns can't create items.
         """
@@ -433,6 +431,13 @@ class ItemCreateViewTests(TestCase):
         # The item shouldn't exist in the database
         self.assertFalse(Item.objects.filter(model="Intern\'s Item").exists(), "This item does exist.")
         
+    def test_item_create_as_intern_with_technician_view(self):
+        """
+        Make sure interns can't create items.
+        """
+        login = self.client.login(username="testintern", password="password")
+        self.assertTrue(login, "Login failed.")
+        
         # Attempt to create an item with the technician's view
         response = self.client.post(reverse("inventory:item_create_form_technician"), {
             "manufacturer": "Intern",
@@ -453,10 +458,9 @@ class ItemCreateViewTests(TestCase):
         # The item shouldn't exist in the database
         self.assertFalse(Item.objects.filter(model="Intern\'s Item").exists(), "This item does exist.")
     
-    def test_item_create_as_viewer(self):
-        # [ ]: Split test_item_create_as_viewer into teo test functions
+    def test_item_create_as_viewer_with_superuser_view(self):
         """
-        Make sure viewers can't create items.
+        Make sure viewers can't create items with the superuser view.
         """
         login = self.client.login(username="testviewer", password="password")
         self.assertTrue(login, "Login failed.")
@@ -480,6 +484,13 @@ class ItemCreateViewTests(TestCase):
         
         # The item shouldn't exist in the database
         self.assertFalse(Item.objects.filter(model="Viewer\'s Item").exists(), "This item does exist.")
+        
+    def test_item_create_as_viewer_with_technician_view(self):
+        """
+        Make sure viewers can't create items with the technician view.
+        """
+        login = self.client.login(username="testviewer", password="password")
+        self.assertTrue(login, "Login failed.")
         
         # Attempt to create an item with the technician's view
         response = self.client.post(reverse("inventory:item_create_form_technician"), {
@@ -1218,6 +1229,11 @@ class ItemHistoryViewTests(TestCase):
             self.assertEqual(item_history.action, "create", f"The action for this record should be 'create'. It is actually {item_history.action}.")
             self.assertEqual(item_history.user, self.user, f"The user responsible for the creation should be {self.user}. It is actually {item_history.user}.")
             self.assertEqual(item_history.changes, "Created and added to the database.", "The changes field does not match the expected value.")
+            
+            # [ ]: Move the above code for checking history to test_models.py
+            
+            
+            # [ ]: Check that the item history view shows the complete history for the item
     
     def test_item_history_view_record_of_update(self):
         """
@@ -1232,7 +1248,7 @@ class ItemHistoryViewTests(TestCase):
         # [ ]: Check for form errors
         # [ ]: Make sure the item was updated successfully and redirects
         # [ ]: Refresh with `self.item.refresh_from_db()`
-        # [ ]: Check Item History for record of update 
+        # [ ]: Check that the item history view shows the complete history for the item
         
     def test_item_history_view_record_of_use(self):
         """
@@ -1248,9 +1264,7 @@ class ItemHistoryViewTests(TestCase):
         # [ ]: Check for form errors
         # [ ]: Make sure the item was updated successfully and redirects
         # [ ]: Refresh with `self.item.refresh_from_db()`
-        # [ ]: Check Item History for record of use
-
-
+        # [ ]: Check that the item history view shows the complete history for the item
 
 
 ###################################################################################################
@@ -1267,9 +1281,6 @@ class ItemRequestViewTests(TestCase):
         # [ ]: Create one user for each group
         # [ ]: One or more item requests to view for the list
         
-    
-    
-
 
 ###################################################################################################
 # Tests for the Views for the UsedItem Model ######################################################
@@ -1285,7 +1296,6 @@ class UsedItemViewTests(TestCase):
         # [ ]: Create one user for each group
         # [ ]: Create one item for use
         
-    
     def test_used_item_view_access_control(self):
         """
         
