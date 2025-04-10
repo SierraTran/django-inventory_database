@@ -2,6 +2,7 @@ coverage==7.6.12
 Django==5.1.5
 django-haystack==3.3.0
 django-model-utils==5.0.0
+freezegun==1.5.1
 openpyxl==3.1.5
 whitenoise==6.9.0
 Whoosh==2.7.4
