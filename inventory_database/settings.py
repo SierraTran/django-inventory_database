@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "haystack",
     "coverage",
-    "discover_runner",
     "inventory_database",
     "inventory",
     "authentication",
