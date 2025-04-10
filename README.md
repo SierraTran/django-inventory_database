@@ -3,7 +3,7 @@
 ![Python Version](https://img.shields.io/badge/python-3.13.2-blue)
 ![Django Version](https://img.shields.io/badge/django-5.1.5-green)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![Coverage](https://img.shields.io/badge/coverage-67%-A8FF00)
+![Coverage](https://img.shields.io/badge/coverage-69%-A8FF00)
 
 This is a Django-based web application for managing an inventory database. The application allows users to browse, search, and manage items in the inventory. It also includes user authentication and authorization features.
 
@@ -28,14 +28,14 @@ This is a Django-based web application for managing an inventory database. The a
 
 ## Features
 
-**User Authentication**: Secure login and role-based access control
-**User Management**: Create, view, and delete users (Superuser only)
-**Item Management**: Create, update, use, and delete for items
-**Item Browsing**: Look through items with the search bar
-**Item Requests**: Make requests for new or existing items
-**Data Import**: Import item data from Excel Files
-**Purchase Orders**: Make a list of items to write to a purchase order Excel file
-**Notifications**: Mark notifications as read or delete them
+- **User Authentication**: Secure login and role-based access control
+- **User Management**: Create, view, and delete users (Superuser only)
+- **Item Management**: Create, update, use, and delete for items
+- **Item Browsing**: Look through items with the search bar
+- **Item Requests**: Make requests for new or existing items
+- **Data Import**: Import item data from Excel Files
+- **Purchase Orders**: Make a list of items to write to a purchase order Excel file
+- **Notifications**: Mark notifications as read or delete them
 
 ## User Roles
 
