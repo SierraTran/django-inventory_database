@@ -1,9 +1,6 @@
 from decimal import Decimal
-from unittest.mock import patch
 from django.test import Client, RequestFactory, TestCase, tag
 from django.urls import reverse
-import time_machine
-import datetime
 
 from django.contrib.auth.models import User, Group
 from inventory.models import Item, ItemHistory
@@ -261,21 +258,25 @@ class ItemCreateViewTests(TestCase):
         self.client.login(username="testsuperuser", password="password")
         response = self.client.get(self.item_create_superuser_url)
         self.assertEqual(response.status_code, 200, "Superuser failed to access their own view.")
+        self.assertTemplateUsed(response, "item_create_form.html")
         self.client.logout()
         
         self.client.login(username="testtechnician", password="password")
         response = self.client.get(self.item_create_superuser_url)
         self.assertEqual(response.status_code, 403, "Technician unexpectedly gained access to superuser view.")
+        self.assertTemplateUsed(response, "403.html")
         self.client.logout()
         
         self.client.login(username="testintern", password="password")
         response = self.client.get(self.item_create_superuser_url)
         self.assertEqual(response.status_code, 403, "Intern unexpectedly gained access to superuser view.")
+        self.assertTemplateUsed(response, "403.html")
         self.client.logout()
         
         self.client.login(username="testviewer", password="password")
         response = self.client.get(self.item_create_superuser_url)
         self.assertEqual(response.status_code, 403, "Viewer unexpectedly gained access to superuser view.")
+        self.assertTemplateUsed(response, "403.html")
         self.client.logout()
      
     @tag("critical")   
@@ -286,21 +287,25 @@ class ItemCreateViewTests(TestCase):
         self.client.login(username="testsuperuser", password="password")
         response = self.client.get(self.item_create_technician_url)
         self.assertEqual(response.status_code, 403, "Superuser unexpectedly gained access to technician view.")
+        self.assertTemplateUsed(response, "403.html")
         self.client.logout()
         
         self.client.login(username="testtechnician", password="password")
         response = self.client.get(self.item_create_technician_url)
         self.assertEqual(response.status_code, 200, "Technician failed to access their own view.")
+        self.assertTemplateUsed(response, "item_create_form.html")
         self.client.logout()
         
         self.client.login(username="testintern", password="password")
         response = self.client.get(self.item_create_technician_url)
         self.assertEqual(response.status_code, 403, "Intern unexpectedly gained access to technician view.")
+        self.assertTemplateUsed(response, "403.html")
         self.client.logout()
         
         self.client.login(username="testviewer", password="password")
         response = self.client.get(self.item_create_technician_url)
         self.assertEqual(response.status_code, 403, "Viewer unexpectedly gained access to technician view.")
+        self.assertTemplateUsed(response, "403.html")
         self.client.logout()
             
     def test_item_create_as_superuser_with_superuser_view(self):
@@ -1187,6 +1192,27 @@ class ItemHistoryViewTests(TestCase):
         self.assertEqual(len(actual_history), 1, "The queryset should only contain one item.")
         self.assertEqual(actual_history, expected_history, "The queryset does not match the expected history.")
         
+    def test_get_context_data(self):
+        """
+        Test the context data for the view
+        """
+        # TODO: test_get_context_data
+        # Simulate GET request
+        request = self.factory.get(self.item_history_url)
+        view = ItemHistoryView()
+        view.request = request
+        view.kwargs = {"pk": self.item.pk}  
+        
+        # Set the object_list attribute by calling get_queryset
+        view.object_list = view.get_queryset()
+        
+        # Call get_context_data
+        context_data = view.get_context_data()
+
+        self.assertIn("item", context_data, "The context does not contain the 'item' key.")
+        self.assertEqual(context_data["item"], self.item, "The 'item' in the context does not match the expected item")
+        
+        
     def test_item_history_view_record_of_creation(self):
             """
             The ItemHistory view shows the record of an item's creation by a user.
@@ -1197,20 +1223,18 @@ class ItemHistoryViewTests(TestCase):
             # User logs in
             login = self.client.login(username="testuser", password="password")
             self.assertTrue(login, "Login failed.")
-            print(self.client.session.get('_auth_user_id'))
-
             
             # User creates an Item
             response = self.client.post(reverse("inventory:item_create_form_superuser"), {
-                "manufacturer": "Fluke",
-                "model": "N/A",
+                "manufacturer": "HP",
+                "model": "Main board",
                 "part_or_unit": Item.PART,
-                "part_number": "1285578",
-                "description": "Power supply connector",
+                "part_number": "0482D",
+                "description": "",
                 "location": "Closet",
-                "quantity": 3,
+                "quantity": 1,
                 "min_quantity": 0,
-                "unit_price": 11.33,
+                "unit_price": 2.00,
             })
             
             # Check for form errors
@@ -1219,22 +1243,19 @@ class ItemHistoryViewTests(TestCase):
             
             # Make sure the item was created successfully and redirects
             self.assertEqual(response.status_code, 302, "User failed to create the item.")
-            self.assertTrue(Item.objects.filter(part_number="1285578").exists(), "This item doesn't exist.")
+            self.assertTrue(Item.objects.filter(part_number="0482D").exists(), "This item doesn't exist.")
             
             # Check Item History for record of creation        
-            item = Item.objects.filter(part_number="1285578").first()
+            item = Item.objects.filter(part_number="0482D").first()
             item_history = ItemHistory.objects.filter(item=item).first()
 
             self.assertIsNotNone(item_history, "The item's history doesn't exist.")
             self.assertEqual(item_history.action, "create", f"The action for this record should be 'create'. It is actually {item_history.action}.")
             self.assertEqual(item_history.user, self.user, f"The user responsible for the creation should be {self.user}. It is actually {item_history.user}.")
-            self.assertEqual(item_history.changes, "Created and added to the database.", "The changes field does not match the expected value.")
-            
-            # [ ]: Move the above code for checking history to test_models.py
-            
+            self.assertEqual(item_history.changes, "Created and added to the database.", "The changes field does not match the expected value.")            
             
             # [ ]: Check that the item history view shows the complete history for the item
-    
+               
     def test_item_history_view_record_of_update(self):
         """
         The ItemHistory view shows the record of an item's update by a user

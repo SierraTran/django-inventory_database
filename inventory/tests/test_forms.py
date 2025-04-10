@@ -1,16 +1,11 @@
-from decimal import Decimal
-from unittest.mock import patch
-from django.test import TestCase, tag
+from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-import time_machine
 import datetime
 
 from django.contrib.auth.models import User, Group
 from inventory.models import Item
-from inventory.forms import UsedItemForm, ItemRequestForm, PurchaseOrderItemForm
-
 
 
 # Create your tests here.
@@ -32,21 +27,43 @@ class UsedItemFormTests(TestCase):
         items = [
             Item(manufacturer="Tektronix", model="18934G", part_or_unit=Item.PART, part_number="V9856", quantity=2),            
             Item(manufacturer="HP", model="Main Board", part_or_unit=Item.PART, part_number="1234-5678", quantity=8),
-                       
+            Item(manufacturer="Test MFG", model="Test Model", part_or_unit=Item.PART, part_number="9876-5432", quantity=5),
+            Item(manufacturer="Fluke", model="Knob", part_or_unit=Item.PART, part_number="00129", quantity=3),
         ]
-        Item.objects.bulk_create(items)
+        for item in items: 
+            item.save()
+            
+        cls.item_use_form_url = reverse("inventory:item_use_form")
+            
+        cls.user = User.objects.create_user(username="testuser", password="password")
+        cls.user.groups.add(Group.objects.get(name="Superuser"))
         
-    def test___init__(self):
+        cls.client = Client()
+        
+        
+    def test___init__no_get_params(self):
         """
-        Test that the __init__ function works correctly
+        Test that the __init__ function works correctly without get parameters in the url
+        """
+        self.client.login(username="testuser", password="password")
+        response = self.client.get(self.item_use_form_url)
+        
+        self.assertEqual(response.status_code, 404, "Unexpectedly gained access to the item use form")
+
+        
+    def test___init__with_get_params(self):
+        """
+        Test that the __init__ function works correctly with get parameters in the url
         """
         # TODO: test___init__
-        # [ ]: Initiate the form 
-        # [ ]: Make sure the item choices are in the expected order
-        # [ ]: make sure the `datetime_used` field label is "Date & Time used:"
+        # [x]: GET the form 
+        # [ ]: Make sure the item choices in the select2 dropdown menu are in the expected order
+        # [x]: make sure the `datetime_used` field label is "Date & Time used:"
+        self.client.login(username="testuser", password="password")
+        response = self.client.get(self.item_use_form_url+f"?item_id=1")
         
-        form = UsedItemForm()
-        
+        self.assertEqual(response.status_code, 200, "Failed to access the item use form")
+        self.assertContains(response, '-datetime_used">Date & Time used:</label>')
 
 class ItemRequestFormTests(TestCase):
     @classmethod
@@ -55,14 +72,47 @@ class ItemRequestFormTests(TestCase):
         Setup
         """
         # TODO: setUpTestData
+        items = [
+            Item(manufacturer="Tektronix", model="18934G", part_or_unit=Item.PART, part_number="V9856", quantity=2),            
+            Item(manufacturer="HP", model="Main Board", part_or_unit=Item.PART, part_number="1234-5678", quantity=8),
+            Item(manufacturer="Test MFG", model="Test Model", part_or_unit=Item.PART, part_number="9876-5432", quantity=5),
+            Item(manufacturer="Fluke", model="Knob", part_or_unit=Item.PART, part_number="00129", quantity=3),
+        ]
+        for item in items: 
+            item.save()
+            
+            
+        cls.user = User.objects.create_user(username="testuser", password="password")
+        cls.user.groups.add(Group.objects.get(name="Technician"))
         
-    def test___init__(self):
+        cls.item_request_form_url = reverse("inventory:item_request_form")
+        
+        cls.client = Client()
+        
+    def test___init__no_get_params(self):
+        """
+        Test that the __init__ function works correctly without get parameters in the url
+        """
+        self.client.login(username="testuser", password="password")
+        response = self.client.get(self.item_use_form_url)
+        
+        self.assertEqual(response.status_code, 404, "Unexpectedly gained access to the item use form")
+        
+    def test___init__with_get_params(self):
         """
         Test that the __init__ function works correctly
         """
         # TODO: test___init__
-        # [ ]: Make sure the `model_part_num` field label is "Model / Part #:"
-
+        # [x]: Make sure the `model_part_num` field label is "Model / Part #"
+        self.client.login(username="testuser", password="password")
+        response = self.client.get(
+            self.item_request_form_url +
+            f"?item_id={self.item.id}&manufacturer={self.item.manufacturer}&model_part_num={self.item.model_part_num}&description={self.item.description}&unit_price={self.item.unit_price}"
+        )
+        
+        self.assertEqual(response.status_code, 200, "Failed to access the item request form")
+        self.assertContains(response, '-model_part_num">Model / Part #</label>')    
+        
 
 class PurchaseOrderItemFormTests(TestCase):
     @classmethod
@@ -71,12 +121,21 @@ class PurchaseOrderItemFormTests(TestCase):
         Setup
         """
         # TODO: setUpTestData
+        cls.user = User.objects.create_user(username="testuser", password="password")
+        cls.user.groups.add(Group.objects.get(name="Superuser"))
+        
+        cls.purchase_order_form_url = reverse("inventory:purchase_order_form")
+        
+        cls.client = Client()
         
     def test___init__(self):
         """
         Test that the __init__ function works correctly
-        """
-        # TODO: test___init__
-        # [ ]: The `model_part_num` field label is "Model / Part #:"
-        # [ ]: The `serial_num` field label is "Serial #"
-        # [ ]: The `property_num` field label is "Property #"
+        """        
+        self.client.login(username="testuser", password="password")
+        response = self.client.get(self.purchase_order_form_url)
+        
+        self.assertEqual(response.status_code, 200, "Failed to access the purchase order form")
+        self.assertContains(response, '-model_part_num">Model / Part #</label>')
+        self.assertContains(response, '-serial_num">Serial #</label>')
+        self.assertContains(response, '-property_num">Property #</label>')

@@ -255,6 +255,8 @@ class ItemHistoryModelTests(TestCase):
         
         cls.user = User.objects.create_user(username="testuser", password="password")
         cls.user.groups.add(Group.objects.get(name="Superuser"))
+        
+        cls.client = Client()
 
     def test_history_action_create(self):
         """
@@ -289,13 +291,9 @@ class ItemHistoryModelTests(TestCase):
         )
 
     def test_history_action_update(self):
-        # TODO: test_history_action_update
         """
-        Update each item and check their history records for updates
-        """
-        # [ ]: Update each item
-        # [ ]: Check history records for updates
-        
+        Update an item and check their history records for the update
+        """        
         self.item1.manufacturer = "Fluke"
         self.item1.save(user=self.user)
 
@@ -304,14 +302,18 @@ class ItemHistoryModelTests(TestCase):
         self.assertEqual(self.item_history1[1].user, self.user, f"The user responsible for the creation should be {self.user}. It is actually {self.item_history1[1].user}.")
         self.assertEqual(self.item_history1[1].changes, "manufacturer: 'Test MFG1' has been changed to 'Fluke'", "The changes field does not match the expected value.")
         
-        
     def test_history_action_use(self):
         # TODO: test_history_action_use
         """
-        Use each item and check their history records for use
+        Use an item and check their history records for the use
         """
-        # [ ]: Use each item
+        # [ ]: Use an item
         # [ ]: Check history records for use
+        
+        self.client.login(username="testuser", password="password")
+        response = self.client.post(reverse("inventory:item_use_form"))
+        
+        
         
 
 class ItemRequestModelTests(TestCase):
