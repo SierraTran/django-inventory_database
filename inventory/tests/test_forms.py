@@ -81,6 +81,7 @@ class ItemRequestFormTests(TestCase):
         for item in items: 
             item.save()
             
+        cls.item = Item.objects.get(manufacturer="Tektronix", model="18934G", part_number="V9856")
             
         cls.user = User.objects.create_user(username="testuser", password="password")
         cls.user.groups.add(Group.objects.get(name="Technician"))
@@ -94,7 +95,7 @@ class ItemRequestFormTests(TestCase):
         Test that the __init__ function works correctly without get parameters in the url
         """
         self.client.login(username="testuser", password="password")
-        response = self.client.get(self.item_use_form_url)
+        response = self.client.get(self.item_request_form_url)
         
         self.assertEqual(response.status_code, 404, "Unexpectedly gained access to the item use form")
         
