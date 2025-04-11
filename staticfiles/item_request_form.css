@@ -8,7 +8,7 @@
 
 /* Styles */
 form {    
-    width: 80%;
+    width: 60%;
     min-width: 1000px;
     margin: 0 auto;
     background-color: var(--gray);
@@ -42,7 +42,7 @@ table.second tr:nth-child(2) {
 
 table.second tr th, tr td {
     padding: 0.5em 1.25em 0.5em 1.25em;
-    width: 20%;
+    width: 80%;
 }
 
 table.third {

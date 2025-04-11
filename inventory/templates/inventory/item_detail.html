@@ -101,7 +101,7 @@
     </button>
     {% else %}
     <button type="button" id="request-more" 
-        onclick="window.open('{% url "inventory:item_request_form" %}?item_id={{ item.id }}&manufacturer={{ item.manufacturer }}&model_part_num={{ item.model_part_num }}&description={{ item.description }}&unit_price={{ item.unit_price }}', '_blank')"
+        onclick="window.location.href='{% url "inventory:item_request_form" %}?item_id={{ item.id }}&manufacturer={{ item.manufacturer }}&model_part_num={{ item.model_part_num }}&description={{ item.description }}&unit_price={{ item.unit_price }}'""
     >
         Request More
     </button>

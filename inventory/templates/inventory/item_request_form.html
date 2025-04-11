@@ -16,7 +16,7 @@
     <table>
     {% for field in form %}
         <tr>
-            <th>{{ field.label_tag }}</th>
+            <th>{{ field.label }}</th>
             <td>
                 {% if field.name == 'description' %}
                 <textarea name="description" cols="40" rows="10" id="id_description">{{ field.value }}</textarea>
@@ -31,10 +31,6 @@
         <button type="button" onclick="window.location.href='{% url "inventory:item_detail" pk=item.pk %}'">Cancel</button>
         <input type="submit" value="Request Item">
     </div>
-    <p>
-        The button above should add the item(s) to a 'request' table
-        and have an email sent to the admin(s)
-    </p>
 </form>
 
 <!-- Include jQuery and Select2 -->

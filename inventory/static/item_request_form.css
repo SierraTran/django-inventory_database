@@ -8,28 +8,53 @@
 
 /* Styles */
 form {    
-    width: 80%;
-    max-width: 1000px;
+    width: 60%;
+    min-width: 1000px;
     margin: 0 auto;
+    background-color: var(--gray);
 }
 
 table {    
     border-collapse: collapse;
     width: 100%;
-    margin: 0 auto;
-    /* margin-bottom: 2em; */
-    background-color: var(--gray);
-    border-collapse: collapse;
-    max-width: 900px;
 }
 
-td {
-    padding: 10px;
+table.first {
+    border-bottom: var(--fieldset-border);
 }
 
-textarea {
-    font-family: arial, sans-serif;
-    min-width: 170px;
+table.first tr th, tr td {
+    padding: 0 0.25em 0 0.25em;  
+}
+
+table.first tr th {
+    width: 10%;
+    max-width: 125px;
+}
+
+table.first tr td {
+    width: 23%;
+}
+
+table.second tr:nth-child(2) {
+    background-color: var(--light-gray);
+}
+
+table.second tr th, tr td {
+    padding: 0.5em 1.25em 0.5em 1.25em;
+    width: 80%;
+}
+
+table.third {
+    border-top: var(--fieldset-border);
+}
+
+table.third tr th {
+    width: 10%;
+    max-width: 125px;
+}
+table.third tr td {
+    width: 40%;
 }
 
 label {

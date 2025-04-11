@@ -37,7 +37,6 @@ class UsedItemForm(forms.ModelForm):
         fields = [
             "item",
             "work_order",
-            "datetime_used",
             "used_by",
         ]
 
