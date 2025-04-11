@@ -317,13 +317,13 @@ class NotificationDeleteView(UserPassesTestMixin, DeleteView):
             return super(NotificationDeleteView, self).post(request, *args, **kwargs)
 
 
-class UsersView(SuperuserRequiredMixin, ListView):
+class UsersView(LoginRequiredMixin, ListView):
     """
     Displays a list of users.
     Users must be in the "Superuser" group to access this view.
     
     Inherits functionality from:
-        - SuperuserRequiredMixin
+        - LoginRequiredMixin
         - ListView
     (See module docstring for more details on the inherited classes)
 
@@ -350,13 +350,13 @@ class UsersView(SuperuserRequiredMixin, ListView):
         return User.objects.all().order_by("username", "last_name", "first_name")
 
 
-class UserDetailsView(SuperuserRequiredMixin, DetailView):
+class UserDetailsView(LoginRequiredMixin, DetailView):
     """
     Displays the details of a specific user.
     Users must be in the "Superuser" group to access this view.
 
     Inherits functionality from:
-        - SuperuserRequiredMixin
+        - LoginRequiredMixin
         - DetailView
     (See module docstring for more details on the inherited classes)
 

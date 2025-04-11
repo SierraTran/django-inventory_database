@@ -1166,7 +1166,7 @@ class UsedItemView(LoginRequiredMixin, ListView):
         Returns:
             QuerySet: A queryset containing all used items.
         """
-        return UsedItem.objects.all().order_by("work_order", "item")
+        return UsedItem.objects.all().order_by("datetime_used", "work_order", "item")
 
 
 class UsedItemDetailView(LoginRequiredMixin, DetailView):

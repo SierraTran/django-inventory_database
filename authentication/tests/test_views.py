@@ -6,10 +6,6 @@ from authentication.models import Notification
 
 
 class DatabaseLoginViewTests(TestCase):
-    # TODO: DatabaseLoginViewTests
-    # [ ]: test_login_invalid_username
-    # [ ]: test_login_invalid_password
-    # [ ]: test_login_success
     @classmethod
     def setUpTestData(cls):
         """
@@ -22,16 +18,19 @@ class DatabaseLoginViewTests(TestCase):
         """
         An error message displays for an invalid username
         """
+        # TODO: test_login_invalid_username
         
     def test_login_invalid_password(self):
         """
         An error message displays for an invalid password
         """
+        # TODO: test_login_invalid_password
         
     def test_login_success(self):
         """
         Successfully login and redirect to the home page
         """
+        # TODO: test_login_success
 
 ###################################################################################################
 # Tests for the Views for the Notification Model ##################################################
@@ -121,5 +120,8 @@ class NotificationViewTests(TestCase):
 class NotificationUpdateViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        return super().setUpTestData()
-
+        """
+        Setup
+        """
+        # TODO: Set up test data for NotificationUpdateViewTests
+        # [ ]: Create a user for logging in 
