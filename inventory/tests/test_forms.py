@@ -57,13 +57,10 @@ class UsedItemFormTests(TestCase):
         """
         # TODO: test___init__
         # [x]: GET the form 
-        # [ ]: Make sure the item choices in the select2 dropdown menu are in the expected order
-        # [x]: make sure the `datetime_used` field label is "Date & Time used:"
         self.client.login(username="testuser", password="password")
         response = self.client.get(self.item_use_form_url+f"?item_id=1")
         
         self.assertEqual(response.status_code, 200, "Failed to access the item use form")
-        self.assertContains(response, '-datetime_used">Date & Time used:</label>')
 
 class ItemRequestFormTests(TestCase):
     @classmethod
@@ -112,7 +109,8 @@ class ItemRequestFormTests(TestCase):
         )
         
         self.assertEqual(response.status_code, 200, "Failed to access the item request form")
-        self.assertContains(response, '-model_part_num">Model / Part #</label>')    
+        self.assertNotContains(response, '<th>Model part num</th>')
+        self.assertContains(response, '<th>Model / Part #</th>')    
         
 
 class PurchaseOrderItemFormTests(TestCase):

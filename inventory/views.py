@@ -5,7 +5,7 @@ This module defines class-based views for displaying and managing items, item hi
     - LoginRequiredMixin:
         Restricts access to authenticated users. Unauthenticated users will be redirected to the login page. After logging in, they
         will be redirected back to the original destination preserved by the query parameter defined by `redirect_field_name`.
-    - SuperuserOrTechnicianRequiredMixin, SuperuserRequiredMixin, TechnicianRequiredMixin, InternRequiredMixin:
+    - SuperuserOrTechnicianRequiredMixin, SuperuserRequiredMixin, TechnicianRequiredMixin, InternRequiredMixin, UserPassesTestMixin:
         Restricts access based on user-specific conditions.
 
 ### Base Classes
@@ -32,8 +32,8 @@ from django.views.generic import TemplateView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, FormView, DeleteView
-from django.shortcuts import get_object_or_404, redirect
-from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, redirect, render
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 
 from haystack.query import SearchQuerySet
@@ -42,7 +42,7 @@ from openpyxl import load_workbook
 
 from inventory_database.mixins import SuperuserOrTechnicianRequiredMixin, SuperuserRequiredMixin, TechnicianRequiredMixin, InternRequiredMixin
 
-from .forms import ImportFileForm, PurchaseOrderItemFormSet
+from .forms import ImportFileForm, PurchaseOrderItemFormSet, UsedItemForm, ItemRequestForm
 
 from .models import Item, ItemHistory, ItemRequest, PurchaseOrderItem, UsedItem
 
@@ -485,14 +485,7 @@ class ItemDeleteView(SuperuserOrTechnicianRequiredMixin, DeleteView):
         if "Cancel" in request.POST:
             return redirect(self.fail_url)
         else:
-            try:
-                return super(ItemDeleteView, self).post(request, *args, **kwargs)
-            except IntegrityError as e:
-                messages.error(
-                    request,
-                    f"Cannot delete this item because it is referenced by other records: {e}",
-                )
-                return redirect(self.fail_url)
+            return super(ItemDeleteView, self).post(request, *args, **kwargs)
 
 
 class SearchItemsView(LoginRequiredMixin, ListView):
@@ -803,14 +796,15 @@ class ItemRequestCreateView(TechnicianRequiredMixin, CreateView):
     """
 
     model = ItemRequest
-    fields = [
-        "manufacturer",
-        "model_part_num",
-        "quantity_requested",
-        "description",
-        "unit_price",
-        "requested_by",
-    ]
+    form_class = ItemRequestForm
+    # fields = [
+    #     "manufacturer",
+    #     "model_part_num",
+    #     "quantity_requested",
+    #     "description",
+    #     "unit_price",
+    #     "requested_by",
+    # ]
     template_name = "item_request_form.html"
 
     def get_initial(self):
@@ -964,7 +958,7 @@ class ItemRequestRejectView(SuperuserRequiredMixin, TemplateView):
 
     Methods:
         `get_object()`: Retrieves the specific item request for the view.
-        `get_fail_url()`: Returns the URL to redirect if the deletion is canceled.
+        `get_fail_url()`: Returns the URL to redirect if the rejection is canceled.
         `get_context_data()`: Adds the specific item request to the context data.
         `post()`: Handles POST requests to set the item request's status to "Rejected" or cancel the operation.
     """
@@ -1042,14 +1036,28 @@ class ItemRequestRejectView(SuperuserRequiredMixin, TemplateView):
 
 
 class ItemRequestDeleteView(UserPassesTestMixin, DeleteView):
-    """_summary_
+    # TODO: ItemRequestDeleteView docstring
+    """
+    Class-based view for confirming or canceling the deletion of an item request.
+    Only users who made the request can access this view.
 
-    Args:
-        UserPassesTestMixin (_type_): _description_
-        DeleteView (_type_): _description_
+    Inherits functionality from:
+        - UserPassesTestMixin
+        - DeleteView
+    (See module docstring for more details on the inherited classes)
 
-    Returns:
-        _type_: _description_
+    Attributes:
+        model (ItemRequest): The model that this view operates on.
+        template_name (str): The name of the template used to render the view.
+        success_url (str): The URL to redirect to upon successful deletion (resolved using reverse_lazy).
+        fail_url (str): The URL to redirect to if the deletion is canceled (resolved using the `get_fail_url` method).
+
+    Methods:
+        `test_func()`: Checks if the item request belongs to the user.
+        `handle_no_permission()`: Renders the 403 page with a message explaining the reason for the error.
+        `get_fail_url()`: Returns the URL to redirect if the deletion is canceled.
+        
+        `post()`: Handles POST requests to set the item request's status to "Rejected" or cancel the operation.
     """
     model = ItemRequest
     template_name = "item_request_confirm_delete.html"
@@ -1071,6 +1079,16 @@ class ItemRequestDeleteView(UserPassesTestMixin, DeleteView):
         item_request_id = self.kwargs.get("pk")
         request_from = get_object_or_404(ItemRequest, id=item_request_id).requested_by
         return request_from == user
+    
+    def handle_no_permission(self):
+        """
+        Renders the 403 page with a message explaining the reason for the error.
+
+        Returns:
+            HttpResponse: The HTTP response object with the rendered 403 page.
+        """
+        message = "You didn't make this item request, so you can't delete it. Please ask the author of the item request to delete it."
+        return HttpResponseForbidden(render(self.request, "403.html", {"message": message})) 
     
     def get_fail_url(self):
         """
@@ -1218,7 +1236,8 @@ class UsedItemCreateView(SuperuserOrTechnicianRequiredMixin, CreateView):
     """
 
     model = UsedItem
-    fields = ["item", "work_order", "used_by"]
+    form_class = UsedItemForm
+    # fields = ["item", "work_order", "used_by"]
     template_name = "item_use_form.html"
 
     def get_initial(self):

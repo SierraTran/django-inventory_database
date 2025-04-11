@@ -54,9 +54,9 @@ class UsedItemForm(forms.ModelForm):
         self.fields["item"].queryset = Item.objects.order_by(
             "manufacturer", "model", "part_number"
         )
-        self.fields["datetime_used"].label = "Date & Time used:"
-
-
+        self.fields["work_order"].label = "Work Order"
+        
+        
 class ItemRequestForm(forms.ModelForm):
     """
     A form for creating new `ItemRequest` objects, used in the ItemRequestCreateView.
@@ -98,9 +98,9 @@ class ItemRequestForm(forms.ModelForm):
             *args: Additional positional arguments
             **kwargs: Additional keyword arguments
         """
-        super(UsedItemForm, self).__init__(*args, **kwargs)
+        super(ItemRequestForm, self).__init__(*args, **kwargs)
 
-        self.fields["model_part_num"].label = "Model / Part #:"
+        self.fields["model_part_num"].label = "Model / Part #"
 
 
 class PurchaseOrderItemForm(forms.ModelForm):
