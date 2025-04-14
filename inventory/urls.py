@@ -37,6 +37,7 @@ urlpatterns = [
     # URLs for the UseItem model
     path("used_items/", views.UsedItemView.as_view(), name="used_items"),
     path("used_items/<int:pk>/", views.UsedItemDetailView.as_view(), name="used_item_detail"),
+    path("used_items/<int:pk>/delete/", views.UsedItemDeleteView.as_view(), name="used_item_confirm_delete"),
     path("used_items/search/", views.SearchUsedItemsView.as_view(), name="search_used_items"),
     
     # URLs for the PurchaseOrderForm

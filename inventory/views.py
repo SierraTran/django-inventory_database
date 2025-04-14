@@ -43,7 +43,6 @@ from openpyxl import load_workbook
 from inventory_database.mixins import SuperuserOrTechnicianRequiredMixin, SuperuserRequiredMixin, TechnicianRequiredMixin, InternRequiredMixin
 
 from .forms import ImportFileForm, PurchaseOrderItemFormSet, UsedItemForm, ItemRequestForm
-
 from .models import Item, ItemHistory, ItemRequest, PurchaseOrderItem, UsedItem
 
 from .excel_functions import setup_worksheet
@@ -1036,7 +1035,6 @@ class ItemRequestRejectView(SuperuserRequiredMixin, TemplateView):
 
 
 class ItemRequestDeleteView(UserPassesTestMixin, DeleteView):
-    # TODO: ItemRequestDeleteView docstring
     """
     Class-based view for confirming or canceling the deletion of an item request.
     Only users who made the request can access this view.
@@ -1055,9 +1053,8 @@ class ItemRequestDeleteView(UserPassesTestMixin, DeleteView):
     Methods:
         `test_func()`: Checks if the item request belongs to the user.
         `handle_no_permission()`: Renders the 403 page with a message explaining the reason for the error.
-        `get_fail_url()`: Returns the URL to redirect if the deletion is canceled.
-        
-        `post()`: Handles POST requests to set the item request's status to "Rejected" or cancel the operation.
+        `get_fail_url()`: Returns the URL to redirect if the deletion is canceled.        
+        `post()`: Handles POST requests to delete the item or cancel the deletion.
     """
     model = ItemRequest
     template_name = "item_request_confirm_delete.html"
@@ -1237,7 +1234,6 @@ class UsedItemCreateView(SuperuserOrTechnicianRequiredMixin, CreateView):
 
     model = UsedItem
     form_class = UsedItemForm
-    # fields = ["item", "work_order", "used_by"]
     template_name = "item_use_form.html"
 
     def get_initial(self):
@@ -1348,6 +1344,38 @@ class UsedItemCreateView(SuperuserOrTechnicianRequiredMixin, CreateView):
         history_record_to_edit.save()
 
         return response
+
+
+class UsedItemDeleteView(SuperuserOrTechnicianRequiredMixin, DeleteView):
+    """
+    Class-based view for confirming or canceling the deletion of a used item.
+    Only users in the "Superuser" or "Technician" group can access this view.
+
+    Inherits functionality from:
+        - SuperuserOrTechnicianRequiredMixin
+        - DeleteView
+        
+    Attributes:
+
+    """
+    
+    model = UsedItem
+    template_name = "used_item_confirm_delete.html"
+    success_url = reverse_lazy("inventory:used_items")
+
+    def get_context_data(self, **kwargs):
+        """
+        Adds the specific used item to the context data.
+
+        This method retrieves the base context by calling the base class's `get_context_data` method.
+        Then, it adds the specific UsedItem object to the context under the "object" key.
+
+        Returns:
+            dict: The context data for the view including the specific used item.
+        """
+        context = super().get_context_data(**kwargs)
+        context["object"] = self.get_object()
+        return context
 
 
 class SearchUsedItemsView(LoginRequiredMixin, ListView):

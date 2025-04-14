@@ -253,6 +253,8 @@ class ItemHistoryModelTests(TestCase):
         cls.item_history2 = ItemHistory.objects.filter(item=cls.item2)
         cls.item_history3 = ItemHistory.objects.filter(item=cls.item3)
         
+        cls.item1_use_url = reverse("inventory:item_use_form")
+        
         cls.user = User.objects.create_user(username="testuser", password="password")
         cls.user.groups.add(Group.objects.get(name="Superuser"))
         
@@ -303,34 +305,90 @@ class ItemHistoryModelTests(TestCase):
         self.assertEqual(self.item_history1[1].changes, "manufacturer: 'Test MFG1' has been changed to 'Fluke'", "The changes field does not match the expected value.")
         
     def test_history_action_use(self):
-        # TODO: test_history_action_use
         """
         Use an item and check their history records for the use
-        """
-        # [ ]: Use an item
-        # [ ]: Check history records for use
-        
+        """        
         self.client.login(username="testuser", password="password")
-        response = self.client.post(reverse("inventory:item_use_form"))
+        response = self.client.post(self.item1_use_url+f"?item_id={self.item1.id}", data={"item_id": self.item1.id, "work_order": "WO123"})
         
+        used_item_url = self.item1.get_absolute_url()
         
+        self.assertEqual(response.status_code, 200, "Failed to access the item use form")
+        self.item1.refresh_from_db()
+        
+        item_history = ItemHistory.objects.filter(item=self.item1).order_by('-timestamp').first()
+        
+        # self.assertEqual(self.item1.quantity, 0, "The quantity of the item should have decremented to 0 after use.")
+        
+        # self.assertIsNotNone(self.item_history1, "The item's history doesn't exist.")
+        # self.assertEqual(self.item_history1[1].action, "use", f"The action for this record should be 'use'. It is actually {self.item_history1[1].action}.")
+        # self.assertEqual(self.item_history1[1].user, self.user, f"The user responsible for the creation should be {self.user}. It is actually {self.item_history1[1].user}.")
+        # self.assertEqual(self.item_history1[1].changes, f"quantity: '1' has been changed to '0', <a href=\"{used_item_url}\">Item used in work order {self.item1.work_order}</a>", "The changes field does not match the expected value.")    
+        
+        self.assertIsNotNone(item_history, "The item's history doesn't exist.")
+        self.assertEqual(item_history.action, "use", f"The action for this record should be 'use'. It is actually {item_history.action}.")
+        self.assertEqual(item_history.user, self.user, f"The user responsible for the creation should be {self.user}. It is actually {item_history.user}.")
+        self.assertEqual(item_history.changes, f"quantity: '1' has been changed to '0', <a href=\"{used_item_url}\">Item used in work order {self.item1.work_order}</a>", "The changes field does not match the expected value.")            
         
 
 class ItemRequestModelTests(TestCase):
-    # TODO: ItemRequest tests
     @classmethod
     def setUpTestData(cls):
         """
         Setup
         """
-        # TODO: Set up for ItemRequestModelTests     
+        # TODO: Set up for ItemRequestModelTests  
+        # [ ]: Create an ItemRequest object   
+
+    def test_get_absolute_url(self):
+        """
+        Test that the get_absolute_url method returns the correct URL.
+        """
+        # TODO: test_get_absolute_url
+        # [ ]: Call the get_absolute_url method for the ItemRequest object
+        # [ ]: Assert that the URL is correct and in the expected format
+        
+    def test___str__(self):
+        """
+        Test that the string representation of the ItemRequest object is correct.
+        """
+        # TODO: test___str__
+        # [ ]: Call the __str__ method for the ItemRequest object
+        # [ ]: Assert that the string representation is correct and in the expected format
 
 
 class UsedItemModelTests(TestCase):
-    # TODO: UsedItem tests
+    @classmethod
     def setUpTestData(cls):
         """
         Setup
         """
         # TODO: Set up for UsedItemModelTests
+        # [ ]: Create an Item object
+        # [ ]: Create a UsedItem object
+
+    def test_get_absolute_url(self):
+        """
+        Test that the get_absolute_url method returns the correct URL.
+        """
+        # TODO: test_get_absolute_url
+        # [ ]: Call the get_absolute_url method for the UsedItem object
+        # [ ]: Assert that the URL is correct and in the expected format
+        
+class PurchaseOrderItemModelTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        # TODO: Set up for PurchaseOrderItemModelTests
+        # [ ]: Create a PurchaseOrderItem object
+        
+    def test___str__(self):
+        """
+        Test that the string representation of the PurchaseOrderItem object is correct.
+        """
+        # TODO: test___str__
+        # [ ]: Call the __str__ method for the PurchaseOrderItem object
+        # [ ]: Assert that the string representation is correct and in the expected format
         

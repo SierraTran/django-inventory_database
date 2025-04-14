@@ -20,8 +20,8 @@ class UsedItemFormTests(TestCase):
         Setup
         """
         # TODO: setUpTestData
-        # [ ]: Make several different (available) items
-        # [ ]: Create a user for using the items
+        # [x]: Make several different (available) items
+        # [x]: Create a user for using the items
         # [ ]: Set time for the tests
         
         items = [
@@ -57,10 +57,12 @@ class UsedItemFormTests(TestCase):
         """
         # TODO: test___init__
         # [x]: GET the form 
+        # [ ]: Make sure the `work_order` field label is "Work Order"
         self.client.login(username="testuser", password="password")
         response = self.client.get(self.item_use_form_url+f"?item_id=1")
         
         self.assertEqual(response.status_code, 200, "Failed to access the item use form")
+        self.assertContains(response, 'Work Order')
 
 class ItemRequestFormTests(TestCase):
     @classmethod
@@ -68,7 +70,6 @@ class ItemRequestFormTests(TestCase):
         """
         Setup
         """
-        # TODO: setUpTestData
         items = [
             Item(manufacturer="Tektronix", model="18934G", part_or_unit=Item.PART, part_number="V9856", quantity=2),            
             Item(manufacturer="HP", model="Main Board", part_or_unit=Item.PART, part_number="1234-5678", quantity=8),
@@ -100,8 +101,6 @@ class ItemRequestFormTests(TestCase):
         """
         Test that the __init__ function works correctly
         """
-        # TODO: test___init__
-        # [x]: Make sure the `model_part_num` field label is "Model / Part #"
         self.client.login(username="testuser", password="password")
         response = self.client.get(
             self.item_request_form_url +
@@ -119,7 +118,6 @@ class PurchaseOrderItemFormTests(TestCase):
         """
         Setup
         """
-        # TODO: setUpTestData
         cls.user = User.objects.create_user(username="testuser", password="password")
         cls.user.groups.add(Group.objects.get(name="Superuser"))
         

@@ -220,7 +220,6 @@ class ItemDetailViewTests(TestCase):
 
 
 class ItemCreateViewTests(TestCase):
-    # TODO: More tests
     @classmethod
     def setUpTestData(cls):
         """
@@ -341,12 +340,9 @@ class ItemCreateViewTests(TestCase):
         """
         Superusers cannot create items with the technician view
         """
-        # TODO: test_item_create_as_superuser_with_technician_view
-        # [x]: User logs in
         login = self.client.login(username="testsuperuser", password="password")
         self.assertTrue(login, "Login failed.")
         
-        # [x]: Attempt to create an item with the technician view
         response = self.client.post(self.item_create_technician_url, {
             "manufacturer": "Superuser",
             "model": "Superuser\'s Item",
@@ -359,27 +355,34 @@ class ItemCreateViewTests(TestCase):
             "unit_price": 0.01,
         })
         
-        # [x]: Check for form errors
         if response.context and 'form' in response.context:
             self.assertFalse(response.context['form'].errors, f"Form errors: {response.context['form'].errors}")
         
-        # [ ]: Make sure the item doesn't exist in the database
+        self.assertFalse(Item.objects.filter(model="Superuser\'s Item").exists(), "This item does exist.")
         
     def test_item_create_as_technician_with_superuser_view(self):
         """
         Technicians cannot create items with the superuser view
         """
-        # TODO: test_item_create_as_technician_with_superuser_view
-        # [x]: User logs in
         login = self.client.login(username="testtechnician", password="password")
         self.assertTrue(login, "Login failed.")
-        
-        # [ ]: Attempt to create an item with the superuser view
-        # [ ]: Check for form errors
-        # if response.context and 'form' in response.context:
-        #     self.assertFalse(response.context['form'].errors, f"Form errors: {response.context['form'].errors}")
+
+        response = self.client.post(reverse("inventory:item_create_form_superuser"), {
+            "manufacturer": "Technician",
+            "model": "Technician\'s Item",
+            "part_or_unit": Item.UNIT,
+            # "part_number" is blank since it's a unit
+            "description": "Item created by the Technician",
+            "location": "N/A",
+            "quantity": 1,
+            "min_quantity": 0,
+            "unit_price": 0.01,
+        })
+
+        if response.context and 'form' in response.context:
+            self.assertFalse(response.context['form'].errors, f"Form errors: {response.context['form'].errors}")
             
-        # [ ]: Make sure the item doesn't exist in the database
+        self.assertFalse(Item.objects.filter(model="Technician\'s Item").exists(), "This item does exist.")
     
     def test_item_create_as_technician_with_technician_view(self):
         """
@@ -1147,13 +1150,11 @@ class ItemHistoryViewTests(TestCase):
         Setup
         """
         # Assume all users have access to Item History and the button to go to its page.
-        # TODO: Set up for ItemHistoryViewTests     
         
         cls.user = User.objects.create_user(username="testuser", password="password")
         cls.superuser_group = Group.objects.get(name="Superuser")
         cls.user.groups.add(cls.superuser_group)
         
-        # [x]: Add an existing item for the user to update
         cls.item = Item.objects.create(
             manufacturer="Fluke",
             model="N/A",
@@ -1166,9 +1167,7 @@ class ItemHistoryViewTests(TestCase):
             unit_price=11.33,
         )
         
-        # [x]: Get the URL for the item to update
         cls.item_update_url = reverse("inventory:item_update_form_superuser", kwargs={"pk": cls.item.pk})
-        # [x]: Get the URL for the item history of the item
         cls.item_history_url = reverse("inventory:item_history", kwargs={"pk": cls.item.pk})
         
         cls.client = Client()    
@@ -1301,6 +1300,14 @@ class ItemRequestViewTests(TestCase):
         # [ ]: Get the user groups
         # [ ]: Create one user for each group
         # [ ]: One or more item requests to view for the list
+        # [ ]: Set time for the tests
+        
+    def test_get_queryset(self):
+        """
+        Test the queryset for the item requests.
+        """
+        # TODO: test_get_queryset
+        # [ ]: Simulate GET request
         
 
 ###################################################################################################
@@ -1317,6 +1324,7 @@ class UsedItemViewTests(TestCase):
         # [ ]: Create one user for each group
         # [ ]: Create one item for use
         
+    @tag('critical')
     def test_used_item_view_access_control(self):
         """
         
@@ -1328,3 +1336,79 @@ class UsedItemViewTests(TestCase):
         # [ ]: Viewers don't have access
 
 
+class UsedItemDetailViewTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        # TODO: Set up test data
+        # [ ]: Create at least one used item
+        # [ ]: Resolve absolute URL of the used item
+        # [ ]: Create a user for logging in
+        
+        cls.client = Client()
+        cls.factory = RequestFactory()
+        
+    @tag('critical')
+    def test_used_item_detail_access_control(self):
+        """
+        Test that only logged-in users can access the UsedItemDetailView.
+        """
+        # TODO: test_used_item_detail_access_control
+        # [ ]: Try to simulate GET request without logging in
+        # [ ] : Log in and simulate GET request
+
+    
+class UsedItemCreateViewTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        # TODO: Set up test data
+        # [ ]L Create two items, one with a quantity of 0 and one with a quantity of 1
+        # [ ]: Create a user 
+        
+        cls.client = Client()
+        cls.factory = RequestFactory()    
+        
+    def test_dispatch(self):
+        """
+        Test the dispatch method of the UsedItemCreateView.
+        """
+        # TODO: test_dispatch
+        # [ ]: Test that items with quantities over 0 can be used
+        # [ ]: Test that items with quantities equal to 0 cannot be used
+        
+    def test_form_valid(self):
+        """
+        Test that the form_valid function works as expected.
+        """
+        # TODO: test_form_valid
+        # [ ]: The quantity of the item being used is decremented by 1
+        # [ ]: The `last_modified_by` field is set to the user who used the item
+        # [ ]: The used_item_url is resolved correctly
+        # [ ]: The latest ItemHistory record is updated with the correct action and changes
+        
+
+class UsedItemDeleteViewTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        # TODO: Set up test data
+        # [ ]: Create a used item for deletion
+        # [ ]: Create a user
+        
+        cls.client = Client()
+        cls.factory = RequestFactory()
+        
+    def test_get_context_data(self):
+        """
+        Test the context data for the UsedItemDeleteView.
+        """
+        # TODO: test_get_context_data
+        # [ ]: Log in
+        # [ ]: Simulate GET request
