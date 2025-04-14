@@ -1,10 +1,6 @@
 import logging
 from django.contrib import admin
 from .models import Item, ItemHistory, ItemRequest, UsedItem, PurchaseOrderItem
-from django.db import IntegrityError
-from django.contrib import messages
-from django.shortcuts import redirect
-from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 
@@ -25,19 +21,22 @@ class ItemAdmin(admin.ModelAdmin):
 
 
 class ItemHistoryAdmin(admin.ModelAdmin):
+    # Item History can be filtered for the action taken on the item
     list_filter = ["action"]
 
 
 class ItemRequestAdmin(admin.ModelAdmin):
-    # Items can be filtered based on status
+    # Item Requests can be filtered based on status
     list_filter = ["status"]
 
 
 class UsedItemAdmin(admin.ModelAdmin):
+    # Used Items will be listed by work order and item
     list_display = ["work_order", "item"]
 
 
 class PurchaseOrderItemAdmin(admin.ModelAdmin):
+    # Purchase Order Items will be listed by manufacturer, model part number, quantity ordered, and description
     list_display = ["manufacturer", "model_part_num", "quantity_ordered", "description"]
 
 
