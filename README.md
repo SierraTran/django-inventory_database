@@ -1,7 +1,7 @@
 # Inventory Database
 
 ![Python Version](https://img.shields.io/badge/python-3.13.2-blue)
-![Django Version](https://img.shields.io/badge/django-5.1.5-green)
+![Django Version](https://img.shields.io/badge/django-5.2-green)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Coverage](https://img.shields.io/badge/coverage-74%25-2BFF00)
 
@@ -103,7 +103,50 @@ The list of required software below will also be included in the `requirements.t
 1. Download and install Python from the [official Python website](https://www.python.org/downloads/). At the time of writing this, the latest version of Python is 3.13.2.
 2. During installation, make sure to check the box that says **Add Python to PATH**.
 
-### Step 4: Start and Run the Application
+### Step 4: Configure Environment Variables
+
+1. Create a file named `.env` in the root directory of the project (where `manage.py` is located).
+2. Add the following environment variables to the `.env` file:
+
+   ```plaintext
+   DJANGO_SECRET_KEY=your-secret-key
+   DEBUG=False
+   ALLOWED_HOSTS=localhost,127.0.0.1
+   ```
+
+3. Replace `your-secret-key` with a strong, unique key. To generate this key:
+  
+    - Open a terminal or command prompt. You can do this by pressing `Win + R`, typing `cmd`, and pressing Enter on Windows. On Mac, you can open the Terminal app from the Applications folder. If you're using Linux, open the terminal from your applications menu.
+    - Copy and paste the following command and press Enter:
+
+        ```shell
+        py -c "import secrets; print(secrets.token_urlsafe(50))"
+        ```
+
+      - Note: This command uses `py` to run Python on Windows. If you're using Linux or Mac, you can use `python3` or `python` instead.
+
+    - This will output a long, random string. it will look somehting like this:
+
+        ```plaintext
+        n3w5tr0ng53cr3tK3y-EXAMPLE-1234567890
+        ```
+
+    - Copy this string and paste it into the `DJANGO_SECRET_KEY` variable in the `.env` file. The variable should look something like this now:
+
+        ```plaintext
+        DJANGO_SECRET_KEY=n3w5tr0ng53cr3tK3y-EXAMPLE-1234567890
+        ```
+
+4. Set `DEBUG` to `True` for development and debugging. For production, set to `False`
+
+5. Update `ALLOWED_HOSTS` with the domain names or IP addresses you want the application to run on.
+
+    - For local development: `localhost,127.0.0.1`
+    - For production: Add your domain name (e.g., `example.com`)
+
+6. Save the `.env` file.
+
+### Step 5: Start and Run the Application
 
 1. Open the folder where you extracted the files.
 2. Double-click the app.bat file. This will automatically install all the required packages and set up the application for you.
