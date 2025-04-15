@@ -5,6 +5,16 @@ from django.contrib.auth.models import User, Group
 from authentication.models import Notification
 
 
+class HomeViewTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        # TODO: Set up test data for HomeViewTests
+        # [ ]: Create a user for logging in
+
+
 class DatabaseLoginViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -19,12 +29,18 @@ class DatabaseLoginViewTests(TestCase):
         An error message displays for an invalid username
         """
         # TODO: test_login_invalid_username
+        # [ ]: Attempt to log in with an invalid username
+        # [ ]: Check for an error message
+        # [ ]: Make sure the user is not logged in
         
     def test_login_invalid_password(self):
         """
         An error message displays for an invalid password
         """
         # TODO: test_login_invalid_password
+        # [ ]: Attempt to log in with an invalid password 
+        # [ ]: Check for an error message
+        # [ ]: Make sure the user is not logged in
         
     def test_login_success(self):
         """
@@ -53,20 +69,17 @@ class NotificationViewTests(TestCase):
         
         cls.superuser_group = Group.objects.get(name="Superuser")
         
-        cls.user = User.objects.create_user(username="testuser", password="password")
-        cls.user.groups.add(cls.superuser_group)
+        cls.user1 = User.objects.create_user(username="testuser1", password="password")
+        cls.user1.groups.add(cls.superuser_group)
         
         cls.client = Client()
         
     @tag("critical")
     def test_notification_view_GET(self):
-        # TODO: test_notification_view_GET
         """
         User has access to their notification page, which only show notifications addressed to them.
-        """
-        # [x]: User logs in
-        # [x]: Make sure status code is 200        
-        login = self.client.login(username="testuser", password="password")
+        """      
+        login = self.client.login(username="testuser1", password="password")
         self.assertTrue(login, "Login failed.")
         
         response = self.client.get(self.notifications_url)
@@ -79,12 +92,14 @@ class NotificationViewTests(TestCase):
         No notifications or notification badge will be shown.
         """
         # [x]: Delete all notifications from the database (We only need to do this for this test.)
-        # [ ]: Log in and access the notification page
+        # [x]: Log in and access the notification page
         # [ ]: Check for no notifications and a message that says so
         # [ ]: Make sure the notification badge doesn't show
         Notification.objects.all().delete()
         
         self.client.login(username="testuser", password="password")
+        response = self.client.get(self.notifications_url)
+        self.assertEqual(response.status_code, 200, "Failed to access the notifications page.")
         
     def test_notification_all_unread_notifs(self):
         # TODO: test_notification_all_unread_notifs
@@ -124,4 +139,61 @@ class NotificationUpdateViewTests(TestCase):
         Setup
         """
         # TODO: Set up test data for NotificationUpdateViewTests
-        # [ ]: Create a user for logging in 
+        # [ ]: Create a notification to update
+        # [ ]: Create two users: one with access to the notification and one without access
+        
+        cls.client = Client()
+        
+    @tag("critical")
+    def test_notification_update_view_access_control(self):
+        """
+        Access control for the notification update view.
+        """
+        # TODO: test_notification_update_view_access_control
+        # [ ]: Log in as the user with access to the notification
+        # [ ]: Make sure the user can access the notification update view   
+        # [ ]: Log in as the user without access to the notification
+        # [ ]: Make sure the user cannot access the notification update view
+
+    def test_get_context_data(self):
+        """
+        Test the context data for the notification update view.
+        """
+        # TODO: test_get_context_data
+        # [ ]: Log in as the user with access to the notification
+        # [ ]: Make a GET request to the notification update view
+
+
+class NotificationDeleteViewTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        # TODO: Set up for NotificationDeleteViewTests
+        # [ ]: Create a notification to delete
+        # [ ]: Create two users: one with access to the notification and one without access
+        
+    def test_notification_delete_view_access_control(self):
+        """
+        Test the access control for the notification delete view.
+        """
+        # TODO: test_notification_delete_view_access_control
+        # [ ]: Log in as the user without access to the notification
+        # [ ]: Make sure the user can't access the view or delete the notification
+        # [ ]: Log in as the user with access to the notification
+        # [ ]: Make sure the user can access the view and delete the notification
+        
+    def test_post_cancel_delete(self):
+        """
+        Test the cancel delete functionality for the notification delete view.
+        """
+        # TODO: test_post_cancel_delete
+        # [ ]: Log in as the user that can access the view and delete the notification
+        
+    def test_post_confirm_delete(self):
+        """
+        Test the confirm delete functionality for the notification delete view.
+        """
+        # TODO: test_post_confirm_delete
+        # [ ]: Log in as the user that can access the view and delete the notification
