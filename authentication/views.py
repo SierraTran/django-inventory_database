@@ -165,16 +165,20 @@ class NotificationView(LoginRequiredMixin, ListView):
 
 class NotificationUpdateView(UserPassesTestMixin, UpdateView):
     # QUESTION: Custom mixin for user notifications?
-    # TODO: Class docstring
     """
-    
+    Class-based view to update a notification as read or unread.
+    Users are only able to update notifications that are meant for them.
 
-    Args:
-        UserPassesTestMixin (_type_): _description_
-        UpdateView (_type_): _description_
+    Attributes:
+        model (Notification): The model that the view will operate on.
+        fields (list[str]): The fields to be displayed in the form.
+        template_name (str): The template that will be used to render the page.
 
-    Returns:
-        _type_: _description_
+    Methods:
+        `test_func()`: Verifies that the notification is for the current user. 
+        `handle_no_permission`: Renders the 403 page with a message explaining the reason for the error.
+        `get_context_data()`: Retrieves additional context data for the template.
+        `get_success_url()`: Redirects back to the Notifications page upon success.
     """
     model = Notification
     fields = ["is_read"]
@@ -209,7 +213,16 @@ class NotificationUpdateView(UserPassesTestMixin, UpdateView):
         return HttpResponseForbidden(render((self.request, "403.html", {"message": message})))
     
     def get_context_data(self, **kwargs):
-        # TODO: Method docstring
+        """
+        Retrieves additional context data for the template.
+        
+        This method first calls the base class's `get_context_data` method to retrieve the base context data. Then, it retrieves 
+        the notification object using the primary key (pk) from the URL and adds it to the context. If the notification isn't 
+        found, an `Http404` exception is raised. The context dictionary is then updated with the notification object.
+
+        Returns:
+            dict: The context data for the template.
+        """
         context = super().get_context_data(**kwargs)
         notification_id = self.kwargs.get("pk")
         context["notification"] = get_object_or_404(Notification, id=notification_id)
