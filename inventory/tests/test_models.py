@@ -4,7 +4,7 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from django.contrib.auth.models import User, Group
-from inventory.models import Item, ItemHistory
+from inventory.models import Item, ItemHistory, UsedItem
 
 import datetime
 
@@ -309,26 +309,24 @@ class ItemHistoryModelTests(TestCase):
         Use an item and check their history records for the use
         """        
         self.client.login(username="testuser", password="password")
-        response = self.client.post(self.item1_use_url+f"?item_id={self.item1.id}", data={"item_id": self.item1.id, "work_order": "WO123"})
+        response = self.client.post(self.item1_use_url+f"?item_id={self.item1.id}", data={"item": self.item1.id, "work_order": "1234567"})
         
-        used_item_url = self.item1.get_absolute_url()
+        if response.context and 'form' in response.context:
+            self.assertFalse(response.context['form'].errors, f"Form errors: {response.context['form'].errors}")
         
-        self.assertEqual(response.status_code, 200, "Failed to access the item use form")
+        self.assertEqual(response.status_code, 302, "Failed to use the item.")        
+
         self.item1.refresh_from_db()
-        
+        self.assertEqual(self.item1.quantity, 0, "The quantity of the item should have decremented to 0 after use.")
+
         item_history = ItemHistory.objects.filter(item=self.item1).order_by('-timestamp').first()
-        
-        # self.assertEqual(self.item1.quantity, 0, "The quantity of the item should have decremented to 0 after use.")
-        
-        # self.assertIsNotNone(self.item_history1, "The item's history doesn't exist.")
-        # self.assertEqual(self.item_history1[1].action, "use", f"The action for this record should be 'use'. It is actually {self.item_history1[1].action}.")
-        # self.assertEqual(self.item_history1[1].user, self.user, f"The user responsible for the creation should be {self.user}. It is actually {self.item_history1[1].user}.")
-        # self.assertEqual(self.item_history1[1].changes, f"quantity: '1' has been changed to '0', <a href=\"{used_item_url}\">Item used in work order {self.item1.work_order}</a>", "The changes field does not match the expected value.")    
+        used_item = UsedItem.objects.filter(item=self.item1).first()
+        used_item_url = reverse("inventory:used_item_detail", kwargs={"pk": used_item.pk})
         
         self.assertIsNotNone(item_history, "The item's history doesn't exist.")
         self.assertEqual(item_history.action, "use", f"The action for this record should be 'use'. It is actually {item_history.action}.")
         self.assertEqual(item_history.user, self.user, f"The user responsible for the creation should be {self.user}. It is actually {item_history.user}.")
-        self.assertEqual(item_history.changes, f"quantity: '1' has been changed to '0', <a href=\"{used_item_url}\">Item used in work order {self.item1.work_order}</a>", "The changes field does not match the expected value.")            
+        self.assertEqual(item_history.changes, f"quantity: '1' has been changed to '0', <a href=\"{used_item_url}\">Item used in work order {used_item.work_order}</a>", "The changes field does not match the expected value.")            
         
 
 class ItemRequestModelTests(TestCase):
