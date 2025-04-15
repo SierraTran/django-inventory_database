@@ -10,9 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+from django.core.management.commands.runserver import Command as runserver
 from pathlib import Path
 import os
-from django.core.management.commands.runserver import Command as runserver
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,7 +26,7 @@ MEDIA_URL = "/media/"
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-lj(f3$%36ah0&x2j$uiksiz*hwk$$v+!y_k96k9&km_ym^m107"
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "fallback-secret-key-for-dev")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -37,6 +37,7 @@ ALLOWED_HOSTS = ['*']
 runserver.default_port = '8000'
 runserver.default_addr = '127.0.0.1'
 
+SECURE_SSL_REDIRECT = True
 
 # Application definition
 
@@ -188,9 +189,17 @@ LOGIN_REDIRECT_URL = "/inventory_database/"
 # will bring the user back to the login page ("/inventory_database/accounts/login/")
 LOGOUT_REDIRECT_URL = "/inventory_database/accounts/login/"
 
+# This marks session cookies as secure, making it more difficult for network 
+# traffic sniffers to hijack user sessions.
+SESSION_COOKIE_SECURE = True
+
 # If the user closes the browser, the session will expire and the user will
 # have to log in again.
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# This marks CSRF cookies as secure, making it more difficult for network 
+# traffic sniffers to steal the CSRF token.
+CSRF_COOKIE_SECURE = True
 
 # Message storage for the messages framework
 # https://docs.djangoproject.com/en/5.1/ref/settings/#message-storage
