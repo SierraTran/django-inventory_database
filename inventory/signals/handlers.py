@@ -14,7 +14,7 @@ from django.utils.html import escape
 from inventory.models import Item, ItemHistory, ItemRequest, UsedItem
 from authentication.models import Notification
 
-
+# TODO: Test the links in the messages of the notifications.
 # NOTE: Regardless of being used or not, `sender` and `**kwargs` parameters need to be included in the other signal handlers to avoid errors.
 
 
@@ -83,7 +83,7 @@ def send_item_request_notification(sender, instance, created, **kwargs):
         **kwargs: Additional keyword arguments sent by the signal.
     """
     if created:
-        # No notification is needed for an item request being created (at least not yet).
+        # TODO: Send notifications to the Superusers that the item request has been created.
         return
     else: 
         # Display the new status of the item request in the subject of the notification.
@@ -92,6 +92,7 @@ def send_item_request_notification(sender, instance, created, **kwargs):
         # Create a link to the item request to include in the message.
         linked_item_request = f'<a href="{instance.get_absolute_url()}">Your Item Request for {instance.manufacturer}, {instance.model_part_num}</a>'        
         # Explain the new status of the item request and include its link in the message.
+        # TODO: Remind the user to delete their item request if they no longer need it.
         message = f"{linked_item_request} has been {str(instance.status).lower()} by {instance.status_changed_by.username}."
     with transaction.atomic():
         Notification.objects.create(
