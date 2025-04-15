@@ -3,7 +3,7 @@
 ![Python Version](https://img.shields.io/badge/python-3.13.2-blue)
 ![Django Version](https://img.shields.io/badge/django-5.1.5-green)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![Coverage](https://img.shields.io/badge/coverage-69%-A8FF00)
+![Coverage](https://img.shields.io/badge/coverage-74%25-2BFF00)
 
 This is a Django-based web application for managing an inventory database. The application allows users to browse, search, and manage items in the inventory. It also includes user authentication and authorization features.
 
