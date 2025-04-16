@@ -1106,8 +1106,8 @@ class ItemRequestDeleteView(UserPassesTestMixin, DeleteView):
         Handles POST requests to delete the item or cancel the deletion.
 
         This method first checks which button was pressed in the form. If the "Cancel" button was pressed, the user is
-        redirected back to the Notifications page (the failure URL). If the "Confirm" button was pressed (the else case),
-        the notification is deleted.
+        redirected back to the Item Requests page (the failure URL). If the "Confirm" button was pressed (the else case),
+        the item request is deleted.
 
         Args:
             request (HttpRequest): The HTTP request object containing metadata about the request.
@@ -1356,26 +1356,68 @@ class UsedItemDeleteView(SuperuserOrTechnicianRequiredMixin, DeleteView):
         - DeleteView
         
     Attributes:
+        model (UsedItem): The model that this view operates on.
+        template_name (str): The name of the template used to render the view.
+        success_url (str): The URL to redirect to upon successful deletion (resolved using reverse_lazy).
+        fail_url (str): The URL to redirect to if the deletion is canceled (resolved using the `get_fail_url` method).
 
+    Methods:
+        `get_fail_url()`: Returns the URL to redirect if the deletion is canceled.
+        `post()`: Handles POST requests to delete the used item or cancel the deletion.
     """
     
     model = UsedItem
     template_name = "used_item_confirm_delete.html"
     success_url = reverse_lazy("inventory:used_items")
 
-    def get_context_data(self, **kwargs):
-        """
-        Adds the specific used item to the context data.
+    # def get_context_data(self, **kwargs):
+    #     """
+    #     Adds the specific used item to the context data.
 
-        This method retrieves the base context by calling the base class's `get_context_data` method.
-        Then, it adds the specific UsedItem object to the context under the "object" key.
+    #     This method retrieves the base context by calling the base class's `get_context_data` method.
+    #     Then, it adds the specific UsedItem object to the context under the "object" key.
+
+    #     Returns:
+    #         dict: The context data for the view including the specific used item.
+    #     """
+    #     context = super().get_context_data(**kwargs)
+    #     context["object"] = self.get_object()
+    #     return context
+    
+    def get_fail_url(self):
+        """
+        Returns the URL to redirect to if the deletion is canceled.
+
+        This method uses reverse_lazy to resolve the failure URL with the primary key (pk) of the object
+        being processed and returns it.
 
         Returns:
-            dict: The context data for the view including the specific used item.
+            str: The URL to redirect to.
         """
-        context = super().get_context_data(**kwargs)
-        context["object"] = self.get_object()
-        return context
+        return reverse_lazy("inventory:used_items")
+
+    fail_url = property(get_fail_url)
+    
+    def post(self, request, *args, **kwargs):
+        """
+        Handles POST requests to delete the item or cancel the deletion.
+
+        This method first checks which button was pressed in the form. If the "Cancel" button was pressed, the user is
+        redirected back to the Used Items page (the failure URL). If the "Confirm" button was pressed (the else case),
+        the used item is deleted.
+
+        Args:
+            request (HttpRequest): The HTTP request object containing metadata about the request.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            HttpResponse: The HTTP response object.
+        """
+        if "Cancel" in request.POST:
+            return redirect(self.fail_url)
+        else:
+            return super(UsedItemDeleteView, self).post(request, *args, **kwargs)
 
 
 class SearchUsedItemsView(LoginRequiredMixin, ListView):

@@ -4,7 +4,7 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from django.contrib.auth.models import User, Group
-from inventory.models import Item, ItemHistory, UsedItem
+from inventory.models import Item, ItemHistory, ItemRequest, PurchaseOrderItem, UsedItem
 
 import datetime
 
@@ -330,29 +330,49 @@ class ItemHistoryModelTests(TestCase):
         
 
 class ItemRequestModelTests(TestCase):
+    # NOTE: Date and time is set to January 1, 2025 at 12:00 for testing purposes
+    aware_datetime = timezone.make_aware(datetime.datetime(2025, 1, 1, 12, 0, 0))
+    
     @classmethod
+    @freeze_time(aware_datetime)
     def setUpTestData(cls):
         """
         Setup
         """
-        # TODO: Set up for ItemRequestModelTests  
-        # [ ]: Create an ItemRequest object   
+        cls.user = User.objects.create_user(username="testuser", password="password")
+        cls.user.groups.add(Group.objects.get(name="Superuser"))
+        
+        ItemRequest.objects.create(
+            manufacturer="Test MFG",
+            model_part_num="Test Model and Part Num",
+            quantity_requested=1,
+            # description will be blank
+            unit_price=0.01,
+            requested_by=cls.user,
+            # timestamp is set automatically
+            # status set to "Pending" as default
+            # status_changed_by is None
+        )
+        
+        cls.item_request = ItemRequest.objects.filter(pk=1).first()
 
     def test_get_absolute_url(self):
         """
         Test that the get_absolute_url method returns the correct URL.
         """
-        # TODO: test_get_absolute_url
-        # [ ]: Call the get_absolute_url method for the ItemRequest object
-        # [ ]: Assert that the URL is correct and in the expected format
+        expected_url = "/inventory_database/item_requests/1"
+        actual_url = self.item_request.get_absolute_url()
+        
+        self.assertEqual(actual_url, expected_url, "URL for the ItemRequest object doesn't match the expected URL.")
         
     def test___str__(self):
         """
         Test that the string representation of the ItemRequest object is correct.
         """
-        # TODO: test___str__
-        # [ ]: Call the __str__ method for the ItemRequest object
-        # [ ]: Assert that the string representation is correct and in the expected format
+        expected_string = "Request by testuser for Test MFG, Test Model and Part Num"
+        actual_string = self.item_request.__str__()
+        
+        self.assertEqual(actual_string, expected_string, "The string for the ItemRequest object doesn't match the expected string.")
 
 
 class UsedItemModelTests(TestCase):
@@ -362,8 +382,31 @@ class UsedItemModelTests(TestCase):
         Setup
         """
         # TODO: Set up for UsedItemModelTests
-        # [ ]: Create an Item object
-        # [ ]: Create a UsedItem object
+        # [x]: Create an Item object
+        # [x]: Create a UsedItem object
+        cls.user = User.objects.create_user(username="testuser", password="password")
+        cls.user.groups.add(Group.objects.get(name="Superuser"))
+        
+        cls.item = Item.objects.create(
+            manufacturer="Test MFG",
+            model="Test Model",
+            part_or_unit=Item.UNIT,
+            # Item is a unit, no part number required.
+            # description will be blank
+            # location will be blank
+            quantity=2,
+            # min_quantity will be set to 0
+            # unit_price will be set to 0.01
+            # last_modified_by will be set to None
+        )
+        
+        cls.used_item = UsedItem.objects.create(
+            item=cls.item,
+            work_order=1234567,
+            # datetime_used is set automatically
+            used_by=cls.user
+        )
+        
 
     def test_get_absolute_url(self):
         """
@@ -373,20 +416,43 @@ class UsedItemModelTests(TestCase):
         # [ ]: Call the get_absolute_url method for the UsedItem object
         # [ ]: Assert that the URL is correct and in the expected format
         
+    def test___str__(self):
+        """
+        Test that the string representation of the PurchaseOrderItem object is correct.
+        """
+        # TODO: test___str__
+        # [x] : Call the __str__ method for the UsedItem object
+        # [x]: Assert that the string representation is correct and in the expected format
+        expected_string = "Work Order: 1234567 | Item: Test MFG, Test Model" 
+        actual_string = self.used_item.__str__()
+        
+        self.assertEqual(actual_string, expected_string, "The string for the UsedItem object doesn't match the expected string.")
+        
+        
 class PurchaseOrderItemModelTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         """
         Setup
         """
-        # TODO: Set up for PurchaseOrderItemModelTests
-        # [ ]: Create a PurchaseOrderItem object
+        PurchaseOrderItem.objects.create(
+            manufacturer="Test MFG",
+            model_part_num="Test Model and Part Num",
+            quantity_ordered=1,
+            # description will be blank
+            # serial_num will be blank
+            # property_num will be blank
+            unit_price=0.01,
+        )
+        
+        cls.po_item = PurchaseOrderItem.objects.filter(pk=1).first()
         
     def test___str__(self):
         """
         Test that the string representation of the PurchaseOrderItem object is correct.
         """
-        # TODO: test___str__
-        # [ ]: Call the __str__ method for the PurchaseOrderItem object
-        # [ ]: Assert that the string representation is correct and in the expected format
+        expected_string = "Purchase Order for Test Model and Part Num by Test MFG - Quantity: 1"
+        actual_string = self.po_item.__str__()
+        
+        self.assertEqual(actual_string, expected_string, "The string for the PurchaseOsrderItem object doesn't match the expected string.")
         

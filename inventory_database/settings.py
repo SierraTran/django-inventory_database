@@ -29,15 +29,15 @@ MEDIA_URL = "/media/"
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "fallback-secret-key-for-dev")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 TEST_OUTPUT_VERBOSE = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 runserver.default_port = '8000'
 runserver.default_addr = '127.0.0.1'
 
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False
 
 # Application definition
 

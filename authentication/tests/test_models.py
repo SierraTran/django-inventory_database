@@ -13,6 +13,7 @@ import datetime
 class NotificationModelTests(TestCase):
     # NOTE: Local date and time is set to January 1, 2025 at 12:00 for testing purposes
     aware_datetime = timezone.make_aware(datetime.datetime(2025, 1, 1, 12, 0, 0))
+    
     @classmethod
     @freeze_time(aware_datetime)
     def setUpTestData(cls):

@@ -115,8 +115,10 @@ def send_low_stock_notification(sender, instance, **kwargs):
     """
     if instance.low_stock:
         subject = "Low Stock Alert"
+        
+        item_url = instance.get_absolute_url()
 
-        linked_item = f'<a href="{instance.get_absolute_url}">{instance}</a>'        
+        linked_item = f'<a href="{item_url}">{instance}</a>'        
         message = f"{linked_item} is low in stock. {instance.quantity} left."
         
         superuser_group = Group.objects.get(name="Superuser")

@@ -164,7 +164,6 @@ class NotificationView(LoginRequiredMixin, ListView):
 
 
 class NotificationUpdateView(UserPassesTestMixin, UpdateView):
-    # QUESTION: Custom mixin for user notifications?
     """
     Class-based view to update a notification as read or unread.
     Users are only able to update notifications that are meant for them.
@@ -173,16 +172,17 @@ class NotificationUpdateView(UserPassesTestMixin, UpdateView):
         model (Notification): The model that the view will operate on.
         fields (list[str]): The fields to be displayed in the form.
         template_name (str): The template that will be used to render the page.
+        success_url (str): The URL to redirect to after a successful update (resolved using `reverse_lazy`).
 
     Methods:
         `test_func()`: Verifies that the notification is for the current user. 
         `handle_no_permission`: Renders the 403 page with a message explaining the reason for the error.
         `get_context_data()`: Retrieves additional context data for the template.
-        `get_success_url()`: Redirects back to the Notifications page upon success.
     """
     model = Notification
     fields = ["is_read"]
     template_name = "notification_update_form.html"
+    success_url = reverse_lazy("authentication:notifications")
     
     def test_func(self):
         """
@@ -210,7 +210,7 @@ class NotificationUpdateView(UserPassesTestMixin, UpdateView):
             HttpResponse: The HTTP response object with the rendered 403 page.
         """
         message = "This notification is not addressed to you."
-        return HttpResponseForbidden(render((self.request, "403.html", {"message": message})))
+        return HttpResponseForbidden(render(self.request, "403.html", {"message": message}))
     
     def get_context_data(self, **kwargs):
         """
@@ -227,18 +227,6 @@ class NotificationUpdateView(UserPassesTestMixin, UpdateView):
         notification_id = self.kwargs.get("pk")
         context["notification"] = get_object_or_404(Notification, id=notification_id)
         return context
-    
-    
-    def get_success_url(self):
-        """
-        Redirects back to the Notifications page upon success.
-        
-        This method uses the `reverse` function to resolve the URL to the Notifications page and returns it. 
-
-        Returns:
-            str: The URL to the Notifications page.
-        """
-        return reverse("authentication:notifications")
 
     
 class NotificationDeleteView(UserPassesTestMixin, DeleteView):
@@ -292,7 +280,7 @@ class NotificationDeleteView(UserPassesTestMixin, DeleteView):
             HttpResponse: The HTTP response object with the rendered 403 page.
         """
         message = "This notification is not addressed to you."
-        return HttpResponseForbidden(render((self.request, "403.html", {"message": message})))
+        return HttpResponseForbidden(render(self.request, "403.html", {"message": message}))
 
     def get_fail_url(self):
         """

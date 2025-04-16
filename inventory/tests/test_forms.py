@@ -55,9 +55,6 @@ class UsedItemFormTests(TestCase):
         """
         Test that the __init__ function works correctly with get parameters in the url
         """
-        # TODO: test___init__
-        # [x]: GET the form 
-        # [ ]: Make sure the `work_order` field label is "Work Order"
         self.client.login(username="testuser", password="password")
         response = self.client.get(self.item_use_form_url+f"?item_id=1")
         
