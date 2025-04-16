@@ -12,8 +12,10 @@ class HomeViewTests(TestCase):
         Setup
         """
         # TODO: Set up test data for HomeViewTests
-        # [ ]: Create a user for logging in
-
+        # [x]: Create a user for logging in
+        cls.user = User.objects.create_user(username="testuser", password="password")
+        cls.user.groups.add(cls.superuser_group)
+        
 
 class DatabaseLoginViewTests(TestCase):
     @classmethod
@@ -22,7 +24,9 @@ class DatabaseLoginViewTests(TestCase):
         Setup
         """
         # TODO: Set up test data for DatabaseLoginViewTests
-        # [ ]: Create a user for logging in 
+        # [x]: Create a user for logging in 
+        cls.user = User.objects.create_user(username="testuser", password="password")
+        cls.user.groups.add(cls.superuser_group)
         
     def test_login_invalid_username(self):
         """
