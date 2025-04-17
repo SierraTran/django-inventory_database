@@ -18,7 +18,9 @@ class HomeViewTests(TestCase):
         # TODO: Set up test data for HomeViewTests
         # [x]: Create a user for logging in
         cls.user = User.objects.create_user(username="testuser", password="password")
+        cls.superuser = Group.objects.get(name="Superuser")
         cls.user.groups.add(cls.superuser_group)
+        cls.client = Client()
         
 
 class DatabaseLoginViewTests(TestCase):
@@ -281,14 +283,11 @@ class NotificationDeleteViewTests(TestCase):
         # TODO: test_post_cancel_delete
         # [x]: Log in as the user that can access the view and delete the notification
         # [x]: Cancel the deletion
-        # [ ]: Make sure that the notification is still there
-        print("Before: " + f"{self.notification}")
+        # [x]: Make sure that the notification is still there
         self.client.login(username="testuser1", password="password")
         response = self.client.post(self.notification_delete_url, {"cancel": "Cancel"})
         self.assertEqual(response.status_code, 302, "User failed to correctly cancel the deletion.")
-        # FIXME: AssertionError: False is not true : The notification does not exist.
-        print("After: " + f"{self.notification}")
-        self.assertIsNotNone(self.notification, "The notification does not exist.")
+        self.assertIsNotNone(Notification.objects.filter(pk=1).first(), "The notification does not exist.")
         
     def test_post_confirm_delete(self):
         """
@@ -296,11 +295,9 @@ class NotificationDeleteViewTests(TestCase):
         """
         # TODO: test_post_confirm_delete
         # [x]: Log in as the user that can access the view and delete the notification
-        # [ ]: Confirm the deletion
-        # [ ]: Make sure that the notification is gone
-        print("Before: " + f"{self.notification}")
+        # [x]: Confirm the deletion
+        # [x]: Make sure that the notification is gone
         self.client.login(username="testuser1", password="password")
         response = self.client.post(self.notification_delete_url, {"confirm": "Confirm"})
         self.assertEqual(response.status_code, 302, "User failed to correctly confirm the deletion.")
-        print("After: " + f"{self.notification}")
-        self.assertIsNone(self.notification, "The notification does exist.")
+        self.assertIsNone(Notification.objects.filter(pk=1).first(), "The notification does exist.")
