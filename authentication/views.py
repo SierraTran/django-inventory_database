@@ -312,7 +312,7 @@ class NotificationDeleteView(UserPassesTestMixin, DeleteView):
         Returns:
             HttpResponse: The response after handling the POST request.
         """
-        if "Cancel" in request.POST:
+        if "cancel" in request.POST:
             return redirect(self.fail_url)
         else:
             return super(NotificationDeleteView, self).post(request, *args, **kwargs)
