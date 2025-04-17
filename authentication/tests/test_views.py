@@ -18,9 +18,15 @@ class HomeViewTests(TestCase):
         # TODO: Set up test data for HomeViewTests
         # [x]: Create a user for logging in
         cls.user = User.objects.create_user(username="testuser", password="password")
-        cls.superuser = Group.objects.get(name="Superuser")
+        cls.superuser_group = Group.objects.get(name="Superuser")
         cls.user.groups.add(cls.superuser_group)
         cls.client = Client()
+        
+    def test_home_view(self):
+        """
+        Test that the home view is rendered correctly
+        """
+        # TODO: test_home_view
         
 
 class DatabaseLoginViewTests(TestCase):
@@ -33,6 +39,7 @@ class DatabaseLoginViewTests(TestCase):
         # [x]: Create a user for logging in 
         cls.user = User.objects.create_user(username="testuser", password="password")
         cls.user.groups.add(Group.objects.get(name="Superuser"))
+        cls.login_url = reverse("authentication:login")
         cls.client = Client()
         
     def test_login_invalid_username(self):
@@ -41,9 +48,11 @@ class DatabaseLoginViewTests(TestCase):
         """
         # TODO: test_login_invalid_username
         # [ ]: Attempt to log in with an invalid username
-        # [ ]: Check for an error message
+        # [x]: Check for an error message
         # [ ]: Make sure the user is not logged in
-        response = self.client.login(username="invalid", password="password")
+        response = self.client.post(self.login_url, {"username": "invalid", "password": "password"})
+        self.assertEqual(response.status_code, 200, "The user was unexpectedly redirected.")
+        self.assertContains(response, "Invalid username.")
         
         
     def test_login_invalid_password(self):
@@ -52,16 +61,18 @@ class DatabaseLoginViewTests(TestCase):
         """
         # TODO: test_login_invalid_password
         # [ ]: Attempt to log in with an invalid password 
-        # [ ]: Check for an error message
+        # [x]: Check for an error message
         # [ ]: Make sure the user is not logged in
-        response = self.client.login(username="testuser", password="invalid")
+        response = self.client.post(self.login_url, {"username": "testuser", "password": "invalid"})
+        self.assertEqual(response.status_code, 200, "The user was unexpectedly redirected.")
+        self.assertContains(response, "Invalid password.")
         
     def test_login_success(self):
         """
         Successfully login and redirect to the home page
         """
         # TODO: test_login_success
-        response = self.client.login(username="testuser", password="password")
+        response = self.client.post(self.login_url, {"username": "testuser", "password": "password"})
         
 
 ###################################################################################################
