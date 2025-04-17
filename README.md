@@ -90,8 +90,9 @@ The list of required software below will also be included in the `requirements.t
 
 ### Step 1: Download the Application
 
-1. Go to the [GitHub repository](https://github.com/SierraTran/django-inventory_database).
-2. Click the **Code** button and select **Download ZIP**.
+1. Go to the [GitHub repository](https://github.com/SierraTran/django-inventory_database). (You're already here if the URL in your browser is exactly "<https://github.com/SierraTran/django-inventory_database>"!)
+2. Click the **Code** button on the right side of the page.
+3. Select **Download ZIP**.
 
 ### Step 2: Extract the Files
 
@@ -149,10 +150,19 @@ The list of required software below will also be included in the `requirements.t
 ### Step 5: Start and Run the Application
 
 1. Open the folder where you extracted the files.
-2. Double-click the app.bat file. This will automatically install all the required packages and set up the application for you.
+2. There are two files: `deploy.bat` and `deploy.sh`. These files are used to run the application. Choose the one that matches your operating system:
+
+   - For Windows: Double-click `deploy.bat` to run the application.
+   - For Mac/Linux: Open a terminal, navigate to the folder where you extracted the files, and run the following command:
+
+     ```bash
+     chmod +x deploy.sh
+     ./deploy.sh
+     ```
 
 ## Usage
-
+<!-- TODO: Expand this section -->
+<!-- TODO: Add screenshots and usage instructions -->
 - **Home Page**: Displays links to browse items, create new items, import item data, and manage users (based on user permissions).
 - **Items Page**: Lists all available items with search functionality.
 - **Item Detail Page**: Shows detailed information about a specific item.
@@ -183,3 +193,5 @@ Email: <sierra.tran@mail.com>
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+[Back to Top](#inventory-database)
