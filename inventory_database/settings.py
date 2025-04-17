@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from django.core.management.commands.runserver import Command as runserver
 from pathlib import Path
+from decouple import config
 import os
 
 
@@ -26,14 +27,14 @@ MEDIA_URL = "/media/"
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "fallback-secret-key-for-dev")
+SECRET_KEY = config("DJANGO_SECRET_KEY", default="fallback-secret-key-for-dev")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", default=False, cast=bool)
 
 TEST_OUTPUT_VERBOSE = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="").split(",")
 runserver.default_port = '8000'
 runserver.default_addr = '127.0.0.1'
 
@@ -189,17 +190,19 @@ LOGIN_REDIRECT_URL = "/inventory_database/"
 # will bring the user back to the login page ("/inventory_database/accounts/login/")
 LOGOUT_REDIRECT_URL = "/inventory_database/accounts/login/"
 
-# This marks session cookies as secure, making it more difficult for network 
-# traffic sniffers to hijack user sessions.
-SESSION_COOKIE_SECURE = True
+# Setting SESSION_COOKIE_SECURE to True marks session cookies as secure, 
+# making it more difficult for network traffic sniffers to hijack user sessions.
+# For easy installation and setup, this has been set to False.
+SESSION_COOKIE_SECURE = False
 
 # If the user closes the browser, the session will expire and the user will
 # have to log in again.
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-# This marks CSRF cookies as secure, making it more difficult for network 
-# traffic sniffers to steal the CSRF token.
-CSRF_COOKIE_SECURE = True
+# Setting CSRF_COOKIE_SECURE to True marks CSRF cookies as secure, 
+# making it more difficult for network traffic sniffers to steal the CSRF token.
+# For easy installation and setup, this has been set to False. 
+CSRF_COOKIE_SECURE = False
 
 # Message storage for the messages framework
 # https://docs.djangoproject.com/en/5.1/ref/settings/#message-storage
