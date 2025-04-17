@@ -1369,20 +1369,6 @@ class UsedItemDeleteView(SuperuserOrTechnicianRequiredMixin, DeleteView):
     model = UsedItem
     template_name = "used_item_confirm_delete.html"
     success_url = reverse_lazy("inventory:used_items")
-
-    # def get_context_data(self, **kwargs):
-    #     """
-    #     Adds the specific used item to the context data.
-
-    #     This method retrieves the base context by calling the base class's `get_context_data` method.
-    #     Then, it adds the specific UsedItem object to the context under the "object" key.
-
-    #     Returns:
-    #         dict: The context data for the view including the specific used item.
-    #     """
-    #     context = super().get_context_data(**kwargs)
-    #     context["object"] = self.get_object()
-    #     return context
     
     def get_fail_url(self):
         """
