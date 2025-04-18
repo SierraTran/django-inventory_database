@@ -82,10 +82,16 @@ def send_item_request_notification(sender, instance, created, **kwargs):
         created (bool): True if the action done onto the item is "create", False if otherwise.
         **kwargs: Additional keyword arguments sent by the signal.
     """
+    # TODO: Use these variables to create notifications for messages.
+    subject = None
+    message = None
+    user = None
+    
     if created:
         # TODO: Send notifications to the Superusers that the item request has been created.
         return
-    else: 
+    
+    if 'status' in instance.tracker.changed(): 
         # Display the new status of the item request in the subject of the notification.
         subject = escape(f"Item Request {instance.status}")
         
@@ -94,13 +100,14 @@ def send_item_request_notification(sender, instance, created, **kwargs):
         # Explain the new status of the item request and include its link in the message.
         # TODO: Remind the user to delete their item request if they no longer need it.
         message = f"{linked_item_request} has been {str(instance.status).lower()} by {instance.status_changed_by.username}."
-    with transaction.atomic():
-        Notification.objects.create(
-            is_read=False,
-            subject=subject,
-            message=message,
-            user=instance.requested_by,
-        )
+        
+        with transaction.atomic():
+            Notification.objects.create(
+                is_read=False,
+                subject=subject,
+                message=message,
+                user=instance.requested_by,
+            )
 
 @receiver(post_save, sender=Item)
 def send_low_stock_notification(sender, instance, **kwargs):

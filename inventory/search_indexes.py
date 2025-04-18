@@ -21,7 +21,7 @@ class ItemIndex(indexes.SearchIndex, indexes.Indexable):
 class UsedItemIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
     item = indexes.CharField(model_attr='item')
-    work_order = indexes.IntegerField(model_attr="work_order")
+    work_order = indexes.IntegerField(model_attr='work_order')
     
     def get_model(self):
         return UsedItem

@@ -1,10 +1,12 @@
+import datetime
 from decimal import Decimal
 from django.test import Client, RequestFactory, TestCase, tag
 from django.urls import reverse
+from django.utils import timezone
 
 from django.contrib.auth.models import User, Group
-from inventory.models import Item, ItemHistory
-from inventory.views import ItemHistoryView, ItemUpdateSuperuserView, ItemView
+from inventory.models import Item, ItemHistory, ItemRequest
+from inventory.views import ItemHistoryView, ItemRequestView, ItemUpdateSuperuserView, ItemView
 
 
 # Create your tests here.
@@ -1291,24 +1293,116 @@ class ItemHistoryViewTests(TestCase):
 # Tests for the Views for the ItemRequest Model ###################################################
 ###################################################################################################
 class ItemRequestViewTests(TestCase):
+    # NOTE: Local date and time is set to January 3, 2025 at 1:00 PM for testing purposes
+    aware_datetime = timezone.make_aware(datetime.datetime(2025, 1, 3, 13, 0, 0))
+
     @classmethod
     def setUpTestData(cls):
         """
         Setup
         """
         # TODO: Set up for ItemRequestViewTests
-        # [ ]: Get the user groups
-        # [ ]: Create one user for each group
-        # [ ]: One or more item requests to view for the list
+        # [x]: Get the user groups
+        # [x]: Create one user for each group
+        # [ ]: One or more item requests to view for the list (at ifferent times)
         # [ ]: Set time for the tests
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.intern_group = Group.objects.get(name="Intern")
+        cls.viewer_group = Group.objects.get(name="Viewer")
+        
+        cls.superuser = User.objects.create_user(username="testsuperuser", password="password")
+        cls.technician = User.objects.create_user(username="testtechnician", password="password")
+        cls.intern = User.objects.create_user(username="testintern", password="password")
+        cls.viewer = User.objects.create_user(username="testviewer", password="password")
+        
+        item_requests = [
+            ItemRequest(
+                manufacturer="Test MFG",
+                model_part_num="First Model and Part Num",
+                quantity_requested=1,
+                # description left blank
+                unit_price=0.01,
+                requested_by=cls.technician,
+                # timestamp automatically set
+                # status automatically set to "Pending"
+                # status_changed_by automatically set to None
+            ),
+            ItemRequest(
+                manufacturer="Test MFG",
+                model_part_num="Second Model and Part Num",
+                quantity_requested=1,
+                unit_price=0.01,
+                requested_by=cls.technician,
+            ),
+            ItemRequest(
+                manufacturer="Test MFG",
+                model_part_num="Third Model and Part Num",
+                quantity_requested=1,
+                unit_price=0.01,
+                requested_by=cls.technician,
+            ),
+            ItemRequest(
+                manufacturer="Test MFG",
+                model_part_num="Fourth Model and Part Num",
+                quantity_requested=1,
+                unit_price=0.01,
+                requested_by=cls.technician,
+            )
+        ]
+        ItemRequest.objects.bulk_create(item_requests)
+        
+        # FIXME: The computer doesn't like it when I try to manually set date and time
+        for i in range(1, 5):
+            item_request = ItemRequest.objects.filter(pk=i).first()
+            item_request.timestamp = datetime.datetime(2025, 1, i, 12, 0)
+            item_request.save()
+        
+        cls.item_requests_url = reverse("inventory:item_requests")        
+        cls.client = Client()
+        cls.factory = RequestFactory()
+        
+    def test_item_request_view_access_control(self):
+        """
+        Test that only superusers and technicians can access the view
+        """
         
     def test_get_queryset(self):
         """
         Test the queryset for the item requests.
         """
-        # TODO: test_get_queryset
+        # TODO: test_get_queryse
         # [ ]: Simulate GET request
+        request = self.factory.get(self.item_requests_url)
+        view = ItemRequestView()
+        view.request = request
+        queryset = ItemRequest.objects.all().order_by("-timestamp") 
         
+        expected_ordered_item_requests = [
+            ("Test MFG", "Fourth Model and Part Num"),
+            ("Test MFG", "Third Model and Part Num"),
+            ("Test MFG", "Second Model and Part Num"),
+            ("Test MFG", "First Model and Part Num"),
+        ]
+        actual_ordered_item_requests = list(queryset.values_list("manufacturer", "model_part_num"))
+        
+        self.assertEqual(queryset.count(), 4)
+        self.assertEqual(actual_ordered_item_requests, expected_ordered_item_requests)
+        
+
+class ItemRequestDetailViewTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """        
+        ItemRequest.objects.create(
+            manufacturer="Test MFG",
+            model_part_num="First Model and Part Num",
+            quantity_requested=1,
+            unit_price=0.01,
+            requested_by=cls.technician,
+        )
 
 ###################################################################################################
 # Tests for the Views for the UsedItem Model ######################################################

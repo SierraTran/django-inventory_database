@@ -15,19 +15,33 @@ class HomeViewTests(TestCase):
         """
         Setup
         """
-        # TODO: Set up test data for HomeViewTests
-        # [x]: Create a user for logging in
         cls.user = User.objects.create_user(username="testuser", password="password")
         cls.superuser_group = Group.objects.get(name="Superuser")
         cls.user.groups.add(cls.superuser_group)
+        cls.home_url = reverse("authentication:home")
         cls.client = Client()
         
-    def test_home_view(self):
+    def test_home_view_unauthenticated(self):
         """
-        Test that the home view is rendered correctly
+        Test that the home view is rendered correctly when not logged in
         """
-        # TODO: test_home_view
+        response = self.client.get(self.home_url)
         
+        self.assertTemplateUsed(response, "home.html")
+        self.assertFalse(response.wsgi_request.user.is_authenticated, "The user is unexpectedly authenticated.")
+        self.assertContains(response, '<p>Please <a href="/inventory_database/login/">log in</a> to see the database.</p>')
+        
+    def test_home_view_authenticated(self):
+        """
+        Test that the home view is rendered correctly when logged in
+        """
+        self.client.login(username="testuser", password="password")
+        response = self.client.get(self.home_url)
+        
+        self.assertTemplateUsed(response, "home.html")
+        self.assertTrue(response.wsgi_request.user.is_authenticated, "The user is not authenticated.")
+        self.assertNotContains(response, '<p>Please <a href="/inventory_database/login/">log in</a> to see the database.</p>')
+
 
 class DatabaseLoginViewTests(TestCase):
     @classmethod
@@ -47,58 +61,73 @@ class DatabaseLoginViewTests(TestCase):
         An error message displays for an invalid username
         """
         # TODO: test_login_invalid_username
-        # [ ]: Attempt to log in with an invalid username
+        # [x]: Attempt to log in with an invalid username
         # [x]: Check for an error message
-        # [ ]: Make sure the user is not logged in
+        # [x]: Make sure the user is not logged in
         response = self.client.post(self.login_url, {"username": "invalid", "password": "password"})
         self.assertEqual(response.status_code, 200, "The user was unexpectedly redirected.")
         self.assertContains(response, "Invalid username.")
-        
+        self.assertFalse(response.wsgi_request.user.is_authenticated, "The user is unexpectedly authenticated.")        
         
     def test_login_invalid_password(self):
         """
         An error message displays for an invalid password
         """
         # TODO: test_login_invalid_password
-        # [ ]: Attempt to log in with an invalid password 
+        # [x]: Attempt to log in with an invalid password 
         # [x]: Check for an error message
-        # [ ]: Make sure the user is not logged in
+        # [x]: Make sure the user is not logged in
         response = self.client.post(self.login_url, {"username": "testuser", "password": "invalid"})
         self.assertEqual(response.status_code, 200, "The user was unexpectedly redirected.")
         self.assertContains(response, "Invalid password.")
+        self.assertFalse(response.wsgi_request.user.is_authenticated, "The user is unexpectedly authenticated.")        
         
     def test_login_success(self):
         """
         Successfully login and redirect to the home page
         """
         # TODO: test_login_success
+        # [x]: Attempt to log in 
+        # [x]: Check for redirection
+        # [x]: Make sure the user is logged in
         response = self.client.post(self.login_url, {"username": "testuser", "password": "password"})
+        self.assertEqual(response.status_code, 302, "The user failed to log in.")
+        self.assertTrue(response.wsgi_request.user.is_authenticated, "The user is not authenticated.")
         
 
 ###################################################################################################
 # Tests for the Views for the Notification Model ##################################################
 ###################################################################################################
-class NotificationViewTests(TestCase): 
+class NotificationViewTests(TestCase):
+    # NOTE: Local date and time is set to January 1, 2025 at 12:00 for testing purposes
+    aware_datetime = timezone.make_aware(datetime.datetime(2025, 1, 1, 12, 0, 0))
+     
     @classmethod
+    @freeze_time(aware_datetime)
     def setUpTestData(cls):
         """
         Setup
         """
         # TODO: Set up for NotificationViewTests
+        # [x]: Set date and time for testing
         # [x]: Create a user for any group
         # [ ]: Bulk create notifications for the user as well as ones not for the user
-        
-        notifications = [
-            
-        ]        
-        Notification.objects.bulk_create(notifications)
-        cls.notifications_url = reverse("authentication:notifications")
-        
-        cls.superuser_group = Group.objects.get(name="Superuser")
-        
+        cls.superuser_group = Group.objects.get(name="Superuser")        
         cls.user1 = User.objects.create_user(username="testuser1", password="password")
         cls.user1.groups.add(cls.superuser_group)
         
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.user2 = User.objects.create_user(username="testuser2", password="password")
+        cls.user2.groups.add(cls.technician_group)
+        
+        notifications = [
+            Notification(subject="Low Stock Alert", message="An item in the database is below the minimum quantity.", user=cls.user1),
+            Notification(subject="New Item Request", message="A new item request has been created.", user=cls.user1),
+            Notification(subject="Welcome!", message="Welcome to the Inventory Database!", user=cls.user2),
+        ]        
+        Notification.objects.bulk_create(notifications)
+        cls.notifications_url = reverse("authentication:notifications")
+            
         cls.client = Client()
         
     @tag("critical")
@@ -145,7 +174,6 @@ class NotificationViewTests(TestCase):
         response = self.client.get(self.notifications_url)
         self.assertEqual(response.status_code, 200, "Failed to access the notifications page.")
         self.assertTemplateUsed(response, "notifications.html", "The correct template for the view is not used.")
-        
         
     def test_notification_all_read_notifs(self):
         # TODO: test_notification_all_read_notifs

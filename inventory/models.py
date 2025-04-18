@@ -151,6 +151,8 @@ class ItemRequest(models.Model):
         default=None,
         related_name="status_changed_by_user"
     )
+    
+    tracker = FieldTracker(fields=['status'])
 
     def get_absolute_url(self):
         return reverse("inventory:item_request_detail", kwargs={"pk": self.pk})
