@@ -187,7 +187,7 @@ The list of required software below will also be included in the `requirements.t
 ### Inventory Management Features
 
 - **Users Page Access for Everyone**: All users can access the users page and user details for improved transparency.
-- **"Shopping Cart for Items**: Users can add items to a list for purchasing, which will be used to populate purchase order forms on the application.
+- **"Shopping Cart" for Items**: Users can add items to a list for purchasing, which will be used to populate purchase order forms on the application.
 - **Export Inventory to Excel**: Users can generate an Excel file for reports, audits, and inventory tracking without manual data entry.
 
 ## Contributing
