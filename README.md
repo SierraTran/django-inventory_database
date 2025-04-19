@@ -90,7 +90,7 @@ The list of required software below will also be included in the `requirements.t
 
 ### Step 1: Download the Application
 
-1. Go to the [GitHub repository](https://github.com/SierraTran/inventory_database). (You're already here if the URL in your browser is exactly "<https://github.com/SierraTran/inventory_database>"!)
+1. Go to the [GitHub repository](https://github.com/SierraTran/inventory_database). (You're already here if the URL in your browser starts with "<https://github.com/SierraTran/inventory_database>"!)
 2. Click the **Code** button on the right side of the page.
 3. Select **Download ZIP**.
 
