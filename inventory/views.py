@@ -458,9 +458,7 @@ class ItemDeleteView(SuperuserOrTechnicianRequiredMixin, DeleteView):
         Returns:
             str: The URL to redirect to.
         """
-        return reverse_lazy(
-            "inventory:item_detail", kwargs={"pk": self.get_object().pk}
-        )
+        return reverse_lazy("inventory:item_detail", kwargs={"pk": self.get_object().pk})
 
     fail_url = property(get_fail_url)
 
@@ -895,9 +893,7 @@ class ItemRequestAcceptView(SuperuserRequiredMixin, TemplateView):
         Returns:
             str: The resolved URL for redirction.
         """
-        return reverse_lazy(
-            "inventory:item_request_detail", kwargs={"pk": self.get_object().pk}
-        )
+        return reverse_lazy("inventory:item_request_detail", kwargs={"pk": self.get_object().pk})
 
     fail_url = property(get_fail_url)
 
@@ -987,9 +983,7 @@ class ItemRequestRejectView(SuperuserRequiredMixin, TemplateView):
         Returns:
             str: The resolvd URL for redirection.
         """
-        return reverse_lazy(
-            "inventory:item_request_detail", kwargs={"pk": self.get_object().pk}
-        )
+        return reverse_lazy("inventory:item_request_detail", kwargs={"pk": self.get_object().pk})
 
     fail_url = property(get_fail_url)
 
@@ -1163,7 +1157,7 @@ class UsedItemView(LoginRequiredMixin, ListView):
         Returns:
             QuerySet: A queryset containing all used items.
         """
-        return UsedItem.objects.all().order_by("datetime_used", "work_order", "item")
+        return UsedItem.objects.all().order_by("-datetime_used", "work_order", "item")
 
 
 class UsedItemDetailView(LoginRequiredMixin, DetailView):
