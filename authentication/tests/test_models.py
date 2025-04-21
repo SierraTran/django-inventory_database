@@ -20,7 +20,6 @@ class NotificationModelTests(TestCase):
         """
         Setup
         """
-        # [ ]; Create notifications
         cls.user = User.objects.create_user(username="testuser", password="password")
         cls.user.groups.add(Group.objects.get_or_create(name="Superuser")[0])
         
