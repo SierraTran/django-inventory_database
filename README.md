@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Coverage](https://img.shields.io/badge/coverage-74%25-2BFF00)
 
-This is a Django-based web application for managing an inventory database. The application allows users to browse, search, and manage items in the inventory. It also includes user authentication and authorization features.
+This is a Django-based web application for managing an inventory. The application allows users to browse, search, and manage items in the inventory. It also includes user authentication and authorization features. It is specifically tailored for [Hayes Instrument Service](https://hayesinstruments.com/) to make keeping inventory much easier.
 
 ## Table of Contents
 
@@ -74,23 +74,32 @@ More info about [OpenPyXL](https://openpyxl.readthedocs.io/en/stable/)
 
 ## Required Software
 
-- Python 3.13.2
+|Software|Version|
+|--------|-------|
+|Python|3.13.2|
 
 ## Required Packages
 
 The list of required software below will also be included in the `requirements.txt` file.
 
-- Django
-- django-haystack
-- openpyxl
-- whitenoise
-- Whoosh
+|Package|Version|
+|-------|-------|
+|coverage|7.6.12|
+|Django|5.2|
+|django-haystack|3.3.0|
+|django-model-utils|5.0.0|
+|freezegun|1.5.1|
+|gunicorn|23.0.0|
+|openpyxl|3.1.5|
+|waitress|3.0.2|
+|whitenoise|6.9.0|
+|Whoosh|2.7.4|
 
 ## Installation and Setup Instructions
 
 ### Step 1: Download the Application
 
-1. Go to the [GitHub repository](https://github.com/SierraTran/django-inventory_database). (You're already here if the URL in your browser is exactly "<https://github.com/SierraTran/django-inventory_database>"!)
+1. Go to the [GitHub repository](https://github.com/SierraTran/inventory_database). (You're already here if the URL in your browser starts with "<https://github.com/SierraTran/inventory_database>"!)
 2. Click the **Code** button on the right side of the page.
 3. Select **Download ZIP**.
 
@@ -124,7 +133,7 @@ The list of required software below will also be included in the `requirements.t
         py -c "import secrets; print(secrets.token_urlsafe(50))"
         ```
 
-      - Note: This command uses `py` to run Python on Windows. If you're using Linux or Mac, you can use `python3` or `python` instead.
+      - *Note: This command uses `py` to run Python on Windows. If you're using Linux or Mac, you can use `python3` or `python` instead.*
 
     - This will output a long, random string. it will look somehting like this:
 
@@ -170,13 +179,16 @@ The list of required software below will also be included in the `requirements.t
 
 ## Future Enhancements
 
-This list contains features that may possibly be added to the application in the future.
+### UI Improvements
 
-- Allow all users access to *only* view the list of all users and their details
-- More seamless notification marking and deleting
-- Extensive help page and/or contextual help messages
-- "Shopping cart" feature for saving a list of items to purchase for purchase order form
-- Export items in the inventory to an Excel File
+- **Seamless Notification Management**: Users can mark and delete notifications directly from the notifications page, avoiding unnecessary navigation.
+- **Help page and/or messages**: Users can refer to an extensive page or contextual messages throughout the application for guidance. 
+
+### Inventory Management Features
+
+- **Users Page Access for Everyone**: All users can access the users page and user details for improved transparency.
+- **"Shopping Cart" for Items**: Users can add items to a list for purchasing, which will be used to populate purchase order forms on the application.
+- **Export Inventory to Excel**: Users can generate an Excel file for reports, audits, and inventory tracking without manual data entry.
 
 ## Contributing
 
