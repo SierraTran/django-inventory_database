@@ -49,8 +49,6 @@ class DatabaseLoginViewTests(TestCase):
         """
         Setup
         """
-        # TODO: Set up test data for DatabaseLoginViewTests
-        # [x]: Create a user for logging in 
         cls.user = User.objects.create_user(username="testuser", password="password")
         cls.user.groups.add(Group.objects.get(name="Superuser"))
         cls.login_url = reverse("authentication:login")
@@ -60,10 +58,6 @@ class DatabaseLoginViewTests(TestCase):
         """
         An error message displays for an invalid username
         """
-        # TODO: test_login_invalid_username
-        # [x]: Attempt to log in with an invalid username
-        # [x]: Check for an error message
-        # [x]: Make sure the user is not logged in
         response = self.client.post(self.login_url, {"username": "invalid", "password": "password"})
         self.assertEqual(response.status_code, 200, "The user was unexpectedly redirected.")
         self.assertContains(response, "Invalid username.")
@@ -73,10 +67,6 @@ class DatabaseLoginViewTests(TestCase):
         """
         An error message displays for an invalid password
         """
-        # TODO: test_login_invalid_password
-        # [x]: Attempt to log in with an invalid password 
-        # [x]: Check for an error message
-        # [x]: Make sure the user is not logged in
         response = self.client.post(self.login_url, {"username": "testuser", "password": "invalid"})
         self.assertEqual(response.status_code, 200, "The user was unexpectedly redirected.")
         self.assertContains(response, "Invalid password.")
@@ -86,10 +76,6 @@ class DatabaseLoginViewTests(TestCase):
         """
         Successfully login and redirect to the home page
         """
-        # TODO: test_login_success
-        # [x]: Attempt to log in 
-        # [x]: Check for redirection
-        # [x]: Make sure the user is logged in
         response = self.client.post(self.login_url, {"username": "testuser", "password": "password"})
         self.assertEqual(response.status_code, 302, "The user failed to log in.")
         self.assertTrue(response.wsgi_request.user.is_authenticated, "The user is not authenticated.")
@@ -218,9 +204,6 @@ class NotificationUpdateViewTests(TestCase):
         """
         Setup
         """
-        # TODO: Set up test data for NotificationUpdateViewTests
-        # [x]: Create two users: one with access to the notification and one without access
-        # [x]: Create a notification to update
         cls.user_with_access = User.objects.create_user(username="testuser1", password="password")
         cls.user_with_no_access = User.objects.create_user(username="testuser2", password="password")
         
@@ -241,11 +224,6 @@ class NotificationUpdateViewTests(TestCase):
         """
         Access control for the notification update view.
         """
-        # TODO: test_notification_update_view_access_control
-        # [x]: Log in as the user with access to the notification
-        # [x]: Make sure the user can access the notification update view   
-        # [x]: Log in as the user without access to the notification
-        # [x]: Make sure the user cannot access the notification update view
         self.client.login(username="testuser1", password="password")
         response = self.client.get(self.notification_update_url)        
         self.assertEqual(response.status_code, 200, "The user failed to access the update view for their notification.")
@@ -278,9 +256,6 @@ class NotificationDeleteViewTests(TestCase):
         """
         Setup
         """
-        # TODO: Set up for NotificationDeleteViewTests
-        # [x]: Create a notification to delete
-        # [x]: Create two users: one with access to the notification and one without access
         cls.user_with_access = User.objects.create_user(username="testuser1", password="password")
         cls.user_with_no_access = User.objects.create_user(username="testuser2", password="password")
         
@@ -300,11 +275,6 @@ class NotificationDeleteViewTests(TestCase):
         """
         Test the access control for the notification delete view.
         """
-        # TODO: test_notification_delete_view_access_control
-        # [x]: Log in as the user without access to the notification
-        # [x]: Make sure the user can't access the view or delete the notification
-        # [x]: Log in as the user with access to the notification
-        # [x]: Make sure the user can access the view and delete the notification
         self.client.login(username="testuser1", password="password")
         response = self.client.get(self.notification_delete_url)
         self.assertEqual(response.status_code, 200, "The user failed to access the update view for their notification.")
@@ -319,10 +289,6 @@ class NotificationDeleteViewTests(TestCase):
         """
         Test the cancel delete functionality for the notification delete view.
         """
-        # TODO: test_post_cancel_delete
-        # [x]: Log in as the user that can access the view and delete the notification
-        # [x]: Cancel the deletion
-        # [x]: Make sure that the notification is still there
         self.client.login(username="testuser1", password="password")
         response = self.client.post(self.notification_delete_url, {"cancel": "Cancel"})
         self.assertEqual(response.status_code, 302, "User failed to correctly cancel the deletion.")
@@ -332,10 +298,6 @@ class NotificationDeleteViewTests(TestCase):
         """
         Test the confirm delete functionality for the notification delete view.
         """
-        # TODO: test_post_confirm_delete
-        # [x]: Log in as the user that can access the view and delete the notification
-        # [x]: Confirm the deletion
-        # [x]: Make sure that the notification is gone
         self.client.login(username="testuser1", password="password")
         response = self.client.post(self.notification_delete_url, {"confirm": "Confirm"})
         self.assertEqual(response.status_code, 302, "User failed to correctly confirm the deletion.")
