@@ -381,9 +381,6 @@ class UsedItemModelTests(TestCase):
         """
         Setup
         """
-        # TODO: Set up for UsedItemModelTests
-        # [x]: Create an Item object
-        # [x]: Create a UsedItem object
         cls.user = User.objects.create_user(username="testuser", password="password")
         cls.user.groups.add(Group.objects.get(name="Superuser"))
         
@@ -412,17 +409,15 @@ class UsedItemModelTests(TestCase):
         """
         Test that the get_absolute_url method returns the correct URL.
         """
-        # TODO: test_get_absolute_url
-        # [ ]: Call the get_absolute_url method for the UsedItem object
-        # [ ]: Assert that the URL is correct and in the expected format
+        expected_url = "/inventory_database/used_items/1/"
+        actual_url = self.used_item.get_absolute_url()
+        
+        self.assertEqual(actual_url, expected_url, "URL for the UsedItem object doesn't match the expected URL.")
         
     def test___str__(self):
         """
         Test that the string representation of the PurchaseOrderItem object is correct.
         """
-        # TODO: test___str__
-        # [x] : Call the __str__ method for the UsedItem object
-        # [x]: Assert that the string representation is correct and in the expected format
         expected_string = "Work Order: 1234567 | Item: Test MFG, Test Model" 
         actual_string = self.used_item.__str__()
         
