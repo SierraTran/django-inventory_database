@@ -3,10 +3,11 @@ from decimal import Decimal
 from django.test import Client, RequestFactory, TestCase, tag
 from django.urls import reverse
 from django.utils import timezone
+from unittest.mock import patch
 
 from django.contrib.auth.models import User, Group
-from inventory.models import Item, ItemHistory, ItemRequest
-from inventory.views import ItemHistoryView, ItemRequestView, ItemUpdateSuperuserView, ItemView
+from inventory.models import Item, ItemHistory, ItemRequest, UsedItem
+from inventory.views import ItemHistoryView, ItemRequestView, ItemUpdateSuperuserView, ItemView, UsedItemView
 
 
 # Create your tests here.
@@ -32,8 +33,7 @@ class ItemViewTests(TestCase):
         Item.objects.bulk_create(items)
         cls.items_list_url = reverse("inventory:items")
         
-        cls.technician_group = Group.objects.get(name="Technician")
-        
+        cls.technician_group = Group.objects.get(name="Technician")        
         cls.user = User.objects.create_user(username="testuser", password="password")
         cls.user.groups.add(cls.technician_group)
         
@@ -549,14 +549,11 @@ class ItemUpdateViewTests(TestCase):
 
         # Create users and assign them to groups
         cls.superuser = User.objects.create_superuser(username="testsuperuser", password="password")
-        cls.superuser.groups.add(cls.superuser_group)
-        
+        cls.superuser.groups.add(cls.superuser_group)        
         cls.technician = User.objects.create_user(username="testtechnician", password="password")
-        cls.technician.groups.add(cls.technician_group)
-        
+        cls.technician.groups.add(cls.technician_group)        
         cls.intern = User.objects.create_user(username="testintern", password="password")
-        cls.intern.groups.add(cls.intern_group)
-        
+        cls.intern.groups.add(cls.intern_group)        
         cls.viewer = User.objects.create_user(username="testviewer", password="password")
         cls.viewer.groups.add(cls.viewer_group)
 
@@ -567,7 +564,7 @@ class ItemUpdateViewTests(TestCase):
 
         cls.factory = RequestFactory()
         cls.client = Client()
-        cls.view = ItemUpdateSuperuserView()
+        # cls.view = ItemUpdateSuperuserView()
     
     @tag("critical")
     def test_item_update_superuser_view_access_control(self):
@@ -1004,6 +1001,34 @@ class ItemUpdateViewTests(TestCase):
         self.item.refresh_from_db()
         self.assertEqual(self.item.quantity, 4, "The quantity has been updated.")
 
+    @patch("inventory.models.Item.save") # Mock the save method
+    def test_save_adds_superuser_in_view(self, mock_save):
+        """
+        Test that the save method for ItemUpdateSuperuserView saves the superuser
+        """
+        # request = self.factory.post(reverse("inventory:item_update_form_superuser", kwargs={"pk": self.item.pk}), {"description": "Updated Item"})
+        # request.user = self.superuser
+        # response = ItemUpdateSuperuserView.as_view()(request, pk=self.item.pk)
+        self.client.login(username="testsuperuser", password="password")
+        
+        response = self.client.post(self.item_update_superuser_url, {
+            "manufacturer": "Updated Manufacturer",
+            "model": "Updated Model",
+            "part_or_unit": Item.PART,
+            "part_number": "12345",
+            "description": "Updated description",
+            "location": "Updated location",
+            "quantity": 10,
+            "min_quantity": 2,
+            "unit_price": 1.50,
+        })
+        
+        mock_save.assert_called_once()
+        args, kwargs = mock_save.call_args
+        self.assertIn("user", kwargs)
+        self.assertEqual(kwargs["user"], self.superuser)
+        self.assertEqual(response.status_code, 302)
+    
 
 class ItemDeleteViewtests(TestCase):
     @classmethod
@@ -1263,14 +1288,13 @@ class ItemHistoryViewTests(TestCase):
         """
         # TODO: test_item_history_view_record_of_update
         # [x]: User logs in
-        login = self.client.login(username="testuser", password="password")
-        self.assertTrue(login, "Login failed.")
-        
         # [ ]: User updates the existing item
         # [ ]: Check for form errors
         # [ ]: Make sure the item was updated successfully and redirects
         # [ ]: Refresh with `self.item.refresh_from_db()`
         # [ ]: Check that the item history view shows the complete history for the item
+        login = self.client.login(username="testuser", password="password")
+        self.assertTrue(login, "Login failed.")
         
     def test_item_history_view_record_of_use(self):
         """
@@ -1352,16 +1376,11 @@ class ItemRequestViewTests(TestCase):
         ]
         ItemRequest.objects.bulk_create(item_requests)
         
-        # FIXME: The computer doesn't like it when I try to manually set date and time
-        for i in range(1, 5):
-            item_request = ItemRequest.objects.filter(pk=i).first()
-            item_request.timestamp = datetime.datetime(2025, 1, i, 12, 0)
-            item_request.save()
-        
         cls.item_requests_url = reverse("inventory:item_requests")        
         cls.client = Client()
         cls.factory = RequestFactory()
-        
+    
+    @tag('critical')
     def test_item_request_view_access_control(self):
         """
         Test that only superusers and technicians can access the view
@@ -1371,12 +1390,10 @@ class ItemRequestViewTests(TestCase):
         """
         Test the queryset for the item requests.
         """
-        # TODO: test_get_queryse
-        # [ ]: Simulate GET request
         request = self.factory.get(self.item_requests_url)
         view = ItemRequestView()
         view.request = request
-        queryset = ItemRequest.objects.all().order_by("-timestamp") 
+        queryset = view.get_queryset()
         
         expected_ordered_item_requests = [
             ("Test MFG", "Fourth Model and Part Num"),
@@ -1403,6 +1420,18 @@ class ItemRequestDetailViewTests(TestCase):
             unit_price=0.01,
             requested_by=cls.technician,
         )
+        
+    @tag('critical')
+    def test_item_request_detail_view_access_control(self):
+        """
+        
+        """
+        
+    def test_get_context_data(self):
+        """
+        
+        """
+
 
 ###################################################################################################
 # Tests for the Views for the UsedItem Model ######################################################
@@ -1414,9 +1443,42 @@ class UsedItemViewTests(TestCase):
         Setup
         """
         # TODO: Set up test data
-        # [ ]: Get the user groups
-        # [ ]: Create one user for each group
-        # [ ]: Create one item for use
+        # [x]: Get the user groups
+        # [x]: Create one user for each group
+        # [x]: Create used items
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.intern_group = Group.objects.get(name="Intern")
+        cls.viewer_group = Group.objects.get(name="Viewer")
+        
+        cls.superuser = User.objects.create_user(username="testsuperuser", password="password")
+        cls.technician = User.objects.create_user(username="testtechnician", password="password")
+        cls.intern = User.objects.create_user(username="testintern", password="password")
+        cls.viewer = User.objects.create_user(username="testviewer", password="password")
+        
+        items = [
+            Item(manufacturer="Fluke", model="Dials", part_or_unit=Item.UNIT, quantity=17),
+            Item(manufacturer="Fluke", model="45", part_or_unit=Item.PART, part_number="814137 Rev 2", quantity=10),
+            Item(manufacturer="Amprobe", model="Bodys", part_or_unit=Item.PART, part_number="ACDC-100 TRMS", quantity=20),
+        ]
+        Item.objects.bulk_create(items)
+        cls.item1 = Item.objects.filter(pk=1).first()
+        cls.item2 = Item.objects.filter(pk=2).first()
+        cls.item3 = Item.objects.filter(pk=3).first()
+        
+        used_items = [
+            UsedItem(item=cls.item1, work_order=1234567, used_by=cls.technician),
+            UsedItem(item=cls.item1, work_order=1010101, used_by=cls.superuser),
+            UsedItem(item=cls.item2, work_order=1234567, used_by=cls.technician),
+            UsedItem(item=cls.item3, work_order=5135265, used_by=cls.technician),
+            UsedItem(item=cls.item3, work_order=1234567, used_by=cls.technician),
+        ]
+        UsedItem.objects.bulk_create(used_items)
+        
+        cls.used_items_url = reverse("inventory:used_items")
+        
+        cls.client = Client()
+        cls.factory = RequestFactory()
         
     @tag('critical')
     def test_used_item_view_access_control(self):
@@ -1429,6 +1491,27 @@ class UsedItemViewTests(TestCase):
         # [ ]: Technicians have access
         # [ ]: Interns don't have access
         # [ ]: Viewers don't have access
+        
+    def test_get_queryset(self):
+        """
+        Test the queryset for the item requests.
+        """
+        request = self.factory.get(self.used_items_url)
+        view = UsedItemView()
+        view.request = request
+        queryset = view.get_queryset()
+        
+        expected_ordered_used_items = [
+            (self.item3.pk, 1234567),
+            (self.item3.pk, 5135265),
+            (self.item2.pk, 1234567),
+            (self.item1.pk, 1010101),
+            (self.item1.pk, 1234567),
+        ]
+        actual_ordered_used_items = list(queryset.values_list("item", "work_order"))
+        
+        self.assertEqual(queryset.count(), 5)
+        self.assertEqual(actual_ordered_used_items, expected_ordered_used_items)
 
 
 class UsedItemDetailViewTests(TestCase):
@@ -1446,13 +1529,13 @@ class UsedItemDetailViewTests(TestCase):
         cls.factory = RequestFactory()
         
     @tag('critical')
-    def test_used_item_detail_access_control(self):
+    def test_used_item_detail_view_access_control(self):
         """
         Test that only logged-in users can access the UsedItemDetailView.
         """
-        # TODO: test_used_item_detail_access_control
+        # TODO: test_used_item_detail_view_access_control
         # [ ]: Try to simulate GET request without logging in
-        # [ ] : Log in and simulate GET request
+        # [ ]: Log in and simulate GET request
 
     
 class UsedItemCreateViewTests(TestCase):
@@ -1462,11 +1545,35 @@ class UsedItemCreateViewTests(TestCase):
         Setup
         """
         # TODO: Set up test data
-        # [ ]L Create two items, one with a quantity of 0 and one with a quantity of 1
-        # [ ]: Create a user 
+        # [x]L Create two items, one with a quantity of 0 and one with a quantity of 1
+        # [x]: Create a user 
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.user = User.objects.create_user(username="testtechnician", password="password")
+        cls.user.groups.add(cls.technician_group)
+        
+        items = [
+            Item(manufacturer="Fluke", model="Dials", part_or_unit=Item.UNIT, quantity=0),
+            Item(manufacturer="Fluke", model="45", part_or_unit=Item.PART, part_number="814137 Rev 2", quantity=1),
+        ]
+        Item.objects.bulk_create(items)
+        cls.item1 = Item.objects.filter(pk=1).first()
+        cls.item2 = Item.objects.filter(pk=2).first()
+        cls.item1_use_url = reverse("inventory:item_use_form") + f"?item_id={cls.item1.pk}"
+        cls.item2_use_url = reverse("inventory:item_use_form") + f"?item_id={cls.item2.pk}"
         
         cls.client = Client()
-        cls.factory = RequestFactory()    
+        cls.factory = RequestFactory() 
+        
+    @tag('critical')
+    def test_used_item_create_view_access_control(self):
+        """
+        Test that only superusers and technicians can access the UsedItemCreateView.
+        """
+        # TODO: test_used_item_create_view_access_control
+        self.client.login(username="testtechnician", password="password")
+        response = self.client.get(self.item2_use_url)        
+        self.assertEqual(response.status_code, 200, "The user failed to access the .")
+        self.client.logout()
         
     def test_dispatch(self):
         """
@@ -1475,6 +1582,7 @@ class UsedItemCreateViewTests(TestCase):
         # TODO: test_dispatch
         # [ ]: Test that items with quantities over 0 can be used
         # [ ]: Test that items with quantities equal to 0 cannot be used
+        
         
     def test_form_valid(self):
         """
@@ -1499,6 +1607,12 @@ class UsedItemDeleteViewTests(TestCase):
         
         cls.client = Client()
         cls.factory = RequestFactory()
+        
+    @tag('critical')
+    def test_used_item_delete_view_access_control(self):
+        """
+        Test that only superusers and technicians can access the UsedItemDeleteView.
+        """
         
     def test_get_context_data(self):
         """
