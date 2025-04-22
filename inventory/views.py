@@ -252,7 +252,6 @@ class ItemUpdateSuperuserView(SuperuserRequiredMixin, UpdateView):
 
     Methods:
         `form_valid()`: Passes the current user to the save method.
-        `save()`: Saves the updated item with additional keyword arguments.
     """
 
     model = Item
@@ -285,23 +284,6 @@ class ItemUpdateSuperuserView(SuperuserRequiredMixin, UpdateView):
         form.instance.last_modified_by = self.request.user
         return super().form_valid(form)
 
-    def save(self, *args, **kwargs):
-        """
-        Saves the updated item with additional keyword arguments.
-
-        This method updates `kwargs` to include the current user before delegating the save operation to the base class.
-
-        Args:
-            *args: Additional positional arguments.
-            **kwargs: Additional keyword arguments.
-
-        Returns:
-            HttpResponse: The HTTP response object.
-        """
-        kwargs["user"] = self.request.user
-        return super().save(*args, **kwargs)
-
-
 class ItemUpdateTechnicianView(TechnicianRequiredMixin, UpdateView):
     """
     Class-based view for updating an existing item as a Technician.
@@ -319,7 +301,6 @@ class ItemUpdateTechnicianView(TechnicianRequiredMixin, UpdateView):
 
     Methods:
         `form_valid()`: Overrides form_valid function of the `UpdateView` base class to pass the current user to the save method.
-        `save()`: Saves the current user as an argument for the save function of the `UpdateView` base class.
     """
 
     model = Item
@@ -351,19 +332,6 @@ class ItemUpdateTechnicianView(TechnicianRequiredMixin, UpdateView):
         form.instance.updated_by = self.request.user
         return super().form_valid(form)
 
-    def save(self, *args, **kwargs):
-        """
-        Saves the current user as an argument for the save function of the `UpdateView` base class.
-
-        This method updates `kwargs` to include the current user before delegating the save operation to the base class.
-
-        Args:
-            *args: Additional positional arguments
-            **kwargs: Additional keyword arguments
-        """
-        kwargs["user"] = self.request.user
-        return super().save(*args, **kwargs)
-
 
 class ItemUpdateInternView(InternRequiredMixin, UpdateView):
     """
@@ -382,7 +350,6 @@ class ItemUpdateInternView(InternRequiredMixin, UpdateView):
 
     Methods:
         `form_valid()`: Overrides the `form_valid` function of the base class `UpdateView` to pass the current user to the save method.
-        `save()`: Saves the item with the current user included in the keyword arguments.
     """
 
     model = Item
@@ -404,23 +371,6 @@ class ItemUpdateInternView(InternRequiredMixin, UpdateView):
         """
         form.instance.last_modified_by = self.request.user
         return super().form_valid(form)
-
-    def save(self, *args, **kwargs):
-        """
-        Saves the item with the current user included in the keyword arguments.
-
-        This method retrieves the current user object from the request, adds it to the `kwargs` under the key "user"
-        and calls the base class's `save` method with the provided arguments
-
-        Args:
-            *args: Additional positional arguments passed to the base class's `save` method.
-            **kwargs: Additional keyword arguments passed to the base class's `save` method.
-
-        Returns:
-            HttpResponse: The HTTP response object.
-        """
-        kwargs["user"] = self.request.user
-        return super().save(*args, **kwargs)
 
 
 class ItemDeleteView(SuperuserOrTechnicianRequiredMixin, DeleteView):
@@ -551,7 +501,6 @@ class ImportItemDataView(SuperuserOrTechnicianRequiredMixin, FormView):
 
     Methods:
         `form_valid(form)`: Processes data from an uploaded Excel file to the database.
-        `save()`: Saves the item with the current user included in the keyword arguments.
     """
 
     form_class = ImportFileForm
@@ -609,23 +558,6 @@ class ImportItemDataView(SuperuserOrTechnicianRequiredMixin, FormView):
 
         # Go to items page after finishing
         return HttpResponseRedirect(reverse("inventory:items"))
-
-    def save(self, *args, **kwargs):
-        """
-        Saves the item with the current user included in the keyword arguments.
-
-        This method retrieves the current user object from the request, adds it to the `kwargs` under
-        the key "user" and calls the base class's `save` method with the provided arguments
-
-        Args:
-            *args: Additional positional arguments passed to the base class's `save` method.
-            **kwargs: Additional keyword arguments passed to the base class's `save` method.
-
-        Returns:
-            HttpResponse: The HTTP response object.
-        """
-        kwargs["user"] = self.request.user
-        return super().save(*args, **kwargs)
 
 
 ###################################################################################################
