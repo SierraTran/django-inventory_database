@@ -1,3 +1,4 @@
+import tempfile
 from django.test import TestCase
 from django.core.management import call_command
 from haystack import connections
@@ -37,10 +38,25 @@ class SearchIndexesTests(TestCase):
             item=cls.item1,
             work_order=1234567,
         )
+        
+        # Use a temporary directory for the Whoosh index
+        cls.temp_dir = tempfile.TemporaryDirectory()
 
-        # Rebuild the search index
-        call_command("clear_index", interactive=False, verbosity=0)
-        call_command("rebuild_index", interactive=False, verbosity=0)
+        # Override Haystack settings
+        cls.settings_override = {
+            'HAYSTACK_CONNECTIONS': {
+                'default': {
+                    'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+                    'PATH': cls.temp_dir.name,
+                },
+            }
+        }
+        cls.settings_context = cls.settings(self=cls, **cls.settings_override)
+        cls.settings_context.enable()
+
+        # Update the search index
+        call_command("update_index", verbosity=0)
+
 
     def test_item_indexing(self):
         """
@@ -63,3 +79,9 @@ class SearchIndexesTests(TestCase):
         """
         results = SearchQuerySet().filter(content="Nonexistent Item")
         self.assertEqual(results.count(), 0, "The search query returned results when it should not have.")
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.settings_context.disable()
+        cls.temp_dir.cleanup()  # Clean up the temporary directory
+        super().tearDownClass()
