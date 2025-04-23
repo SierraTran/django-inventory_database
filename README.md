@@ -3,7 +3,7 @@
 ![Python Version](https://img.shields.io/badge/python-3.13.2-blue)
 ![Django Version](https://img.shields.io/badge/django-5.2-green)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![Coverage](https://img.shields.io/badge/coverage-74%25-2BFF00)
+![Coverage](https://img.shields.io/badge/coverage-82%25-2BFF00)
 
 This is a Django-based web application for managing an inventory. The application allows users to browse, search, and manage items in the inventory. It also includes user authentication and authorization features. It is specifically tailored for [Hayes Instrument Service](https://hayesinstruments.com/) to make keeping inventory much easier.
 
@@ -182,7 +182,7 @@ The list of required software below will also be included in the `requirements.t
 ### UI Improvements
 
 - **Seamless Notification Management**: Users can mark and delete notifications directly from the notifications page, avoiding unnecessary navigation.
-- **Help page and/or messages**: Users can refer to an extensive page or contextual messages throughout the application for guidance. 
+- **Help page and/or messages**: Users can refer to an extensive page or contextual messages throughout the application for guidance.
 
 ### Inventory Management Features
 

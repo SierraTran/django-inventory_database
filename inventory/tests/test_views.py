@@ -1412,26 +1412,55 @@ class ItemRequestDetailViewTests(TestCase):
     def setUpTestData(cls):
         """
         Setup
-        """        
-        ItemRequest.objects.create(
+        """
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.intern_group = Group.objects.get(name="Intern")
+        cls.viewer_group = Group.objects.get(name="Viewer")
+        
+        cls.superuser = User.objects.create_user(username="testsuperuser", password="password")
+        cls.superuser.groups.add(cls.superuser_group)
+        cls.technician = User.objects.create_user(username="testtechnician", password="password")
+        cls.technician.groups.add(cls.technician_group)
+        cls.intern = User.objects.create_user(username="testintern", password="password")
+        cls.intern.groups.add(cls.intern_group)
+        cls.viewer = User.objects.create_user(username="testviewer", password="password")
+        cls.viewer.groups.add(cls.viewer_group)
+         
+        cls.item_request = ItemRequest.objects.create(
             manufacturer="Test MFG",
             model_part_num="First Model and Part Num",
             quantity_requested=1,
             unit_price=0.01,
             requested_by=cls.technician,
         )
+        cls.item_request_detail_url = reverse("inventory:item_request_detail", kwargs={"pk": cls.item_request.pk})
+        
+        cls.client = Client()
         
     @tag('critical')
     def test_item_request_detail_view_access_control(self):
         """
         
         """
+        # TODO: test_item_request_detail_view_access_control
         
-    def test_get_context_data(self):
+    def test_GET_superuser(self):
         """
+        Test that the view renders the correct template and the correct buttons for superusers.
+        """
+        self.client.login(username="testsuperuser", password="password")
+        response = self.client.get(self.item_request_detail_url)
+        self.assertEqual(response.status_code, 200, "Superuser failed to access the item request detail view.")
+        self.assertTemplateUsed(response, "item_request_detail.html")
         
-        """
-
+        # Superuser has reject and accept buttons
+        self.assertContains(response, '<button type="button" name="reject"')
+        self.assertContains(response, '<button type="button" name="accept"')
+        
+        # Superuser doesn't have a delete button        
+        self.assertNotContains(response, '<button type="button" name="delete"')
+        
 
 ###################################################################################################
 # Tests for the Views for the UsedItem Model ######################################################

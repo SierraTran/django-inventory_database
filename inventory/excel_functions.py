@@ -37,9 +37,7 @@ def format_row(worksheet, row):
         row (int): The row index of the new row.
     """
     border_side = Side(style="thin")
-    cell_border = Border(
-        top=border_side, bottom=border_side, left=border_side, right=border_side
-    )
+    cell_border = Border(top=border_side, bottom=border_side, left=border_side, right=border_side)
     cell_vert_align = Alignment(vertical="center")
     cell_all_align = Alignment(vertical="center", horizontal="center")
 
@@ -66,9 +64,8 @@ def format_row(worksheet, row):
         worksheet[f"{letter}{row}"].alignment = align_format
 
     # Formula for Total Price
-    worksheet[f"J{row}"] = f"=+I{row}*D{row}"
-    worksheet[f"J{row+1}"] = f"=+I{row+1}*D{row+1}"
-    worksheet[f"J{row+2}"] = f"=+I{row+2}*D{row+2}"
+    for r in range(row, row+3):
+        worksheet[f"J{r}"] = f"=+I{r}*D{r}"
 
 
 def setup_worksheet(worksheet, itemCount):
@@ -79,7 +76,7 @@ def setup_worksheet(worksheet, itemCount):
         worksheet (openpyxl.worksheet.worksheet.Worksheet): The worksheet object that needs to be set up and adjusted.
         itemCount (int): The total number of items that have been submitted.
     """
-    amount = itemCount - 7
+    amount = itemCount - 8
 
     # Variables for initial row numbers
     initial_last_item_row = 24
@@ -100,10 +97,8 @@ def setup_worksheet(worksheet, itemCount):
 
     # Unmerge the "Notes" rows
     worksheet.unmerge_cells("C27:H27")
-    worksheet.unmerge_cells("B28:H28")
-    worksheet.unmerge_cells("B29:H29")
-    worksheet.unmerge_cells("B30:H30")
-    worksheet.unmerge_cells("B31:H31")
+    for r in range(28, 32):
+        worksheet.unmerge_cells(f"B{r}:H{r}")
 
     # Unmerge the "Total" cells
     worksheet.unmerge_cells("I30:I31")

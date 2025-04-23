@@ -281,8 +281,8 @@ class ItemUpdateSuperuserView(SuperuserRequiredMixin, UpdateView):
         Returns:
             HttpResponse: The HTTP response object.
         """
-        form.instance.last_modified_by = self.request.user
-        return super().form_valid(form)
+        form.instance.save(user=self.request.user)        
+        return HttpResponseRedirect(self.get_success_url())
 
 class ItemUpdateTechnicianView(TechnicianRequiredMixin, UpdateView):
     """
@@ -1260,9 +1260,7 @@ class UsedItemCreateView(SuperuserOrTechnicianRequiredMixin, CreateView):
         item.last_modified_by = self.request.user
         item.save()
 
-        used_item_url = reverse(
-            "inventory:used_item_detail", kwargs={"pk": used_item.pk}
-        )
+        used_item_url = reverse("inventory:used_item_detail", kwargs={"pk": used_item.pk})
 
         history_record_to_edit = ItemHistory.objects.last()
         history_record_to_edit.action = "use"
@@ -1477,12 +1475,8 @@ class PurchaseOrderItemsFormView(SuperuserRequiredMixin, FormView):
         Returns:
             HttpResponse: The HTTP response object to download the Excel file.
         """
-        response = HttpResponse(
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
-        response["Content-Disposition"] = (
-            'attachment; filename="new_purchase_order.xlsx"'
-        )
+        response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",)
+        response["Content-Disposition"] = ('attachment; filename="new_purchase_order.xlsx"')
         po_template_path = "PO_Template.xlsx"
         workbook = load_workbook(po_template_path)
         worksheet = workbook.active
@@ -1490,10 +1484,13 @@ class PurchaseOrderItemsFormView(SuperuserRequiredMixin, FormView):
         # Count the items in the form
         itemCount = 0
         for form in formset:
+            # Skip forms marked for deletion
+            if form.cleaned_data.get("DELETE"):
+                continue
             itemCount += 1
 
-        # If there are 8 or more items, set up the worksheet to accommodate them
-        if itemCount >= 8:
+        # If there are more than 8 items, set up the worksheet to accommodate them
+        if itemCount > 8:
             setup_worksheet(worksheet, itemCount)
 
         # Write data to the worksheet
