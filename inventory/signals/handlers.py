@@ -70,7 +70,8 @@ def handle_related_records(sender, instance, **kwargs):
 # NOTE: The following signal handlers create notifications for users when certain events happen in they system.
 @receiver(post_save, sender=ItemRequest)
 def send_item_request_notification(sender, instance, created, **kwargs):
-    """
+    # TODO: Update docstring
+    """ 
     Creates a notification for Technicians if their item request has been accepted or rejected.
     
     This method checks if the item request is created or not. If it is, no notification is needed.
@@ -82,25 +83,33 @@ def send_item_request_notification(sender, instance, created, **kwargs):
         created (bool): True if the action done onto the item is "create", False if otherwise.
         **kwargs: Additional keyword arguments sent by the signal.
     """
-    # TODO: Use these variables to create notifications for messages.
     subject = None
     message = None
     user = None
+    instance_url = instance.get_absolute_url()
     
     if created:
-        # TODO: Send notifications to the Superusers that the item request has been created.
-        return
+        subject = "New Item Request"
+        message = f"There's a new item request for {instance.manufacturer}, {instance.model_part_num}. " \
+                    f'See the <a href="{instance_url}">item request</a> for more details.'
+        superuser_group = Group.objects.get(name="Superuser")        
+        for user in superuser_group.user_set.all():
+            Notification.objects.create(
+                is_read=False,
+                subject=subject,
+                message=message,
+                user=user,
+            )
     
     if 'status' in instance.tracker.changed(): 
         # Display the new status of the item request in the subject of the notification.
         subject = escape(f"Item Request {instance.status}")
-        
         # Create a link to the item request to include in the message.
-        linked_item_request = f'<a href="{instance.get_absolute_url()}">Your Item Request for {instance.manufacturer}, {instance.model_part_num}</a>'        
+        linked_item_request = f'<a href="{instance_url}">Your Item Request for {instance.manufacturer}, {instance.model_part_num}</a>'        
         # Explain the new status of the item request and include its link in the message.
         # TODO: Remind the user to delete their item request if they no longer need it.
-        message = f"{linked_item_request} has been {str(instance.status).lower()} by {instance.status_changed_by.username}."
-        
+        message = f"{linked_item_request} has been {str(instance.status).lower()} by {instance.status_changed_by.username}. " \
+                    "If you're all set with your item request, please delete it."
         with transaction.atomic():
             Notification.objects.create(
                 is_read=False,
