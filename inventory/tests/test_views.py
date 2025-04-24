@@ -1461,6 +1461,14 @@ class ItemRequestDetailViewTests(TestCase):
         # Superuser doesn't have a delete button        
         self.assertNotContains(response, '<button type="button" name="delete"')
         
+        
+class ItemRequestCreateViewTests(TestCase):
+    # TEST: ItemRequestCreateViewTests
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
 
 ###################################################################################################
 # Tests for the Views for the UsedItem Model ######################################################

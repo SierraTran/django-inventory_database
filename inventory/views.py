@@ -284,6 +284,7 @@ class ItemUpdateSuperuserView(SuperuserRequiredMixin, UpdateView):
         form.instance.save(user=self.request.user)        
         return HttpResponseRedirect(self.get_success_url())
 
+
 class ItemUpdateTechnicianView(TechnicianRequiredMixin, UpdateView):
     """
     Class-based view for updating an existing item as a Technician.
@@ -705,6 +706,8 @@ class ItemRequestDetailView(SuperuserOrTechnicianRequiredMixin, DetailView):
 
 
 class ItemRequestCreateView(TechnicianRequiredMixin, CreateView):
+    # FIXME: Doesn't work; Can't create an Item Request with the form
+    # Maybe because of "status_changed_by" field
     """
     Class-based view for creating an item request.
     This view requires the user to be in the "Technician" group.
@@ -726,14 +729,6 @@ class ItemRequestCreateView(TechnicianRequiredMixin, CreateView):
 
     model = ItemRequest
     form_class = ItemRequestForm
-    # fields = [
-    #     "manufacturer",
-    #     "model_part_num",
-    #     "quantity_requested",
-    #     "description",
-    #     "unit_price",
-    #     "requested_by",
-    # ]
     template_name = "item_request_form.html"
 
     def get_initial(self):
@@ -753,7 +748,6 @@ class ItemRequestCreateView(TechnicianRequiredMixin, CreateView):
         initial["model_part_num"] = self.request.GET.get("model_part_num")
         initial["description"] = self.request.GET.get("description")
         initial["unit_price"] = self.request.GET.get("unit_price")
-        initial["requested_by"] = self.request.user
         return initial
 
     def get_context_data(self, **kwargs):
@@ -775,6 +769,22 @@ class ItemRequestCreateView(TechnicianRequiredMixin, CreateView):
         item_id = self.request.GET.get("item_id")
         context["item"] = get_object_or_404(Item, pk=item_id)
         return context
+    
+    def form_valid(self, form):
+        """
+        Overrides the form_valid function of the base class (`CreateView`) to pass the current user to the save method.
+        
+        This method sets the `requested_by` field of the new ItemRequest object to the current user before calling
+        the base class's `form_valid` method with the updated form.
+        
+        Args:
+            form (ModelForm): The form that handles the data for creating the ItemRequest object.
+            
+        Returns:
+            HttpResponse: The HTTP response object.
+        """
+        form.instance.requested_by = self.request.user
+        return super().form_valid(form)
 
 
 class ItemRequestAcceptView(SuperuserRequiredMixin, TemplateView):

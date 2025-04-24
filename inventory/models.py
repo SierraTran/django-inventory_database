@@ -147,8 +147,9 @@ class ItemRequest(models.Model):
         User,
         on_delete=models.SET_NULL,
         null=True,
-        limit_choices_to={"groups__name": "Superuser"},
+        blank=True,
         default=None,
+        limit_choices_to={"groups__name": "Superuser"},
         related_name="status_changed_by_user"
     )
     

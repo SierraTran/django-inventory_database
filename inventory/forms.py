@@ -86,7 +86,6 @@ class ItemRequestForm(forms.ModelForm):
             "quantity_requested",
             "description",
             "unit_price",
-            "requested_by",
         ]
 
     def __init__(self, *args, **kwargs):
