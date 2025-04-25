@@ -92,7 +92,9 @@ class ItemRequestFormTests(TestCase):
         self.client.login(username="testuser", password="password")
         response = self.client.get(self.item_request_form_url)
         
-        self.assertEqual(response.status_code, 404, "Unexpectedly gained access to the item use form")
+        self.assertEqual(response.status_code, 200, "Failed to access the item request form")
+        self.assertNotContains(response, '<th>Model part num</th>')
+        self.assertContains(response, '<th>Model / Part #</th>')    
         
     def test___init__with_get_params(self):
         """

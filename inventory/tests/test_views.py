@@ -1463,12 +1463,93 @@ class ItemRequestDetailViewTests(TestCase):
         
         
 class ItemRequestCreateViewTests(TestCase):
-    # TEST: ItemRequestCreateViewTests
     @classmethod
     def setUpTestData(cls):
         """
         Setup
         """
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.technician = User.objects.create_user(username="testtechnician", password="password")
+        cls.technician.groups.add(cls.technician_group)
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.superuser = User.objects.create_user(username="testsuperuser", password="password")
+        cls.superuser.groups.add(cls.superuser_group)
+        cls.intern_group = Group.objects.get(name="Intern")
+        cls.intern = User.objects.create_user(username="testintern", password="password")
+        cls.intern.groups.add(cls.intern_group)
+        cls.viewer_group = Group.objects.get(name="Viewer")
+        cls.viewer = User.objects.create_user(username="testviewer", password="password")
+        cls.viewer.groups.add(cls.viewer_group)
+        
+        cls.item = Item.objects.create(
+            manufacturer="Test MFG",
+            model="Test Model",
+            part_or_unit=Item.PART,
+            part_number="Test Part Number",
+            description="Test Description",
+            location="Test Location",
+            quantity=10,
+            min_quantity=0,
+            unit_price=0.10
+        )
+        cls.item_request_form_url = reverse("inventory:item_request_form")
+        cls.url_parameters = f"?item_id={cls.item.pk}&manufacturer={cls.item.manufacturer}&model_part_num={cls.item.model}&unit_price={cls.item.unit_price}&description={cls.item.description}"
+        
+        cls.client = Client()
+        
+    def test_item_request_create_view_access_control(self):
+        """
+        Test that only technicians can access the view.
+        """
+        self.client.login(username="testtechnician", password="password")
+        response = self.client.get(self.item_request_form_url)
+        self.assertEqual(response.status_code, 200, "Technician failed to access the item request form view.")
+        
+        self.client.logout()
+        
+        # Test that other users cannot access the view
+        for user in ["testsuperuser", "testintern", "testviewer"]:
+            self.client.login(username=user, password="password")
+            response = self.client.get(self.item_request_form_url)
+            self.assertEqual(response.status_code, 403, f"{user} was able to access the item request form view.")
+            self.client.logout()
+        
+    def test_create_item_request_no_params(self):
+        """
+        Test that the item request is created successfully with no parameters.
+        """
+        self.client.login(username="testtechnician", password="password")
+        response = self.client.get(self.item_request_form_url)
+        self.assertEqual(response.status_code, 200, "Failed to access the view.")
+        
+        response = self.client.post(self.item_request_form_url, {
+            "manufacturer": "Test MFG",
+            "model_part_num": "Test Model Part Number",
+            "quantity_requested": 2,
+            # description will be blank
+            "unit_price": 0.10
+        })
+        self.assertEqual(response.status_code, 302, "Failed to create the item request.")
+        
+        new_item_request = ItemRequest.objects.filter(pk=1)        
+        self.assertTrue(new_item_request.exists(), "The item request does not exist.")
+        
+    def test_create_item_request_with_params(self):
+        """
+        Test that the item request is created successfully with parameters.
+        """
+        self.client.login(username="testtechnician", password="password")
+        response = self.client.get(self.item_request_form_url + self.url_parameters)
+        self.assertEqual(response.status_code, 200, "Failed to access the view.")
+        
+        response = self.client.post(self.item_request_form_url + self.url_parameters, {"quantity_requested": 2, "unit_price": 0.10})
+        if response.context and 'form' in response.context:
+            self.assertFalse(response.context['form'].errors, f"Form errors: {response.context['form'].errors}")
+        self.assertEqual(response.status_code, 302, "Failed to create the item request.")
+        
+        new_item_request = ItemRequest.objects.filter(pk=1)        
+        self.assertTrue(new_item_request.exists(), "The item request does not exist.")
+
 
 ###################################################################################################
 # Tests for the Views for the UsedItem Model ######################################################
@@ -1489,9 +1570,13 @@ class UsedItemViewTests(TestCase):
         cls.viewer_group = Group.objects.get(name="Viewer")
         
         cls.superuser = User.objects.create_user(username="testsuperuser", password="password")
+        cls.superuser.groups.add(cls.superuser_group)
         cls.technician = User.objects.create_user(username="testtechnician", password="password")
+        cls.technician.groups.add(cls.technician_group)
         cls.intern = User.objects.create_user(username="testintern", password="password")
+        cls.intern.groups.add(cls.intern_group)
         cls.viewer = User.objects.create_user(username="testviewer", password="password")
+        cls.viewer.groups.add(cls.viewer_group)
         
         items = [
             Item(manufacturer="Fluke", model="Dials", part_or_unit=Item.UNIT, quantity=17),
@@ -1609,7 +1694,7 @@ class UsedItemCreateViewTests(TestCase):
         # TODO: test_used_item_create_view_access_control
         self.client.login(username="testtechnician", password="password")
         response = self.client.get(self.item2_use_url)        
-        self.assertEqual(response.status_code, 200, "The user failed to access the .")
+        self.assertEqual(response.status_code, 200, "The user failed to access the view.")
         self.client.logout()
         
     def test_dispatch(self):

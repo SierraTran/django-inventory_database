@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.contrib.auth.models import User
@@ -136,7 +137,7 @@ class ItemRequest(models.Model):
     quantity_requested = models.IntegerField(validators=[MinValueValidator(1)])
     description = models.TextField(blank=True)
     unit_price = models.DecimalField(
-        decimal_places=2, max_digits=14, validators=[MinValueValidator(0.01)]
+        decimal_places=2, max_digits=14, validators=[MinValueValidator(Decimal("0.01"))]
     )
     requested_by = models.ForeignKey(
         User, on_delete=models.CASCADE, limit_choices_to={"groups__name": "Technician"}, related_name="requested_by_user"

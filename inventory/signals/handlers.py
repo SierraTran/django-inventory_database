@@ -14,7 +14,6 @@ from django.utils.html import escape
 from inventory.models import Item, ItemHistory, ItemRequest, UsedItem
 from authentication.models import Notification
 
-# TODO: Test the links in the messages of the notifications.
 # NOTE: Regardless of being used or not, `sender` and `**kwargs` parameters need to be included in the other signal handlers to avoid errors.
 
 
@@ -70,12 +69,13 @@ def handle_related_records(sender, instance, **kwargs):
 # NOTE: The following signal handlers create notifications for users when certain events happen in they system.
 @receiver(post_save, sender=ItemRequest)
 def send_item_request_notification(sender, instance, created, **kwargs):
-    # TODO: Update docstring
     """ 
-    Creates a notification for Technicians if their item request has been accepted or rejected.
+    Creates a notification for Technicians if their item request has been accepted or rejected by a Superuser.
+    Creates a notification for Superusers if a new item request has been created.
     
-    This method checks if the item request is created or not. If it is, no notification is needed.
-    If the item request is not created, a notification is created for the user that requested the item.
+    This method checks if the item request is created or not. If it is, a notification is created for all Superusers.
+    If the item request is not created, it checks if the status of the item request has changed. If it has, a 
+    notification is created for the user that requested the item.
 
     Args:
         sender (ItemRequest): The model class that sent the signal.
@@ -100,6 +100,7 @@ def send_item_request_notification(sender, instance, created, **kwargs):
                 message=message,
                 user=user,
             )
+        return
     
     if 'status' in instance.tracker.changed(): 
         # Display the new status of the item request in the subject of the notification.
@@ -107,7 +108,6 @@ def send_item_request_notification(sender, instance, created, **kwargs):
         # Create a link to the item request to include in the message.
         linked_item_request = f'<a href="{instance_url}">Your Item Request for {instance.manufacturer}, {instance.model_part_num}</a>'        
         # Explain the new status of the item request and include its link in the message.
-        # TODO: Remind the user to delete their item request if they no longer need it.
         message = f"{linked_item_request} has been {str(instance.status).lower()} by {instance.status_changed_by.username}. " \
                     "If you're all set with your item request, please delete it."
         with transaction.atomic():
@@ -117,6 +117,7 @@ def send_item_request_notification(sender, instance, created, **kwargs):
                 message=message,
                 user=instance.requested_by,
             )
+        return
 
 @receiver(post_save, sender=Item)
 def send_low_stock_notification(sender, instance, **kwargs):

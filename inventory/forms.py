@@ -71,8 +71,6 @@ class ItemRequestForm(forms.ModelForm):
             - The description of the item
         - unit_price : DecimalField
             - The unit price of the requested item
-        - requested_by : ForeignKey
-            - The user requesting the item
 
     Methods:
         __init__(): Constructor method that initializes the form and sets the label for the `model_part_num` field to "Model / Part #:".

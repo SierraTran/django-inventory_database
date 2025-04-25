@@ -706,8 +706,6 @@ class ItemRequestDetailView(SuperuserOrTechnicianRequiredMixin, DetailView):
 
 
 class ItemRequestCreateView(TechnicianRequiredMixin, CreateView):
-    # FIXME: Doesn't work; Can't create an Item Request with the form
-    # Maybe because of "status_changed_by" field
     """
     Class-based view for creating an item request.
     This view requires the user to be in the "Technician" group.
@@ -744,10 +742,10 @@ class ItemRequestCreateView(TechnicianRequiredMixin, CreateView):
             dict: The initial data for the form.
         """
         initial = super().get_initial()
-        initial["manufacturer"] = self.request.GET.get("manufacturer")
-        initial["model_part_num"] = self.request.GET.get("model_part_num")
-        initial["description"] = self.request.GET.get("description")
-        initial["unit_price"] = self.request.GET.get("unit_price")
+        initial["manufacturer"] = self.request.GET.get("manufacturer", "")
+        initial["model_part_num"] = self.request.GET.get("model_part_num", "")
+        initial["description"] = self.request.GET.get("description", "")
+        initial["unit_price"] = self.request.GET.get("unit_price", "")
         return initial
 
     def get_context_data(self, **kwargs):
@@ -767,7 +765,10 @@ class ItemRequestCreateView(TechnicianRequiredMixin, CreateView):
         """
         context = super().get_context_data(**kwargs)
         item_id = self.request.GET.get("item_id")
-        context["item"] = get_object_or_404(Item, pk=item_id)
+        if item_id:
+            context["item"] = get_object_or_404(Item, pk=item_id)
+        else:
+            context["item"] = None
         return context
     
     def form_valid(self, form):

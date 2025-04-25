@@ -15,6 +15,11 @@
     {% csrf_token %}
     <table>
     {% for field in form %}
+        {% if field.errors %}
+        <div class="error">
+            {{ field.label }}: {{ field.errors }}
+        </div>
+        {% endif %}
         <tr>
             <th>{{ field.label }}</th>
             <td>
@@ -28,7 +33,11 @@
     {% endfor %}
     </table>
     <div class="buttons">
+        {% if item %}
         <button type="button" onclick="window.location.href='{% url "inventory:item_detail" pk=item.pk %}'">Cancel</button>
+        {% else %}
+        <button type="button" onclick="window.location.href='{% url "authentication:home" %}'">Cancel</button>
+        {% endif %}
         <input type="submit" value="Request Item">
     </div>
 </form>
