@@ -662,7 +662,7 @@ class ItemRequestView(SuperuserOrTechnicianRequiredMixin, ListView):
         Returns:
             QuerySet: The queryset containing all item requests.
         """
-        return ItemRequest.objects.all().order_by("-timestamp")
+        return ItemRequest.objects.all().order_by("timestamp")
 
 
 class ItemRequestDetailView(SuperuserOrTechnicianRequiredMixin, DetailView):

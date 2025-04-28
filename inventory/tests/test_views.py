@@ -1396,10 +1396,10 @@ class ItemRequestViewTests(TestCase):
         queryset = view.get_queryset()
         
         expected_ordered_item_requests = [
-            ("Test MFG", "Fourth Model and Part Num"),
-            ("Test MFG", "Third Model and Part Num"),
-            ("Test MFG", "Second Model and Part Num"),
             ("Test MFG", "First Model and Part Num"),
+            ("Test MFG", "Second Model and Part Num"),
+            ("Test MFG", "Third Model and Part Num"),
+            ("Test MFG", "Fourth Model and Part Num"),          
         ]
         actual_ordered_item_requests = list(queryset.values_list("manufacturer", "model_part_num"))
         
@@ -1445,6 +1445,7 @@ class ItemRequestDetailViewTests(TestCase):
         """
         # TODO: test_item_request_detail_view_access_control
         
+        
     def test_GET_superuser(self):
         """
         Test that the view renders the correct template and the correct buttons for superusers.
@@ -1460,6 +1461,22 @@ class ItemRequestDetailViewTests(TestCase):
         
         # Superuser doesn't have a delete button        
         self.assertNotContains(response, '<button type="button" name="delete"')
+        
+    def test_GET_technician_owner(self):
+        """
+        Test that the view renders the correct template and the correct buttons for the technician that made the item request.
+        """
+        self.client.login(username="testtechnician", password="password")
+        response = self.client.get(self.item_request_detail_url)
+        self.assertEqual(response.status_code, 200, "Technician Owner failed to access the item request detail view.")
+        self.assertTemplateUsed(response, "item_request_detail.html")
+        
+        # Technician Owner has a delete button
+        self.assertContains(response, '<button type="button" name="delete"')
+
+        # Technician Owner doesn't have reject and accept buttons 
+        self.assertNotContains(response, '<button type="button" name="reject"')
+        self.assertNotContains(response, '<button type="button" name="accept"')   
         
         
 class ItemRequestCreateViewTests(TestCase):
@@ -1560,10 +1577,6 @@ class UsedItemViewTests(TestCase):
         """
         Setup
         """
-        # TODO: Set up test data
-        # [x]: Get the user groups
-        # [x]: Create one user for each group
-        # [x]: Create used items
         cls.superuser_group = Group.objects.get(name="Superuser")
         cls.technician_group = Group.objects.get(name="Technician")
         cls.intern_group = Group.objects.get(name="Intern")
@@ -1643,9 +1656,33 @@ class UsedItemDetailViewTests(TestCase):
         Setup
         """
         # TODO: Set up test data
-        # [ ]: Create at least one used item
-        # [ ]: Resolve absolute URL of the used item
-        # [ ]: Create a user for logging in
+        # [x]: Create at least one used item
+        # [x]: Resolve absolute URL of the used item
+        # [x]: Create a user for logging in
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.technician = User.objects.create_user(username="testtechnician", password="password")
+        cls.technician.groups.add(cls.technician_group)
+        
+        cls.generic_user = User.objects.create_user(username="testuser", password="password")
+
+        cls.item = Item.objects.create(
+            manufacturer="Chroma",
+            # model : "N/A"
+            part_or_unit=Item.PART,
+            part_number="G53 003700",
+            description="Fan part",
+            # location : "N/A"
+            quantity=50,
+            # min_quantity : 0
+            unit_price=0.80
+        )
+        cls.used_item = UsedItem.objects.create(
+            item=cls.item,
+            work_order=1234568,
+            # datetime automatically set
+            used_by=cls.technician
+        )
+        cls.used_item_detail_url = reverse("inventory:used_item_detail", kwargs={"pk": cls.used_item.pk})
         
         cls.client = Client()
         cls.factory = RequestFactory()
@@ -1656,8 +1693,15 @@ class UsedItemDetailViewTests(TestCase):
         Test that only logged-in users can access the UsedItemDetailView.
         """
         # TODO: test_used_item_detail_view_access_control
-        # [ ]: Try to simulate GET request without logging in
-        # [ ]: Log in and simulate GET request
+        # [x]: Try to simulate GET request without logging in
+        # [x]: Log in and simulate GET request
+        response = self.client.get(self.used_item_detail_url)
+        self.assertFalse(response.wsgi_request.user.is_authenticated, "The user is unexpectedly authenticated.")
+        self.assertEqual(response.status_code, 302, "Unauthenticated user unexpectedly gained access to the UsedItem detail page.")
+        
+        self.client.login(username="testuser", password="password")
+        response = self.client.get(self.used_item_detail_url)
+        self.assertEqual(response.status_code, 200, "Authenticated user failed to access the UsedItem detail page.")        
 
     
 class UsedItemCreateViewTests(TestCase):
@@ -1667,7 +1711,7 @@ class UsedItemCreateViewTests(TestCase):
         Setup
         """
         # TODO: Set up test data
-        # [x]L Create two items, one with a quantity of 0 and one with a quantity of 1
+        # [x]: Create two items, one with a quantity of 0 and one with a quantity of 1
         # [x]: Create a user 
         cls.technician_group = Group.objects.get(name="Technician")
         cls.user = User.objects.create_user(username="testtechnician", password="password")
@@ -1725,7 +1769,7 @@ class UsedItemDeleteViewTests(TestCase):
         """
         # TODO: Set up test data
         # [ ]: Create a used item for deletion
-        # [ ]: Create a user
+        # [ ]: Create users
         
         cls.client = Client()
         cls.factory = RequestFactory()
@@ -1735,6 +1779,7 @@ class UsedItemDeleteViewTests(TestCase):
         """
         Test that only superusers and technicians can access the UsedItemDeleteView.
         """
+        # TODO: test_used_item_delete_view_access_control
         
     def test_get_context_data(self):
         """

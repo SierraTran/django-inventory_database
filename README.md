@@ -175,7 +175,7 @@ The list of required software below will also be included in the `requirements.t
 - **Home Page**: Displays links to browse items, create new items, import item data, and manage users (based on user permissions).
 - **Items Page**: Lists all available items with search functionality.
 - **Item Detail Page**: Shows detailed information about a specific item.
-- **User Management**: Superusers can create, view, and delete users.
+- **User Management**: Superusers can create, view, and delete users. Everyone else can only view all users and their details.
 
 ## Future Enhancements
 
