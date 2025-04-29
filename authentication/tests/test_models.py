@@ -76,7 +76,7 @@ class NotificationModelTests(TestCase):
         notification = Notification.objects.get(pk=1)
         
         self.assertEqual(
-            notification.__str__(),
+            str(notification),
             '2025-01-01 12:00:00 PM | For testuser: "Welcome!"',
             "The string representation does not match."
         )

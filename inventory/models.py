@@ -422,6 +422,4 @@ class PurchaseOrderItem(models.Model):
         Returns:
             str: The model part number, manufacturer, and quantity ordered.
         """
-        return f"Purchase Order for {self.model_part_num} \
-            by {self.manufacturer} - \
-            Quantity: {self.quantity_ordered}"
+        return f"Purchase Order for {self.model_part_num} by {self.manufacturer} - Quantity: {self.quantity_ordered}"

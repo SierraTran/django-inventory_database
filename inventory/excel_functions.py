@@ -1,4 +1,6 @@
-from openpyxl import load_workbook
+"""
+
+"""
 from openpyxl.utils import range_boundaries
 from openpyxl.styles import Alignment, Border, Side, NamedStyle
 from openpyxl.worksheet.datavalidation import DataValidation
@@ -33,7 +35,8 @@ def format_row(worksheet, row):
     - Adds a formula to calculate the total price in a specific cell.
 
     Args:
-        worksheet (openpyxl.worksheet.worksheet.Worksheet): The worksheet object where the row is located.
+        worksheet (openpyxl.worksheet.worksheet.Worksheet): The worksheet object where the row is 
+            located.
         row (int): The row index of the new row.
     """
     border_side = Side(style="thin")
@@ -70,10 +73,12 @@ def format_row(worksheet, row):
 
 def setup_worksheet(worksheet, itemCount):
     """
-    Sets up and adjusts the worksheet to accomodate 8 or more items submitted in the Purchase Order Item Form. 
+    Sets up and adjusts the worksheet to accomodate 8 or more items submitted in the Purchase Order 
+    Item Form. 
 
     Arguments:
-        worksheet (openpyxl.worksheet.worksheet.Worksheet): The worksheet object that needs to be set up and adjusted.
+        worksheet (openpyxl.worksheet.worksheet.Worksheet): The worksheet object that needs to be 
+            set up and adjusted.
         itemCount (int): The total number of items that have been submitted.
     """
     amount = itemCount - 8
