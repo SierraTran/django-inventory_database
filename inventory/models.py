@@ -1,3 +1,14 @@
+"""
+This module contains the models for the inventory application.
+
+The included models are:
+    - Item
+    - ItemHistory
+    - ItemRequest
+    - UsedItem
+    - PurchaseOrderItem
+"""
+
 from decimal import Decimal
 from django.db import models
 from django.core.validators import MinValueValidator
@@ -9,49 +20,52 @@ from model_utils.fields import StatusField
 from model_utils import Choices, FieldTracker
 
 
-# Create your models here.
 class Item(models.Model):
-    """ 
-    This model represents an item in the inventory database.    
+    """
+    This model represents an item in the inventory database.
 
     Attributes:
-        manufacturer (CharField): The name of the item's manufacturer. Defaults to "N/A" 
-        model (CharField): The name of the item's model. Defaults to "N/A" 
-        part_or_unit (CharField): Indicates whether the item is classified as a 'Part' or a 'Unit'. Defaults to 'Part' 
-        part_number (CharField): The part number of the item. Can be blank if the item is a unit. 
-        description (TextField): The description of the item 
-        location (CharField): The physical location of the item 
-        quantity (IntegerField): The quantity of the item in inventory 
-        min_quantity (IntegerField): The minimum quantity of the item to keep in inventory 
-        unit_price (DecimalField): The price of one of this item 
-        last_modified_by (ForeignKey): The User that last edited the item through creating or updating 
+        manufacturer (CharField): The name of the item's manufacturer. Defaults to "N/A"
+        model (CharField): The name of the item's model. Defaults to "N/A"
+        part_or_unit (CharField): Item classification of 'Part' or 'Unit'. Defaults to 'Part'
+        part_number (CharField): The part number of the item. Can be blank if the item is a unit.
+        description (TextField): The description of the item
+        location (CharField): The physical location of the item
+        quantity (IntegerField): The quantity of the item in inventory
+        min_quantity (IntegerField): The minimum quantity of the item to keep in inventory
+        unit_price (DecimalField): The price of one of this item
+        last_modified_by (ForeignKey): User who last edited the item through creating or updating
 
     Tracking:
-        tracker (FieldTracker): Tracks changes to the following fields: 
-            - "manufacturer" 
-            - "model" 
-            - "part_or_unit" 
-            - "part_number" 
-            - "description" 
-            - "location" 
-            - "quantity" 
-            - "min_quantity" 
-            - "unit_price"  
+        tracker (FieldTracker): Tracks changes to the following fields:
+            - "manufacturer"
+            - "model"
+            - "part_or_unit"
+            - "part_number"
+            - "description"
+            - "location"
+            - "quantity"
+            - "min_quantity"
+            - "unit_price"
 
-    Properties: 
-        low_stock (boolean): Indicates whether the item quantity is below the minimum quantity  
-        model_part_num (str): The model and part number together 
+    Properties:
+        low_stock (boolean): Indicates whether the item quantity is below the minimum quantity
+        model_part_num (str): The model and part number together
 
-    Meta: 
-        db_table: Specifies the name of the database table for the item to be stored in 
-        managed: Indicates whether Django will manage the lifecycle of the table during migrations (True) or not (False). 
-
-    Methods: 
-        `get_absolute_url()`: Resolves the URL for viewing the Item 
-        `save()`: Overrides the save method in the Item model to set the modified_by field 
+    Methods:
+        `get_absolute_url()`: Resolves the URL for viewing the Item
+        `save()`: Overrides the save method in the Item model to set the modified_by field
         `__str__()`: Represents the Item object as a string
     """
+
     class Meta:
+        """
+        Meta class for Item model.
+        
+        Attributes:
+            db_table (str): Name of database table for the item to be stored in
+            managed (bool): Indicates if lifecycle of the table during migrations is managed or not.
+        """
         db_table = "inventory_item"
         managed = True
 
@@ -103,10 +117,22 @@ class Item(models.Model):
 
     @property
     def low_stock(self) -> bool:
+        """
+        Indicates whether the item quantity is below the minimum quantity
+
+        Returns:
+            bool: True if the quantity is below the minimum quantity; False otherwise
+        """
         return self.quantity <= self.min_quantity
 
     @property
     def model_part_num(self) -> str:
+        """
+        Combines model and part number together into a string
+
+        Returns:
+            str: The model and part number as a single string
+        """
         return f"{self.model} {self.part_number}"
 
     def get_absolute_url(self) -> str:
@@ -132,7 +158,7 @@ class Item(models.Model):
         The string representation of the Item object
 
         Returns:
-            str: The `manufacturer`, a comma, `model`, and `part_number` if applicable.
+            str: The `manufacturer`, `model`, and `part_number` if applicable.
         """
         item_string = self.manufacturer + ", " + self.model
         if self.part_or_unit == self.PART:
@@ -145,22 +171,26 @@ class ItemHistory(models.Model):
     This model represents an Item History object.
 
     Attributes:
-        item (ForeignKey): The Item that is the subject of the history 
-        action (CharField): The action that was done onto the item. It can be "Create", "Update", or "Use" 
-        timestamp (DateTimeField): The date and time that the action took place 
-        user (ForeignKey): The User that did the action 
-        changes (TextField) : The details of the action explaining what happened 
+        item (ForeignKey): The Item that is the subject of the history
+        action (CharField): The action that was done onto the item.
+        timestamp (DateTimeField): The date and time that the action took place
+        user (ForeignKey): The User that did the action
+        changes (TextField) : The details of the action explaining what happened
 
     Methods:
-        `__str__()`: _description_
-        
-    Meta: 
-        verbose_name (str): The human readable name for ItemHistory 
-        verbose_name_plural (str): The plural version of ItemHistory's human readable name 
-        db_table (str): Specifies the name of the database table for the Item History to be stored in 
-        managed (bool): Indicates whether Django will manage the lifecycle of the table during migrations (True) or not (False). 
+        `__str__()`: Represents the ItemHistory object as a string
     """
+
     class Meta:
+        """
+        Meta class for ItemHistory model.
+        
+        Attributes:
+            verbose_name (str): The human readable name for ItemHistory
+            verbose_name_plural (str): The plural version of ItemHistory's human readable name
+            db_table (str): Name of database table for the Item History to be stored in
+            managed (bool): Indicates if lifecycle of the table during migrations is managed or not.
+        """
         verbose_name = "Item History"
         verbose_name_plural = "Item Histories"
         db_table = "inventory_itemhistory"
@@ -179,38 +209,48 @@ class ItemHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     changes = models.TextField(null=True, blank=True)
 
-    def __str__(self):
-        local_timestamp = timezone.localtime(self.timestamp) 
+    def __str__(self) -> str:
+        """
+        Represents the ItemHistory object as a string.
+
+        Returns:
+            str: The item, action, and timestamp of the action.
+        """
+        local_timestamp = timezone.localtime(self.timestamp)
         formatted_timestamp = local_timestamp.strftime("%Y-%m-%d %I:%M:%S %p")
         return f"{self.item} - {self.action} - {formatted_timestamp}"
 
 
 class ItemRequest(models.Model):
     """
-    This model represents an item request in the database 
+    This model represents an item request in the database
 
-    Attributes: 
-        manufacturer (CharField): The name of the manufacturer of the item 
-        model_part_num (CharField): The model and part number of the item 
-        quantity_requested (IntegerField): The quantity of the item being requested 
-        description (TextField): The description of the item 
-        unit_price (DecimalField): The price of one of this item 
-        requested_by (ForeignKey): The User requesting the item. Limited to users in the technician group 
-        timestamp (DateTimeField): The date and time that the request was made 
-        status (StatusField): The status of the item request, which can be "Pending", "Accepted", or "Rejected". Defaults to "Pending".  
-        status_changed_by (ForeignKey): The User who "accepted" or "rejected" the item request. Limited to users in the superuser group 
+    Attributes:
+        manufacturer (CharField): The name of the manufacturer of the item
+        model_part_num (CharField): The model and part number of the item
+        quantity_requested (IntegerField): The quantity of the item being requested
+        description (TextField): The description of the item
+        unit_price (DecimalField): The price of one of this item
+        requested_by (ForeignKey): User requesting the item.
+        timestamp (DateTimeField): The date and time that the request was made
+        status (StatusField): Status of the request. Defaults to "Pending".
+        status_changed_by (ForeignKey): User who accepted or rejected the item request.
 
-    Methods: 
-        `get_absolute_url()`: Resolves the URL for viewing the ItemRequest object  
-        `__str__()`: Represents the ItemRequest object as a string  
-
-    Meta: 
-        verbose_name (str): The human readable name for ItemRequest 
-        verbose_name_plural (str): The plural version of ItemRequest's human readable name 
-        db_table (str): Specifies the name of the database table for the Item Request to be stored in  
-        managed (bool): Indicates whether Django will manage the lifecycle of the table during migrations (True) or not (False)
+    Methods:
+        `get_absolute_url()`: Resolves the URL for viewing the ItemRequest object
+        `__str__()`: Represents the ItemRequest object as a string
     """
+
     class Meta:
+        """
+        Meta class for ItemRequest model.
+        
+        Attributes:
+            verbose_name (str): The human readable name for ItemRequest
+            verbose_name_plural (str): The plural version of ItemRequest's human readable name
+            db_table (str): Name of database table for the Item Request to be stored in
+            managed (bool): Indicates if lifecycle of the table during migrations is managed or not.
+        """
         verbose_name = "Item Request"
         verbose_name_plural = "Item Requests"
         db_table = "inventory_itemrequest"
@@ -229,7 +269,10 @@ class ItemRequest(models.Model):
         decimal_places=2, max_digits=14, validators=[MinValueValidator(Decimal("0.01"))]
     )
     requested_by = models.ForeignKey(
-        User, on_delete=models.CASCADE, limit_choices_to={"groups__name": "Technician"}, related_name="requested_by_user"
+        User,
+        on_delete=models.CASCADE,
+        limit_choices_to={"groups__name": "Technician"},
+        related_name="requested_by_user",
     )
     timestamp = models.DateTimeField(auto_now_add=True)
     status = StatusField(db_index=True, default="Pending")
@@ -240,17 +283,17 @@ class ItemRequest(models.Model):
         blank=True,
         default=None,
         limit_choices_to={"groups__name": "Superuser"},
-        related_name="status_changed_by_user"
+        related_name="status_changed_by_user",
     )
-    
-    tracker = FieldTracker(fields=['status'])
+
+    tracker = FieldTracker(fields=["status"])
 
     def get_absolute_url(self) -> str:
         """
         Resolves the URL for viewing the ItemRequest object.
 
         Returns:
-            str: _description_
+            str: The URL path of the ItemRequest object
         """
         return reverse("inventory:item_request_detail", kwargs={"pk": self.pk})
 
@@ -259,32 +302,36 @@ class ItemRequest(models.Model):
         Represents the ItemRequest object as a string.
 
         Returns:
-            str: _description_
+            str: The user who requested the item, the manufacturer, and the model part number.
         """
         return f"Request by {self.requested_by} for {self.manufacturer}, {self.model_part_num}"
 
 
 class UsedItem(models.Model):
     """
-    This model represents a used item in the database 
+    This model represents a used item in the database
 
-    Attributes: 
-        item (ForeignKey): The Item from the inventory that has been used 
-        work_order (IntegerField): The work order that the item has been used in 
-        datetime_used (DateTimeField): The date and time that the item has been used 
-        used_by (ForeignKey): The User that used the item 
-        
+    Attributes:
+        item (ForeignKey): The Item from the inventory that has been used
+        work_order (IntegerField): The work order that the item has been used in
+        datetime_used (DateTimeField): The date and time that the item has been used
+        used_by (ForeignKey): The User that used the item
+
     Methods:
-        `get_absolute_url()`: Resolves the URL for viewing the UsedItem object  
-        `__str__()`: Represents the UsedItem object as a string 
-        
-    Meta:
-        verbose_name (str): The human readable name for UsedItem 
-        verbose_name_plural (str): The plural version of UsedItem's human readable name 
-        db_table (str): Specifies the name of the database table for the Item Request to be stored in  
-        managed (bool): Indicates whether Django will manage the lifecycle of the table during migrations (True) or not (False)
+        `get_absolute_url()`: Resolves the URL for viewing the UsedItem object
+        `__str__()`: Represents the UsedItem object as a string
     """
+
     class Meta:
+        """
+        Meta class for UsedItem model.
+        
+        Attributes:
+            verbose_name (str): The human readable name for UsedItem
+            verbose_name_plural (str): The plural version of UsedItem's human readable name
+            db_table (str): Name of database table for the Item Request to be stored in
+            managed (bool): Indicates if lifecycle of the table during migrations is managed or not.
+        """
         verbose_name = "Used Item"
         verbose_name_plural = "Used Items"
         db_table = "inventory_useditem"
@@ -307,24 +354,52 @@ class UsedItem(models.Model):
         limit_choices_to={"groups__name__in": ["Technician", "Superuser"]},
     )
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         """
-        Resolves the URL for viewing the UsedItem object  
+        Resolves the URL for viewing the UsedItem object
 
         Returns:
-            str: _description_
+            str: The URL path of the UsedItem object
         """
         return reverse("inventory:used_item_detail", kwargs={"pk": self.pk})
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+        Represents the UsedItem object as a string.
+
+        Returns:
+            str: The work order and item used.
+        """
         return f"Work Order: {self.work_order} | Item: {self.item}"
 
 
 class PurchaseOrderItem(models.Model):
     """
+    This model represents a purchase order item in the database
 
+    Attributes:
+        manufacturer (CharField): The name of the item's manufacturer
+        model_part_num (CharField): The model and part number of the item
+        quantity_ordered (IntegerField): The quantity of the item being ordered
+        description (TextField): The description of the item
+        serial_num (CharField): The serial number of the item
+        property_num (CharField): The property number of the item
+        unit_price (DecimalField): The price of one of this item
+
+    Methods:
+        `__str__()`: Represents the PurchaseOrderItem object as a string        
     """
+
     class Meta:
+        """
+        Meta class for the PurchaseorderItem model.
+        
+        Attributes:
+            verbose_name (str): Human readable name for PurchaseOrderItem
+            verbose_name_plural (str): Plural version of PurchaseOrderItem's human readable name
+            db_table (str): Name of database table for the Purchase Order Item to be stored in
+            managed (bool): Indicates if lifecycle of the table during migrations is managed or not.
+        """
         verbose_name = "Purchase Order Item"
         verbose_name_plural = "Purchase Order Items"
         db_table = "inventory_purchaseorderitem"
@@ -340,5 +415,13 @@ class PurchaseOrderItem(models.Model):
         decimal_places=2, max_digits=14, validators=[MinValueValidator(0.00)]
     )
 
-    def __str__(self):
-        return f"Purchase Order for {self.model_part_num} by {self.manufacturer} - Quantity: {self.quantity_ordered}"
+    def __str__(self) -> str:
+        """
+        Represents the PurchaseOrderItem object as a string.
+
+        Returns:
+            str: The model part number, manufacturer, and quantity ordered.
+        """
+        return f"Purchase Order for {self.model_part_num} \
+            by {self.manufacturer} - \
+            Quantity: {self.quantity_ordered}"
