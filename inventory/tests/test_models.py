@@ -222,6 +222,9 @@ class ItemModelTests(TestCase):
 
 
 class ItemHistoryModelTests(TestCase):
+    """
+    Tests for ItemHistory model
+    """
     # NOTE: Date and time is set to January 1, 2025 at 12:00 for testing purposes
     aware_datetime = timezone.make_aware(datetime.datetime(2025, 1, 1, 12, 0, 0))
 
@@ -433,6 +436,9 @@ class ItemRequestModelTests(TestCase):
 
 
 class UsedItemModelTests(TestCase):
+    """
+    Tests for UsedItem model
+    """
     @classmethod
     def setUpTestData(cls):
         """
@@ -489,6 +495,9 @@ class UsedItemModelTests(TestCase):
 
 
 class PurchaseOrderItemModelTests(TestCase):
+    """
+    Tests for PurchaseOrderItem model
+    """
     @classmethod
     def setUpTestData(cls):
         """
@@ -511,11 +520,10 @@ class PurchaseOrderItemModelTests(TestCase):
         Test that the string representation of the PurchaseOrderItem object is correct.
         """
         expected_string = "Purchase Order for Test Model and Part Num by Test MFG - Quantity: 1"
-        # actual_string = self.po_item.__str__()
         actual_string = str(self.po_item)
 
         self.assertEqual(
             actual_string,
             expected_string,
-            "The string for the PurchaseOsrderItem object doesn't match the expected string.",
+            "The string for the PurchaseOrderItem object doesn't match the expected string.",
         )
