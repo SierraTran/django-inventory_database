@@ -1,3 +1,6 @@
+"""
+This module contains the URL patterns for the inventory app.
+"""
 from django.urls import path
 from . import views
 
@@ -17,7 +20,7 @@ urlpatterns = [
     # These URLs are for creating new Item objects as a Superuser or Technician respectively.
     path("items/new_item_form/superuser", views.ItemCreateSuperuserView.as_view(), name="item_create_form_superuser"),
     path("items/new_item_form/technician", views.ItemCreateTechnicianView.as_view(), name="item_create_form_technician"),
-    # These URLs are for updating existing Item objects 
+    # These URLs are for updating existing Item object
     path("items/<int:pk>/update/superuser", views.ItemUpdateSuperuserView.as_view(), name="item_update_form_superuser"),
     path("items/<int:pk>/update/technician", views.ItemUpdateTechnicianView.as_view(), name="item_update_form_technician"),
     path("items/<int:pk>/update/intern", views.ItemUpdateInternView.as_view(), name="item_update_form_intern"),
