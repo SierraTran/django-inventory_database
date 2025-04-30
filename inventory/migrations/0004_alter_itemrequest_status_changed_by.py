@@ -8,14 +8,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('inventory', '0003_alter_itemrequest_quantity_requested_and_more'),
+        ("inventory", "0003_alter_itemrequest_quantity_requested_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='itemrequest',
-            name='status_changed_by',
-            field=models.ForeignKey(blank=True, default=None, limit_choices_to={'groups__name': 'Superuser'}, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='status_changed_by_user', to=settings.AUTH_USER_MODEL),
+            model_name="itemrequest",
+            name="status_changed_by",
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                limit_choices_to={"groups__name": "Superuser"},
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="status_changed_by_user",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]
