@@ -12,5 +12,3 @@ class ItemHistorySignalTests(TestCase):
         """
         Setup
         """
-        
-    

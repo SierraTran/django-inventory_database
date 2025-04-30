@@ -137,8 +137,10 @@ class ItemModelTests(TestCase):
         """
         Test that the `model_part_num` property is correctly set.
 
-        For the first item, this should be "Test Model1 ". (Space included because it's a unit.)
-        For the second item, this should be "Test Model2 ". (Space include because no part number has been specified.)
+        For the first item, this should be "Test Model1 ". 
+            (Space included because it's a unit.)
+        For the second item, this should be "Test Model2 ". 
+            (Space include because no part number has been specified.)
         For the third item, this should be "Test Model3 Test Part Number".
         """
         self.assertEqual(
