@@ -9,11 +9,10 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
-from django.core.management.commands.runserver import Command as runserver
-from pathlib import Path
-from decouple import config
 import os
+from pathlib import Path
+from django.core.management.commands.runserver import Command as runserver
+from decouple import config
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -190,7 +189,7 @@ LOGIN_REDIRECT_URL = "/inventory_database/"
 # will bring the user back to the login page ("/inventory_database/accounts/login/")
 LOGOUT_REDIRECT_URL = "/inventory_database/accounts/login/"
 
-# Setting SESSION_COOKIE_SECURE to True marks session cookies as secure, 
+# Setting SESSION_COOKIE_SECURE to True marks session cookies as secure,
 # making it more difficult for network traffic sniffers to hijack user sessions.
 # For easy installation and setup, this has been set to False.
 SESSION_COOKIE_SECURE = False
@@ -199,9 +198,9 @@ SESSION_COOKIE_SECURE = False
 # have to log in again.
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-# Setting CSRF_COOKIE_SECURE to True marks CSRF cookies as secure, 
+# Setting CSRF_COOKIE_SECURE to True marks CSRF cookies as secure,
 # making it more difficult for network traffic sniffers to steal the CSRF token.
-# For easy installation and setup, this has been set to False. 
+# For easy installation and setup, this has been set to False.
 CSRF_COOKIE_SECURE = False
 
 # Message storage for the messages framework
