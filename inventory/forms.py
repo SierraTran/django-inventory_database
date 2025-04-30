@@ -10,6 +10,9 @@ from .models import Item, UsedItem, ItemRequest, PurchaseOrderItem
 class ImportFileForm(forms.Form):
     """
     A form for importing an Excel file containing items to be added to the inventory.
+    
+    Attributes:
+        file (forms.FileField): A file field for uploading the Excel file.
     """
     file = forms.FileField()
 
@@ -29,10 +32,18 @@ class UsedItemForm(forms.ModelForm):
             - The user that used the item
             
     Methods:
-        `__init__()`: Constructor method that initializes the form and sets the label for the `datetime_used` field to "Date & Time used:".
+        `__init__()`: Constructor method that initializes the form and sets the label for the 
+            `datetime_used` field to "Date & Time used:".
     """
 
     class Meta:
+        """
+        Meta class for UsedItemForm
+        
+        Attributes:
+            model (UsedItem): The model associated with this form.
+            fields (list): The fields to include in the form.
+        """
         model = UsedItem
         fields = [
             "item",
@@ -42,7 +53,8 @@ class UsedItemForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         """
-        Constructor method that initializes the form and sets the label for the `datetime_used` field to "Date & Time used:".
+        Constructor method that initializes the form and sets the label for the `datetime_used` 
+        field to "Date & Time used:".
         
         Args:
             *args: Additional positional arguments
@@ -54,8 +66,8 @@ class UsedItemForm(forms.ModelForm):
             "manufacturer", "model", "part_number"
         )
         self.fields["work_order"].label = "Work Order"
-        
-        
+
+
 class ItemRequestForm(forms.ModelForm):
     """
     A form for creating new `ItemRequest` objects, used in the ItemRequestCreateView.
@@ -73,10 +85,18 @@ class ItemRequestForm(forms.ModelForm):
             - The unit price of the requested item
 
     Methods:
-        __init__(): Constructor method that initializes the form and sets the label for the `model_part_num` field to "Model / Part #:".
+        __init__(): Constructor method that initializes the form and sets the label for the 
+            `model_part_num` field to "Model / Part #:".
     """
 
     class Meta:
+        """
+        Meta class for ItemRequestForm
+        
+        Attributes:
+            model (ItemRequest): The model associated with this form.
+            fields (list): The fields to include in the form.
+        """
         model = ItemRequest
         fields = [
             "manufacturer",
@@ -88,7 +108,8 @@ class ItemRequestForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         """
-        Constructor method that initializes the form and sets the label for the `model_part_num` field to "Model / Part #:".
+        Constructor method that initializes the form and sets the label for the `model_part_num`
+        field to "Model / Part #:".
         
         Args:
             *args: Additional positional arguments
@@ -101,7 +122,7 @@ class ItemRequestForm(forms.ModelForm):
 
 class PurchaseOrderItemForm(forms.ModelForm):
     """
-    A for for creating new `PurchaseOrderItem` objects, used in the PurchaseOrderItemCreateView.
+    A form for creating new `PurchaseOrderItem` objects, used in the PurchaseOrderItemCreateView.
 
     Fields:
         - manufacturer : CharField
@@ -120,9 +141,17 @@ class PurchaseOrderItemForm(forms.ModelForm):
             - The unit price of the item being ordered. 
             
     Methods:
-        `__init__()`: Constructor method that initializes the form and sets the labels for the `model_part_num`, `serial_num`, and `property_num` fields.
+        `__init__()`: Constructor method that initializes the form and sets the labels for the 
+            `model_part_num`, `serial_num`, and `property_num` fields.
     """
     class Meta:
+        """
+        Meta class for PurchaseOrderItemForm
+        
+        Attributes:
+            model (PurchaseOrderItem): The model associated with this form.
+            fields (list): The fields to include in the form.
+        """
         model = PurchaseOrderItem
         fields = [
             "manufacturer",
@@ -136,7 +165,8 @@ class PurchaseOrderItemForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         """
-        Constructor method that initializes the form and sets the labels for the `model_part_num`, `serial_num`, and `property_num` fields.
+        Constructor method that initializes the form and sets the labels for the `model_part_num`,
+        `serial_num`, and `property_num` fields.
         
         Args:
             *args: Additional positional arguments
