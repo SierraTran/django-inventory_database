@@ -17,6 +17,84 @@ class ImportFileForm(forms.Form):
     file = forms.FileField()
 
 
+class ItemSuperuserForm(forms.ModelForm):
+    """
+    A form for creating new `Item` objects as a superuser,
+    used in ItemCreateSuperuserView and ItemUpdateSuperuserView.
+    """
+
+    class Meta:
+        """
+        Meta class for ItemSuperuserForm
+        
+        Attributes:
+            model (Item): The model associated with this form.
+            fields (list[str]): The fields to include in the form.
+            labels (dict): The labels for the fields in the form.
+        """
+        model = Item
+        fields = [
+            "manufacturer",
+            "model",
+            "part_or_unit",
+            "part_number",
+            "description",
+            "location",
+            "quantity",
+            "min_quantity",
+            "unit_price",
+        ]
+        labels = {
+            "manufacturer": "Manufacturer",
+            "model": "Model",
+            "part_or_unit": "Part or Unit",
+            "part_number": "Part Number",
+            "description": "Description",
+            "location": "Storage Location",
+            "quantity": "Quantity in Stock",
+            "min_quantity": "Minimum Quantity",
+            "unit_price": "Unit Price ($)",
+        }
+
+
+class ItemTechnicianForm(forms.ModelForm):
+    """
+    A form for creating new `Item` objects as a technician, 
+    used in ItemCreateTechnicianView and ItemUpdateTechnicianView.
+    """
+
+    class Meta:
+        """
+        Meta class for ItemTechnicianForm
+        
+        Attributes:
+            model (Item): The model associated with this form.
+            fields (list[str]): The fields to include in the form.
+            labels (dict): The labels for the fields in the form.
+        """
+        model = Item
+        fields = [
+            "manufacturer",
+            "model",
+            "part_or_unit",
+            "part_number",
+            "description",
+            "location",
+            "quantity",
+            "unit_price",
+        ]
+        labels = {
+            "manufacturer": "Manufacturer",
+            "model": "Model",
+            "part_or_unit": "Part or Unit",
+            "part_number": "Part Number",
+            "description": "Description",
+            "location": "Storage Location",
+            "quantity": "Quantity in Stock",
+            "unit_price": "Unit Price ($)",
+        }
+
+
 class UsedItemForm(forms.ModelForm):
     """
     A form for creating new `UsedItem` objects, used in the UsedItemCreateView.
