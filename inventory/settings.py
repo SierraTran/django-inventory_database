@@ -1,3 +1,7 @@
+"""
+Specific settings for the inventory app.
+"""
+
 MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
 ]
