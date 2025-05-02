@@ -22,11 +22,11 @@ from authentication.models import Notification
 def create_or_update_item_history(sender, instance, created, **kwargs):
     """
     Creates an ItemHistory record when an item has been created or updated.
-    
+
     This method first checks if the item has been created or updated. If the item has been created,
     the action is set to "create". If the item has been updated, the action is set to "update". The
     changes are then recorded in a newly created ItemHistory record. Records with the "update"
-    action will have the fields that have been changed and their old values recorded in the 
+    action will have the fields that have been changed and their old values recorded in the
     `changes` field.
 
     Arguments:
@@ -55,6 +55,7 @@ def create_or_update_item_history(sender, instance, created, **kwargs):
             changes=changes,
         )
 
+
 @receiver(pre_delete, sender=Item)
 def handle_related_records(sender, instance, **kwargs):
     """
@@ -68,15 +69,16 @@ def handle_related_records(sender, instance, **kwargs):
     ItemHistory.objects.filter(item=instance).delete()
     # QUESTION: Delete this line and make UsedItem not directly reference the item so it can stay in the database?
     UsedItem.objects.filter(item=instance).delete()
-    
-# NOTE: The following signal handlers create notifications for users when certain events happen in 
+
+
+# NOTE: The following signal handlers create notifications for users when certain events happen in
 # they system.
 @receiver(post_save, sender=ItemRequest)
 def send_item_request_notification(sender, instance, created, **kwargs):
-    """ 
+    """
     Creates a notification for Technicians if their item request has been accepted or rejected by a
     Superuser, or creates a notification for Superusers if a new item request has been created.
-    
+
     This method checks if the item request is created or not. If it is, a notification is created
     for all Superusers. If the item request is not created, it checks if the status of the item
     request has changed. If it has, a notification is created for the user that requested the item.
@@ -94,9 +96,11 @@ def send_item_request_notification(sender, instance, created, **kwargs):
 
     if created:
         subject = "New Item Request"
-        message = f"There's a new item request for {instance.manufacturer}, {instance.model_part_num}. " \
-                    f'See the <a href="{instance_url}">item request</a> for more details.'
-        superuser_group = Group.objects.get(name="Superuser")        
+        message = (
+            f"There's a new item request for {instance.manufacturer}, {instance.model_part_num}. "
+            f'See the <a href="{instance_url}">item request</a> for more details.'
+        )
+        superuser_group = Group.objects.get(name="Superuser")
         for user in superuser_group.user_set.all():
             Notification.objects.create(
                 is_read=False,
@@ -106,14 +110,16 @@ def send_item_request_notification(sender, instance, created, **kwargs):
             )
         return
 
-    if 'status' in instance.tracker.changed(): 
+    if "status" in instance.tracker.changed():
         # Display the new status of the item request in the subject of the notification.
         subject = escape(f"Item Request {instance.status}")
         # Create a link to the item request to include in the message.
         linked_item_request = f'<a href="{instance_url}">Your Item Request for {instance.manufacturer}, {instance.model_part_num}</a>'
         # Explain the new status of the item request and include its link in the message.
-        message = f"{linked_item_request} has been {str(instance.status).lower()} by {instance.status_changed_by.username}. " \
-                    "If you're all set with your item request, please delete it."
+        message = (
+            f"{linked_item_request} has been {str(instance.status).lower()} by {instance.status_changed_by.username}. "
+            "If you're all set with your item request, please delete it."
+        )
         with transaction.atomic():
             Notification.objects.create(
                 is_read=False,
@@ -122,6 +128,7 @@ def send_item_request_notification(sender, instance, created, **kwargs):
                 user=instance.requested_by,
             )
         return
+
 
 @receiver(post_save, sender=Item)
 def send_low_stock_notification(sender, instance, **kwargs):
