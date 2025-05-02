@@ -1,5 +1,5 @@
 """
-
+This module contains tests for the inventory app's models.
 """
 
 import datetime
@@ -12,7 +12,6 @@ from django.contrib.auth.models import User, Group
 from inventory.models import Item, ItemHistory, ItemRequest, PurchaseOrderItem, UsedItem
 
 
-# Create your tests here.
 class ItemModelTests(TestCase):
     """
     Tests for Item model
