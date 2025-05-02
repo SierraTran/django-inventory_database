@@ -1,5 +1,5 @@
 """
-
+This module contains tests for the inventory app's forms. 
 """
 import datetime
 from django.test import Client, TestCase
@@ -10,6 +10,9 @@ from inventory.models import Item
 
 
 class UsedItemFormTests(TestCase):
+    """"
+    Tests for UsedItemForm.
+    """
     # NOTE: Local date and time is set to January 3, 2025 at 1:00 PM for testing purposes
     aware_datetime = timezone.make_aware(datetime.datetime(2025, 1, 3, 13, 0, 0))
 
@@ -88,6 +91,9 @@ class UsedItemFormTests(TestCase):
 
 
 class ItemRequestFormTests(TestCase):
+    """
+    Tests for ItemRequestForm.
+    """
     @classmethod
     def setUpTestData(cls):
         """
@@ -168,6 +174,9 @@ class ItemRequestFormTests(TestCase):
 
 
 class PurchaseOrderItemFormTests(TestCase):
+    """
+    Tests for PurchaseOrderItemForm
+    """
     @classmethod
     def setUpTestData(cls):
         """
