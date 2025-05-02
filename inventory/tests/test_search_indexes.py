@@ -1,13 +1,18 @@
+"""
+This module contains tests for the inventory app's search indexes.
+"""
+
 import tempfile
 from django.test import TestCase
 from django.core.management import call_command
-from haystack import connections
 from haystack.query import SearchQuerySet
-from haystack.signals import BaseSignalProcessor
 from inventory.models import Item, UsedItem
 
 
 class SearchIndexesTests(TestCase):
+    """
+    Tests for the `Item` and `UsedItem` search indexes.
+    """
     @classmethod
     def setUpTestData(cls):
         """
