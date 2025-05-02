@@ -47,6 +47,8 @@ from inventory_database.mixins import (
 )
 from .forms import (
     ImportFileForm,
+    ItemSuperuserForm,
+    ItemTechnicianForm,
     PurchaseOrderItemFormSet,
     UsedItemForm,
     ItemRequestForm,
@@ -157,7 +159,7 @@ class ItemCreateSuperuserView(SuperuserRequiredMixin, CreateView):
 
     Attributes:
         model (Item): The model that this view operates on.
-        fields (list): The fields to be displayed in the form.
+        form_class (ItemSuperuserForm): The form that this view operates on.
         template_name (str): The name of the template used to render the view.
 
     Methods:
@@ -165,17 +167,7 @@ class ItemCreateSuperuserView(SuperuserRequiredMixin, CreateView):
     """
 
     model = Item
-    fields = [
-        "manufacturer",
-        "model",
-        "part_or_unit",
-        "part_number",
-        "description",
-        "location",
-        "quantity",
-        "min_quantity",
-        "unit_price",
-    ]
+    form_class = ItemSuperuserForm
     template_name = "item_create_form.html"
 
     def form_valid(self, form):
@@ -208,7 +200,7 @@ class ItemCreateTechnicianView(TechnicianRequiredMixin, CreateView):
 
     Attributes:
         model (Item): The model that this view operates on.
-        fields (list[str]): The fields to be displayed in the form.
+        form_class (ItemTechnicianForm): The form that this view operates on.
         template_name (str): The name of the template used to render the view.
 
     Methods:
@@ -216,16 +208,7 @@ class ItemCreateTechnicianView(TechnicianRequiredMixin, CreateView):
     """
 
     model = Item
-    fields = [
-        "manufacturer",
-        "model",
-        "part_or_unit",
-        "part_number",
-        "description",
-        "location",
-        "quantity",
-        "unit_price",
-    ]
+    form_class = ItemTechnicianForm
     template_name = "item_create_form.html"
 
     def form_valid(self, form):
@@ -258,7 +241,7 @@ class ItemUpdateSuperuserView(SuperuserRequiredMixin, UpdateView):
 
     Attributes:
         model (Item): The model that this view operates on.
-        fields (list[str]): The fields to be displayed in the form.
+        form_class (ItemSuperuserForm): The form that this view operates on.
         template_name (str): The name of the template used to render the view.
 
     Methods:
@@ -266,17 +249,7 @@ class ItemUpdateSuperuserView(SuperuserRequiredMixin, UpdateView):
     """
 
     model = Item
-    fields = [
-        "manufacturer",
-        "model",
-        "part_or_unit",
-        "part_number",
-        "description",
-        "location",
-        "quantity",
-        "min_quantity",
-        "unit_price",
-    ]
+    form_class = ItemSuperuserForm
     template_name = "item_update_form.html"
 
     def form_valid(self, form):
@@ -309,7 +282,7 @@ class ItemUpdateTechnicianView(TechnicianRequiredMixin, UpdateView):
 
     Attributes:
         model (Item): The model that this view operates on.
-        fields (list[str]): The fields to be displayed in the form.
+        form_class (ItemTechnicianForm): The form that this view operates on.
         template_name (str): The name of the template used to render the view.
 
     Methods:
@@ -318,16 +291,7 @@ class ItemUpdateTechnicianView(TechnicianRequiredMixin, UpdateView):
     """
 
     model = Item
-    fields = [
-        "manufacturer",
-        "model",
-        "part_or_unit",
-        "part_number",
-        "description",
-        "location",
-        "quantity",
-        "unit_price",
-    ]
+    form_class = ItemTechnicianForm
     template_name = "item_update_form.html"
 
     def form_valid(self, form):
