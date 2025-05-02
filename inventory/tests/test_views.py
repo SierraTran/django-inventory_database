@@ -82,6 +82,9 @@ class ItemViewTests(TestCase):
         cls.factory = RequestFactory()
 
     def test_get_queryset(self):
+        """
+        Test that the get_queryset function is working correctly
+        """
         request = self.factory.get(self.items_list_url)
         view = ItemView()
         view.request = request
@@ -1923,6 +1926,7 @@ class ItemRequestViewTests(TestCase):
         """
         Test that only superusers and technicians can access the view
         """
+        # TODO: test_item_request_view_access_control
 
     def test_get_queryset(self):
         """
@@ -1994,7 +1998,7 @@ class ItemRequestDetailViewTests(TestCase):
     @tag("critical")
     def test_item_request_detail_view_access_control(self):
         """ 
-        
+        Test that only superusers and technicians can see item request details
         """
         # TODO: test_item_request_detail_view_access_control
 
