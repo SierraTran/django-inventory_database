@@ -1,4 +1,6 @@
-""" """
+""" 
+This module contains tests for the authentication app's views.
+"""
 
 import datetime
 from django.test import Client, TestCase, tag
@@ -206,11 +208,12 @@ class NotificationViewTests(TestCase):
     def test_notification_all_unread_notifs(self):
         # TODO: test_notification_all_unread_notifs
         """
-        All notifications are shown in bold, and the notification badge is shown with the number of unread notifications.
+        Test that all (unread) notifications are shown in bold, and the notification badge is shown
+        with the number of unread notifications.
         """
         # [x]: Log in and access the notification page
         # [ ]: Check for notifications (all should be bold)
-        # [ ]: Make sure the notification badge shows with the correct number of unread notifications
+        # [x]: Make sure notification badge shows with correct number of unread notifications
         login = self.client.login(username="testuser1", password="password")
         self.assertTrue(login, "Login failed.")
 
@@ -223,6 +226,7 @@ class NotificationViewTests(TestCase):
             "notifications.html",
             "The correct template for the view is not used.",
         )
+        self.assertContains(response, '<span id="notification-badge" class="badge">2</span>')
 
     def test_notification_all_read_notifs(self):
         # TODO: test_notification_all_read_notifs
@@ -247,7 +251,6 @@ class NotificationViewTests(TestCase):
         )
 
     def test_notification_read_and_unread_notifs(self):
-        
         """
         Unread notifications are shown in bold while read notifications are not in bold. 
         The notification badge will only count unread notifications.
@@ -256,7 +259,7 @@ class NotificationViewTests(TestCase):
         # [ ]: Mark some notifications as read
         # [x]: Log in and access the notification page
         # [ ]: Check for unread notifications (shown in bold) and read notifications (now shown in bold)
-        # [ ]: Make sure the notification badge shows with the correct number of unread notifications
+        # [ ]: Make sure notification badge shows with correct number of unread notifications
         login = self.client.login(username="testuser1", password="password")
         self.assertTrue(login, "Login failed.")
 
@@ -388,7 +391,7 @@ class NotificationDeleteViewTests(TestCase):
         self.assertEqual(
             response.status_code,
             403,
-            "The user unexpectedly gained access to the update view for a notification that isn't for them.",
+            "User gained access to update view for a notification that isn't for them.",
         )
         self.client.logout()
 
