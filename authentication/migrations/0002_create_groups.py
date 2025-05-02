@@ -55,46 +55,87 @@ def create_groups(apps, schema_editor):
     if not Group.objects.filter(name="Superuser").exists():
         superuser_group = Group.objects.create(name="Superuser")
         superuser_group.permissions.add(
-            add_user_permission, change_user_permission, delete_user_permission, view_user_permission,
-            change_notification_permission, delete_notification_permission, view_notification_permission,
-            add_item_permission, change_item_permission, delete_item_permission, view_item_permission,
+            # User (object) permissions
+            add_user_permission,
+            change_user_permission,
+            delete_user_permission,
+            view_user_permission,
+            # Notification permissions
+            change_notification_permission,
+            delete_notification_permission,
+            view_notification_permission,
+            # Item permissions
+            add_item_permission,
+            change_item_permission,
+            delete_item_permission,
+            view_item_permission,
+            # ItemHistory permissions
             view_itemhistory_permission,
+            # ItemRequest permissions
             view_itemrequest_permission,
-            add_useditem_permission, change_useditem_permission, delete_useditem_permission, view_useditem_permission,
-            add_purchaseorderitem_permission, change_purchaseorderitem_permission, delete_purchaseorderitem_permission, view_purchaseorderitem_permission,
+            # UsedItem permissions
+            add_useditem_permission,
+            change_useditem_permission,
+            delete_useditem_permission,
+            view_useditem_permission,
+            # PurchaseOrderItem permissions
+            add_purchaseorderitem_permission,
+            change_purchaseorderitem_permission,
+            delete_purchaseorderitem_permission,
+            view_purchaseorderitem_permission,
         )
-        
+
     if not Group.objects.filter(name="Technician").exists():
         technician_group = Group.objects.create(name="Technician")
         technician_group.permissions.add(
-            change_notification_permission, delete_notification_permission, view_notification_permission,
-            add_item_permission, change_item_permission, delete_item_permission, view_item_permission,
+            # Notification permissions
+            change_notification_permission,
+            delete_notification_permission,
+            view_notification_permission,
+            # Item permissions
+            add_item_permission,
+            change_item_permission,
+            delete_item_permission,
+            view_item_permission,
+            # ItemHistory permissions
             view_itemhistory_permission,
-            add_itemrequest_permission, change_itemrequest_permission, delete_itemrequest_permission, view_itemrequest_permission,
-            add_useditem_permission, change_useditem_permission, delete_useditem_permission, view_useditem_permission,
-            # No PurchaseOrderItem permissions
+            # ItemRequest permissions
+            add_itemrequest_permission,
+            change_itemrequest_permission,
+            delete_itemrequest_permission,
+            view_itemrequest_permission,
+            # UsedItem permissions
+            add_useditem_permission,
+            change_useditem_permission,
+            delete_useditem_permission,
+            view_useditem_permission,
         )
-        
+
     if not Group.objects.filter(name="Intern").exists():
         intern_group = Group.objects.create(name="Intern")
         intern_group.permissions.add(
-            change_notification_permission, delete_notification_permission, view_notification_permission,
-            change_item_permission, view_item_permission,
+            # Notification permissions
+            change_notification_permission,
+            delete_notification_permission,
+            view_notification_permission,
+            # Item permissions
+            change_item_permission,
+            view_item_permission,
+            # ItemHistory permissions
             view_itemhistory_permission,
-            # No ItemRequest permissions
-            # No UsedItem permissions
-            # No PurchaseOrderItem permissions
         )
-        
+
     if not Group.objects.filter(name="Viewer").exists():
         viewer_group = Group.objects.create(name="Viewer")
         viewer_group.permissions.add(
-            change_notification_permission, delete_notification_permission, view_notification_permission,
+            # Notification permissions
+            change_notification_permission,
+            delete_notification_permission,
+            view_notification_permission,
+            # Item permissions
             view_item_permission,
+            # ItemHistory permissions
             view_itemhistory_permission,
-            # No ItemRequest permissions
-            # No UsedItem permissions
-            # No PurchaseOrderItem permissions
         )
 
 
