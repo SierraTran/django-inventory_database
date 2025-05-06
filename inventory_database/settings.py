@@ -100,7 +100,7 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
-#This setting will update search indexes
+# This setting will update search indexes in real time
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 
