@@ -145,7 +145,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("authentication", "0001_initial"),
-        ("inventory", "0002_itemrequest_status_changed_by_and_more"),
+        ("inventory", "0001_initial"),
     ]
 
     operations = [
