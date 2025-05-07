@@ -2279,10 +2279,6 @@ class UsedItemDetailViewTests(TestCase):
         """
         Setup
         """
-        # TODO: Set up test data
-        # [x]: Create at least one used item
-        # [x]: Resolve absolute URL of the used item
-        # [x]: Create a user for logging in
         cls.technician_group = Group.objects.get(name="Technician")
         cls.technician = User.objects.create_user(
             username="testtechnician", password="password"
@@ -2322,9 +2318,6 @@ class UsedItemDetailViewTests(TestCase):
         """
         Test that only logged-in users can access the UsedItemDetailView.
         """
-        # TODO: test_used_item_detail_view_access_control
-        # [x]: Try to simulate GET request without logging in
-        # [x]: Log in and simulate GET request
         response = self.client.get(self.used_item_detail_url)
         self.assertFalse(
             response.wsgi_request.user.is_authenticated,
@@ -2354,9 +2347,6 @@ class UsedItemCreateViewTests(TestCase):
         """
         Setup
         """
-        # TODO: Set up test data
-        # [x]: Create two items, one with a quantity of 0 and one with a quantity of 1
-        # [x]: Create a user
         cls.technician_group = Group.objects.get(name="Technician")
         cls.user = User.objects.create_user(
             username="testtechnician", password="password"
