@@ -3,7 +3,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-# Create your models here.
 
 # Since the User model from Django is being used,
 # there's no need to put a User model here
@@ -13,21 +12,24 @@ class Notification(models.Model):
     Model for the notification system. This model is used to store notifications for users.
 
     Attributes:
-        is_read (models.BooleanField): A boolean field to indicate if the notification has been read or not.
+        is_read (models.BooleanField): A boolean field to indicate if the notification has been 
+            read or not.
         subject (models.CharField): The subject of the notification.
         message (models.TextField): The message of the notification.
         timestamp (models.DateTimeField): The timestamp of when the notification was created.
-        user (models.ForeignKey): A foreign key to the User model to indicate which user the notification is for.
+        user (models.ForeignKey): A foreign key to the User model to indicate which user the 
+            notification is for.
 
     Methods:
-        `__str__`: Returns a string representation of the notification, including the timestamp and subject.
+        `__str__`: Returns a string representation of the notification, including the timestamp and
+            subject.
     """
     is_read = models.BooleanField(default=False)
     subject = models.CharField(max_length=100, blank=True)
     message = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    
+
     def __str__(self):
         """
         Returns a string representation of the notification, inluding the timestamp and subject.
