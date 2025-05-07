@@ -71,7 +71,7 @@ def format_row(worksheet, row):
         worksheet[f"J{r}"] = f"=+I{r}*D{r}"
 
 
-def setup_worksheet(worksheet, itemCount):
+def setup_worksheet(worksheet, item_count):
     """
     Sets up and adjusts the worksheet to accomodate 8 or more items submitted in the Purchase Order 
     Item Form. 
@@ -81,7 +81,7 @@ def setup_worksheet(worksheet, itemCount):
             set up and adjusted.
         itemCount (int): The total number of items that have been submitted.
     """
-    amount = itemCount - 8
+    amount = item_count - 8
 
     # Variables for initial row numbers
     initial_last_item_row = 24
