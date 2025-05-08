@@ -1,4 +1,10 @@
-# TODO: Module docstring
+"""
+This module contains the models for the authentication application.
+
+The included models are:
+    - Notification
+"""
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
