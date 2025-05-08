@@ -119,7 +119,9 @@ class DatabaseLoginViewTests(TestCase):
 # Tests for the Views for the Notification Model ##################################################
 ###################################################################################################
 class NotificationViewTests(TestCase):
-    # TEST: NotificationViewTests
+    """
+    Tests for NotificaionView
+    """
     # NOTE: Local date and time is set to January 1, 2025 at 12:00 for testing purposes
     aware_datetime = timezone.make_aware(datetime.datetime(2025, 1, 1, 12, 0, 0))
 
@@ -129,10 +131,6 @@ class NotificationViewTests(TestCase):
         """
         Setup
         """
-        # TODO: Set up for NotificationViewTests
-        # [x]: Set date and time for testing
-        # [x]: Create a user for any group
-        # [ ]: Bulk create notifications for the user as well as ones not for the user
         cls.superuser_group = Group.objects.get(name="Superuser")
         cls.user1 = User.objects.create_user(username="testuser1", password="password")
         cls.user1.groups.add(cls.superuser_group)
@@ -188,7 +186,7 @@ class NotificationViewTests(TestCase):
         """
         # [x]: Delete all notifications from the database (We only need to do this for this test.)
         # [x]: Log in and access the notification page
-        # [ ]: Check for no notifications and a message that says so
+        # [x]: Check for no notifications and a message that says so
         # [ ]: Make sure the notification badge doesn't show
         Notification.objects.all().delete()
 
@@ -204,6 +202,7 @@ class NotificationViewTests(TestCase):
             "notifications.html",
             "The correct template for the view is not used.",
         )
+        self.assertContains(response, "<p>There are no notifications.</p>")
 
     def test_notification_all_unread_notifs(self):
         # TODO: test_notification_all_unread_notifs

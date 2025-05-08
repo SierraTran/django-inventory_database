@@ -1,28 +1,30 @@
-"""# TODO: Update module docstring
-This module defines class-based views for displaying the home page, login page, notifications, 
-users, and user details.
+"""
+authentication.views
 
-### Mixins
-    - LoginRequiredMixin:
-        Restricts access to authenticated users. Unauthenticated users will be redirected to the 
-        login page. After logging in, they will be redirected back to the original destination 
-        preserved by the query parameter defined by `redirect_field_name`.
-    - UserPassesTestMixin:
-        Restricts access based on user-specific conditions.
+This module defines class-based and function-based views for user authentication, notification management,
+and user administration within the Django inventory database application.
 
-### Base Classes
-    - LoginView:
-        Handles the login logic and renders the login page.
-    - ListView:
-        Displays a list of objects.
-    - DetailView:
-        Shows the details of an object.
-    - CreateView:
-        Provides a form for creating new objects in the database.
-    - UpdateView:
-        Provides a form for updating existing objects in the database.
-    - DeleteView:
-        Confirms and processes object deletions.
+Views included:
+    - Home page rendering with user group context.
+    - Login page with custom error messaging.
+    - Notification listing, updating (mark as read/unread), and deletion, restricted to the notification's owner.
+    - User listing, detail, creation, update, and deletion, restricted to superusers.
+    - API endpoint for unread notification count.
+
+Access control:
+    - LoginRequiredMixin: Restricts access to authenticated users.
+    - UserPassesTestMixin: Restricts access based on user-specific conditions.
+    - SuperuserRequiredMixin: Restricts access to users with superuser privileges.
+
+Base classes used:
+    - LoginView: Handles login logic and rendering.
+    - ListView: Displays lists of objects.
+    - DetailView: Shows object details.
+    - CreateView: Handles object creation.
+    - UpdateView: Handles object updates.
+    - DeleteView: Handles object deletion.
+
+Each view is documented with its purpose, attributes, and methods.
 """
 
 import logging
@@ -71,6 +73,15 @@ def home(request):
 
 
 def unread_notifications_count_view(request):
+    """
+    
+
+    Args:
+        request (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     if request.user.is_authenticated:
         unread_count = Notification.objects.filter(
             user=request.user, is_read=False

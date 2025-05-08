@@ -171,7 +171,6 @@ The list of required software below will also be included in the `requirements.t
 
 ## Usage
 <!-- TODO: Expand this section -->
-<!-- TODO: Add screenshots and usage instructions -->
 - **Home Page**: Displays links to browse items, create new items, import item data, and manage users (based on user permissions).
 - **Items Page**: Lists all available items with search functionality.
 - **Item Detail Page**: Shows detailed information about a specific item.

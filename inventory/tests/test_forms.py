@@ -6,6 +6,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth.models import User, Group
+from freezegun import freeze_time
 from inventory.models import Item
 
 
@@ -17,15 +18,11 @@ class UsedItemFormTests(TestCase):
     aware_datetime = timezone.make_aware(datetime.datetime(2025, 1, 3, 13, 0, 0))
 
     @classmethod
+    @freeze_time(aware_datetime)
     def setUpTestData(cls):
         """
         Setup
         """
-        # TODO: setUpTestData
-        # [x]: Make several different (available) items
-        # [x]: Create a user for using the items
-        # [ ]: Set time for the tests
-
         items = [
             Item(
                 manufacturer="Tektronix",
