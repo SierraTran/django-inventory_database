@@ -1,13 +1,14 @@
 """
 authentication.views
 
-This module defines class-based and function-based views for user authentication, notification management,
-and user administration within the Django inventory database application.
+This module defines class-based and function-based views for user authentication, notification 
+management, and user administration within the Django inventory database application.
 
 Views included:
     - Home page rendering with user group context.
     - Login page with custom error messaging.
-    - Notification listing, updating (mark as read/unread), and deletion, restricted to the notification's owner.
+    - Notification listing, updating (mark as read/unread), and deletion, restricted to the 
+        notification's owner.
     - User listing, detail, creation, update, and deletion, restricted to superusers.
     - API endpoint for unread notification count.
 
@@ -74,13 +75,17 @@ def home(request):
 
 def unread_notifications_count_view(request):
     """
+    Returns the count of unread notifications for the authenticated user.
     
-
+    This function checks if the user is authenticated. If the user is authenticated, it retrieves
+    the count of unread notifications for that user and returns it as a JSON response. If the user
+    is not authenticated, it returns a JSON response with a count of 0.
+    
     Args:
-        request (_type_): _description_
-
+        request (HttpRequest): The HTTP request object.
+        
     Returns:
-        _type_: _description_
+        JsonResponse: A JSON response containing the count of unread notifications.
     """
     if request.user.is_authenticated:
         unread_count = Notification.objects.filter(
@@ -279,6 +284,7 @@ class NotificationDeleteView(UserPassesTestMixin, DeleteView):
 
     model = Notification
     success_url = reverse_lazy("authentication:notifications")
+    template_name = "notification_confirm_delete.html"
 
     def test_func(self):
         """
@@ -345,8 +351,7 @@ class NotificationDeleteView(UserPassesTestMixin, DeleteView):
         """
         if "cancel" in request.POST:
             return redirect(self.fail_url)
-        else:
-            return super(NotificationDeleteView, self).post(request, *args, **kwargs)
+        return super(NotificationDeleteView, self).post(request, *args, **kwargs)
 
 
 class UsersView(LoginRequiredMixin, ListView):
@@ -571,6 +576,7 @@ class UserDeleteView(SuperuserRequiredMixin, DeleteView):
 
     model = User
     success_url = reverse_lazy("authentication:users")
+    template_name = "auth\\user_confirm_delete.html"
 
     def get_fail_url(self):
         """
@@ -605,7 +611,6 @@ class UserDeleteView(SuperuserRequiredMixin, DeleteView):
         Returns:
             HttpResponse: The response after handling the POST request.
         """
-        if "Cancel" in request.POST:
+        if "cancel" in request.POST:
             return redirect(self.fail_url)
-        else:
-            return super(UserDeleteView, self).post(request, *args, **kwargs)
+        return super(UserDeleteView, self).post(request, *args, **kwargs)

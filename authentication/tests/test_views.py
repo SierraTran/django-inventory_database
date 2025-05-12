@@ -13,6 +13,9 @@ from authentication.models import Notification
 
 
 class HomeViewTests(TestCase):
+    """
+    Tests for the home view
+    """
     @classmethod
     def setUpTestData(cls):
         """
@@ -59,6 +62,9 @@ class HomeViewTests(TestCase):
 
 
 class DatabaseLoginViewTests(TestCase):
+    """
+    Tests for the login view
+    """
     @classmethod
     def setUpTestData(cls):
         """
@@ -274,6 +280,9 @@ class NotificationViewTests(TestCase):
 
 
 class NotificationUpdateViewTests(TestCase):
+    """
+    Tests for NotificationUpdateView
+    """
     # NOTE: Date and time is set to January 1, 2025 at 12:00 for testing purposes
     aware_datetime = timezone.make_aware(datetime.datetime(2025, 1, 1, 12, 0, 0))
 
@@ -345,6 +354,9 @@ class NotificationUpdateViewTests(TestCase):
 
 
 class NotificationDeleteViewTests(TestCase):
+    """
+    Tests for NotificationDeleteView
+    """
     @classmethod
     def setUpTestData(cls):
         """
@@ -421,4 +433,228 @@ class NotificationDeleteViewTests(TestCase):
         )
         self.assertIsNone(
             Notification.objects.filter(pk=1).first(), "The notification does exist."
+        )
+
+
+###################################################################################################
+# Tests for the Views for the User Model ##########################################################
+###################################################################################################
+class UsersViewTests(TestCase):
+    """
+    Tests for UserView
+    """
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.user1 = User.objects.create_user(username="testuser1", password="password")
+        cls.user1.groups.add(cls.superuser_group)
+
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.user2 = User.objects.create_user(username="testuser2", password="password")
+        cls.user2.groups.add(cls.technician_group)
+
+        cls.users_url = reverse("authentication:users")
+        cls.client = Client()
+
+    def test_get_queryset(self):
+        """
+        Test the queryset for the user list view.
+        """
+        # Log in as superuser and check that all users are in the queryset
+        self.client.login(username="testuser1", password="password")
+        response = self.client.get(self.users_url)
+        self.assertEqual(response.status_code, 200)
+        # Both users should be in the context
+        users = response.context["users_list"]
+        usernames = [user.username for user in users]
+        self.assertIn("testuser1", usernames)
+        self.assertIn("testuser2", usernames)
+        self.client.logout()
+
+        # Log in as technician and check that all users are still visible
+        self.client.login(username="testuser2", password="password")
+        response = self.client.get(self.users_url)
+        self.assertEqual(response.status_code, 200)
+        users = response.context["users_list"]
+        usernames = [user.username for user in users]
+        self.assertIn("testuser1", usernames)
+        self.assertIn("testuser2", usernames)
+        self.client.logout()
+
+
+class UserDetailsViewTests(TestCase):
+    """
+    Tests for UserDetailsView
+    """
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.user1 = User.objects.create_user(username="testuser1", password="password")
+        cls.user1.groups.add(cls.superuser_group)
+
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.user2 = User.objects.create_user(username="testuser2", password="password")
+        cls.user2.groups.add(cls.technician_group)
+
+        cls.users_url = reverse("authentication:users")
+        cls.client = Client()
+
+    def test_get_context_data(self):
+        """
+        Test the context data for the user details view.
+        """
+        # Log in as superuser and access user details for technician
+        self.client.login(username="testuser1", password="password")
+        user_detail_url = reverse("authentication:user_details", kwargs={"pk": self.user2.pk})
+        response = self.client.get(user_detail_url)
+        self.assertEqual(response.status_code, 200)
+        # Check that the context contains the correct user
+        self.assertEqual(response.context["user"].username, "testuser2")
+        # Check for group info in context if provided
+        if "groups" in response.context:
+            group_names = [g.name for g in response.context["groups"]]
+            self.assertIn("Technician", group_names)
+        self.client.logout()
+
+        # Log in as technician and access own details
+        self.client.login(username="testuser2", password="password")
+        user_detail_url = reverse("authentication:user_details", kwargs={"pk": self.user2.pk})
+        response = self.client.get(user_detail_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["user"].username, "testuser2")
+        self.client.logout()
+
+
+class UserCreateViewTests(TestCase):
+    """
+    Tests for UserCreateView
+    """
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.user1 = User.objects.create_user(username="testuser1", password="password")
+        cls.user1.groups.add(cls.superuser_group)
+
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.user2 = User.objects.create_user(username="testuser2", password="password")
+        cls.user2.groups.add(cls.technician_group)
+
+        cls.users_url = reverse("authentication:users")
+        cls.client = Client()
+        cls.user_create_url = reverse("authentication:user_create_form")
+
+    def test_user_create_view_access_control(self):
+        """
+        Test the access control for the user create view.
+        """
+        # Log in as superuser and access user create view
+        self.client.login(username="testuser1", password="password")
+        response = self.client.get(self.user_create_url)
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+
+        # Log in as technician and try to access user create view
+        self.client.login(username="testuser2", password="password")
+        response = self.client.get(self.user_create_url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_post_create_user(self):
+        """
+        Test the create user functionality for the user create view.
+        """
+        # Log in as superuser and access user create view
+        self.client.login(username="testuser1", password="password")
+        response = self.client.post(
+            self.user_create_url,
+            {
+                "username": "newuser",
+                "password": "newpassword",
+                "user_group": self.technician_group.name,
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        new_user = User.objects.filter(username="newuser").first()
+        self.assertIsNotNone(new_user, "The new user does not exist.")
+
+
+class UserDeleteViewTests(TestCase):
+    """
+    Tests for UserDeleteView
+    """
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.user1 = User.objects.create_user(username="testuser1", password="password")
+        cls.user1.groups.add(cls.superuser_group)
+
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.user2 = User.objects.create_user(username="testuser2", password="password")
+        cls.user2.groups.add(cls.technician_group)
+
+        cls.users_url = reverse("authentication:users")
+        cls.user_delete_url = reverse(
+            "authentication:user_confirm_delete", kwargs={"pk": cls.user2.pk}
+        )
+        cls.client = Client()
+
+    @tag("critical")
+    def test_user_delete_view_access_control(self):
+        """
+        Test the access control for the user delete view.
+        """
+        # Log in as superuser and access user delete view
+        self.client.login(username="testuser1", password="password")
+        response = self.client.get(self.user_delete_url)
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+
+        # Log in as technician and try to access user delete view
+        self.client.login(username="testuser2", password="password")
+        response = self.client.get(self.user_delete_url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_post_cancel_delete(self):
+        """
+        Test the cancel delete functionality for the user delete view.
+        """
+        # Log in as superuser and access user delete view
+        self.client.login(username="testuser1", password="password")
+        self.assertIsNotNone(
+            User.objects.filter(pk=self.user2.pk).first(),
+            "Before cancellation: The user does not exist.",
+        )
+        response = self.client.post(self.user_delete_url, {"cancel": "Cancel"})
+        self.assertEqual(response.status_code, 302)
+        self.assertIsNotNone(
+            User.objects.filter(pk=self.user2.pk).first(),
+            "After cancellation: The user does not exist.",
+        )
+
+    def test_post_confirm_delete(self):
+        """
+        Test the confirm delete functionality for the user delete view.
+        """
+        # Log in as superuser and access user delete view
+        self.client.login(username="testuser1", password="password")
+        self.assertIsNotNone(
+            User.objects.filter(pk=self.user2.pk).first(),
+            "Before confirmation: The user does not exist.",
+        )
+        response = self.client.post(self.user_delete_url, {"confirm": "Confirm"})
+        self.assertEqual(response.status_code, 302)
+        self.assertIsNone(
+            User.objects.filter(pk=self.user2.pk).first(),
+            "After confirmation: The user does exist.",
         )

@@ -25,6 +25,7 @@ class ItemViewTests(TestCase):
     """
     Tests for ItemView
     """
+
     @classmethod
     def setUpTestData(cls):
         """
@@ -152,6 +153,7 @@ class ItemDetailViewTests(TestCase):
     """
     Tests for ItemDetailView
     """
+
     @classmethod
     def setUpTestData(cls):
         """
@@ -257,7 +259,7 @@ class ItemDetailViewTests(TestCase):
 
     def test_item_detail_get_technician(self):
         """
-        The ItemDetailView renders the detail page for the specific item with buttons for 
+        The ItemDetailView renders the detail page for the specific item with buttons for
         Technicians.
         """
         self.client.login(username="testtechnician", password="password")
@@ -281,7 +283,7 @@ class ItemDetailViewTests(TestCase):
 
     def test_item_detail_get_superuser(self):
         """
-        The ItemDetailView renders the detail page for the specific item with buttons for 
+        The ItemDetailView renders the detail page for the specific item with buttons for
         Superusers.
         """
         self.client.login(username="testsuperuser", password="password")
@@ -308,6 +310,7 @@ class ItemCreateViewTests(TestCase):
     """
     Tests for ItemCreateView
     """
+
     @classmethod
     def setUpTestData(cls):
         """
@@ -719,6 +722,7 @@ class ItemUpdateViewTests(TestCase):
     """
     Tests for ItemUpdateView
     """
+
     @classmethod
     def setUpTestData(cls):
         """
@@ -1459,6 +1463,7 @@ class ItemDeleteViewTests(TestCase):
     """
     Tests for ItemDeleteView
     """
+
     @classmethod
     def setUpTestData(cls):
         """
@@ -1660,6 +1665,7 @@ class ItemHistoryViewTests(TestCase):
     """
     Tests for ItemHistoryView
     """
+
     @classmethod
     def setUpTestData(cls):
         """
@@ -1850,6 +1856,7 @@ class ItemRequestViewTests(TestCase):
     """
     Tests for ItemRequestView
     """
+
     # NOTE: Local date and time is set to January 3, 2025 at 1:00 PM for testing purposes
     aware_datetime = timezone.make_aware(datetime.datetime(2025, 1, 3, 13, 0, 0))
 
@@ -1871,15 +1878,19 @@ class ItemRequestViewTests(TestCase):
         cls.superuser = User.objects.create_user(
             username="testsuperuser", password="password"
         )
+        cls.superuser.groups.add(cls.superuser_group)
         cls.technician = User.objects.create_user(
             username="testtechnician", password="password"
         )
+        cls.technician.groups.add(cls.technician_group)
         cls.intern = User.objects.create_user(
             username="testintern", password="password"
         )
+        cls.intern.groups.add(cls.intern_group)
         cls.viewer = User.objects.create_user(
             username="testviewer", password="password"
         )
+        cls.viewer.groups.add(cls.viewer_group)
 
         item_requests = [
             ItemRequest(
@@ -1926,7 +1937,45 @@ class ItemRequestViewTests(TestCase):
         """
         Test that only superusers and technicians can access the view
         """
-        # TODO: test_item_request_view_access_control
+        # Superuser access
+        self.client.login(username="testsuperuser", password="password")
+        response = self.client.get(self.item_requests_url)
+        self.assertEqual(
+            response.status_code,
+            200,
+            "Superuser failed to access the item requests view.",
+        )
+        self.client.logout()
+
+        # Technician access
+        self.client.login(username="testtechnician", password="password")
+        response = self.client.get(self.item_requests_url)
+        self.assertEqual(
+            response.status_code,
+            200,
+            "Technician failed to access the item requests view.",
+        )
+        self.client.logout()
+
+        # Intern forbidden
+        self.client.login(username="testintern", password="password")
+        response = self.client.get(self.item_requests_url)
+        self.assertEqual(
+            response.status_code,
+            403,
+            "Intern was able to access the item requests view.",
+        )
+        self.client.logout()
+
+        # Viewer forbidden
+        self.client.login(username="testviewer", password="password")
+        response = self.client.get(self.item_requests_url)
+        self.assertEqual(
+            response.status_code,
+            403,
+            "Viewer was able to access the item requests view.",
+        )
+        self.client.logout()
 
     def test_get_queryset(self):
         """
@@ -1955,6 +2004,7 @@ class ItemRequestDetailViewTests(TestCase):
     """
     Tests for ItemRequestDetailView
     """
+
     @classmethod
     def setUpTestData(cls):
         """
@@ -1997,10 +2047,32 @@ class ItemRequestDetailViewTests(TestCase):
 
     @tag("critical")
     def test_item_request_detail_view_access_control(self):
-        """ 
+        """
         Test that only superusers and technicians can see item request details
         """
-        # TODO: test_item_request_detail_view_access_control
+        # Superuser access
+        self.client.login(username="testsuperuser", password="password")
+        response = self.client.get(self.item_request_detail_url)
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+
+        # Technician access
+        self.client.login(username="testtechnician", password="password")
+        response = self.client.get(self.item_request_detail_url)
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+
+        # Intern forbidden
+        self.client.login(username="testintern", password="password")
+        response = self.client.get(self.item_request_detail_url)
+        self.assertEqual(response.status_code, 403)
+        self.client.logout()
+
+        # Viewer forbidden
+        self.client.login(username="testviewer", password="password")
+        response = self.client.get(self.item_request_detail_url)
+        self.assertEqual(response.status_code, 403)
+        self.client.logout()
 
     def test_get_superuser(self):
         """
@@ -2047,6 +2119,7 @@ class ItemRequestCreateViewTests(TestCase):
     """
     Tests for ItemRequestCreateView
     """
+
     @classmethod
     def setUpTestData(cls):
         """
@@ -2164,6 +2237,88 @@ class ItemRequestCreateViewTests(TestCase):
         self.assertTrue(new_item_request.exists(), "The item request does not exist.")
 
 
+class ItemRequestAcceptViewTests(TestCase):
+    """
+    Tests for ItemRequestAcceptView
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        # TODO: Set up for ItemRequestAcceptViewTests
+
+    def test_get_object(self):
+        """
+        Test the get_object method for ItemRequestAcceptView
+        """
+        # TODO: test_get_object
+
+    def test_get_context_data(self):
+        """
+        Test the get_context_data method for ItemRequestAcceptView
+        """
+        # TODO: test_get_context_data
+
+    def test_post(self):
+        """
+        Test the post method for ItemRequestAcceptView
+        """
+        # TODO: test_post
+
+    def test_post_cancel(self):
+        """
+        Test the post method for ItemRequestAcceptView with cancel
+        """
+        # TODO: test_post_cancel
+
+
+class ItemRequestRejectViewTests(TestCase):
+    """
+    Tests for ItemRequestRejectView
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        # TODO: Set up for ItemRequestRejectView
+
+    def test_get_object(self):
+        """
+        Test the get_object method for ItemRequestRejectView
+        """
+        # TODO: test_get_object
+
+    def test_get_context_data(self):
+        """
+        Test the get_context_data method for ItemRequestRejectView
+        """
+        # TODO: test_get_context_data
+
+    def test_post(self):
+        """
+        Test the post method for ItemRequestRejectView
+        """
+        # TODO: test_post
+
+    def test_post_cancel(self):
+        """
+        Test the post method for ItemRequestRejectView with cancel
+        """
+        # TODO: test_post_cancel
+
+
+class ItemRequestDeleteViewTests(TestCase):
+    """
+    Tests for ItemRequestDeleteView
+    """
+
+    # TODO: Tests for ItemRequestDeleteView
+
+
 ###################################################################################################
 # Tests for the Views for the UsedItem Model ######################################################
 ###################################################################################################
@@ -2171,6 +2326,7 @@ class UsedItemViewTests(TestCase):
     """
     Tests for UsedItemView
     """
+
     @classmethod
     def setUpTestData(cls):
         """
@@ -2238,15 +2394,37 @@ class UsedItemViewTests(TestCase):
 
     @tag("critical")
     def test_used_item_view_access_control(self):
-        """ 
+        """
         Test that only superusers and technicians have access to UsedItemView
         """
-        # TODO: test_used_item_view_access_control
-        # [ ]: Unauthenticated users don't have access
-        # [ ]: Superusers have access
-        # [ ]: Technicians have access
-        # [ ]: Interns don't have access
-        # [ ]: Viewers don't have access
+        # Unauthenticated users don't have access (should redirect to login)
+        response = self.client.get(self.used_items_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/login", response.url)
+
+        # Superusers have access
+        self.client.login(username="testsuperuser", password="password")
+        response = self.client.get(self.used_items_url)
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+
+        # Technicians have access
+        self.client.login(username="testtechnician", password="password")
+        response = self.client.get(self.used_items_url)
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+
+        # Interns have access
+        self.client.login(username="testintern", password="password")
+        response = self.client.get(self.used_items_url)
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+
+        # Viewers have access
+        self.client.login(username="testviewer", password="password")
+        response = self.client.get(self.used_items_url)
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
 
     def test_get_queryset(self):
         """
@@ -2274,6 +2452,7 @@ class UsedItemDetailViewTests(TestCase):
     """
     Tests for UsedItemDetailView
     """
+
     @classmethod
     def setUpTestData(cls):
         """
@@ -2342,17 +2521,41 @@ class UsedItemCreateViewTests(TestCase):
     """
     Tests for UsedItemCreateView
     """
+
     @classmethod
     def setUpTestData(cls):
         """
         Setup
         """
+        # Create a superuser
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.superuser = User.objects.create_user(
+            username="testsuperuser", password="password"
+        )
+        cls.superuser.groups.add(cls.superuser_group)
+
+        # Create a technician user
         cls.technician_group = Group.objects.get(name="Technician")
-        cls.user = User.objects.create_user(
+        cls.technician = User.objects.create_user(
             username="testtechnician", password="password"
         )
-        cls.user.groups.add(cls.technician_group)
+        cls.technician.groups.add(cls.technician_group)
 
+        # Create an intern user
+        cls.intern_group = Group.objects.get(name="Intern")
+        cls.intern = User.objects.create_user(
+            username="testintern", password="password"
+        )
+        cls.intern.groups.add(cls.intern_group)
+
+        # Create a viewer user
+        cls.viewer_group = Group.objects.get(name="Viewer")
+        cls.viewer = User.objects.create_user(
+            username="testviewer", password="password"
+        )
+        cls.viewer.groups.add(cls.viewer_group)
+
+        # Items for testing
         items = [
             Item(
                 manufacturer="Fluke", model="Dials", part_or_unit=Item.UNIT, quantity=0
@@ -2383,11 +2586,43 @@ class UsedItemCreateViewTests(TestCase):
         """
         Test that only superusers and technicians can access the UsedItemCreateView.
         """
-        # TODO: test_used_item_create_view_access_control
+        # Superuser access
+        self.client.login(username="testsuperuser", password="password")
+        response = self.client.get(self.item2_use_url)
+        self.assertEqual(
+            response.status_code,
+            200,
+            "Superuser failed to access the UsedItemCreateView.",
+        )
+        self.client.logout()
+
+        # Technician access
         self.client.login(username="testtechnician", password="password")
         response = self.client.get(self.item2_use_url)
         self.assertEqual(
-            response.status_code, 200, "The user failed to access the view."
+            response.status_code,
+            200,
+            "Technician failed to access the UsedItemCreateView.",
+        )
+        self.client.logout()
+
+        # Intern forbidden
+        self.client.login(username="testintern", password="password")
+        response = self.client.get(self.item2_use_url)
+        self.assertEqual(
+            response.status_code,
+            403,
+            "Intern was able to access the UsedItemCreateView.",
+        )
+        self.client.logout()
+
+        # Viewer forbidden
+        self.client.login(username="testviewer", password="password")
+        response = self.client.get(self.item2_use_url)
+        self.assertEqual(
+            response.status_code,
+            403,
+            "Viewer was able to access the UsedItemCreateView.",
         )
         self.client.logout()
 
@@ -2414,6 +2649,7 @@ class UsedItemDeleteViewTests(TestCase):
     """
     Tests for UsedItemDeleteView
     """
+
     @classmethod
     def setUpTestData(cls):
         """
