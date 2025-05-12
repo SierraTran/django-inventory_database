@@ -91,6 +91,7 @@ The list of required software below will also be included in the `requirements.t
 |freezegun|1.5.1|
 |gunicorn|23.0.0|
 |openpyxl|3.1.5|
+|python-decouple|3.8|
 |waitress|3.0.2|
 |whitenoise|6.9.0|
 |Whoosh|2.7.4|
@@ -170,11 +171,71 @@ The list of required software below will also be included in the `requirements.t
      ```
 
 ## Usage
-<!-- TODO: Expand this section -->
-- **Home Page**: Displays links to browse items, create new items, import item data, and manage users (based on user permissions).
-- **Items Page**: Lists all available items with search functionality.
-- **Item Detail Page**: Shows detailed information about a specific item.
-- **User Management**: Superusers can create, view, and delete users. Everyone else can only view all users and their details.
+
+### 1. Logging In
+
+- Navigate to the application's URL in your browser.
+- Enter your username and password to log in.
+- Depending on your role, you will see different options on the home page.
+
+### 2. Home Page
+
+- Provides quick links to:
+  - Browse all items
+  - Create new items (if permitted)
+  - Import item data from Excel
+  - Make new item requests
+  - Manage users (Superuser only)
+  - View notifications
+
+### 3. Browsing and Searching Items
+
+- Go to the **Items Page** to see a list of all inventory items.
+- Use the search bar at the top to filter items by name, description, or other attributes by full words.
+- Click on an item to view its details.
+
+### 4. Item Detail Page
+
+- Shows detailed information about the selected item, including quantity, description, and other fields.
+- Depending on your role:
+  - **Technician/Superuser**: Can edit or delete the item.
+  - **Intern**: Can update the quantity.
+  - **Viewer**: Can only view item details.
+
+### 5. Creating and Managing Items
+
+- Users with appropriate permissions (Technician/Superuser) can create new items using the "Add Item" button.
+- Fill in the required fields and submit the form.
+- Edit or delete items from their detail pages.
+
+### 6. Importing Item Data
+
+- Use the "Import Items" option to upload an Excel file (.xlsx) containing item data.
+- Follow on-screen instructions to map columns and confirm import.
+
+### 7. Item Requests
+
+- Request new items or additional quantities using the "Request Item" feature.
+- View and manage your requests from the Item Requests page.
+
+### 8. Purchase Orders
+
+- Add items to a purchase order list.
+- Export the list to an Excel file for processing orders.
+
+### 9. Notifications
+
+- View notifications about inventory changes, requests, or approvals.
+- Mark notifications as read or delete them directly from the notifications page.
+
+### 10. User Management
+
+- **Superusers**: Can create, view, and delete users.
+- **Other users**: Can view the list of users and their details.
+
+### 11. Logging Out
+
+- Click the "Logout" link in the navigation bar to securely end your session.
 
 ## Future Enhancements
 
@@ -192,6 +253,10 @@ The list of required software below will also be included in the `requirements.t
 ## Contributing
 
 Feel free to fork the repository and submit pull requests. For major changes, please open an issue first to discuss what you would like to change.
+
+## Known Issues
+
+- When running tests, your computer's antivirus may be alerted and think the program is ransomware. This is because of the files in the `whoosh_index` folder being created, modified and deleting during testing. This only affects the `whoosh_index` files. 
 
 ## Author
 
