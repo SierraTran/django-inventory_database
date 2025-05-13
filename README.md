@@ -163,12 +163,12 @@ The list of required software below will also be included in the `requirements.t
 1. Open the folder where you extracted the files.
 2. There are two files: `deploy.bat` and `deploy.sh`. These files are used to run the application. Choose the one that matches your operating system:
 
-   - For Windows: Double-click `deploy.bat` to run the application.
+   - For Windows: Double-click `deploy_windows.bat` to run the application.
    - For Mac/Linux: Open a terminal, navigate to the folder where you extracted the files, and run the following command:
 
      ```bash
-     chmod +x deploy.sh
-     ./deploy.sh
+     chmod +x deploy_mac_linux.sh
+     ./deploy_mac_linux.sh
      ```
 
 ## Usage
