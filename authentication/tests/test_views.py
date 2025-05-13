@@ -61,6 +61,55 @@ class HomeViewTests(TestCase):
         )
 
 
+class UnreadNotificationsCountViewTests(TestCase):
+    """
+    Tests for the unread notifications count view
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        cls.user = User.objects.create_user(username="testuser", password="password")
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.user.groups.add(cls.superuser_group)
+
+        # Create some notifications for the user
+        Notification.objects.create(
+            subject="Test Notification 1",
+            message="This is a test notification.",
+            user=cls.user,
+        )
+        Notification.objects.create(
+            subject="Test Notification 2",
+            message="This is another test notification.",
+            user=cls.user,
+            is_read=True,
+        )
+
+        cls.unread_notifications_url = reverse("authentication:unread_notifications_count")
+
+        cls.client = Client()
+
+    def test_unread_notifications_count_unauthenticated(self):
+        """
+        Test that the unread notifications count is 0 when not logged in
+        """
+        response = self.client.get(self.unread_notifications_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"unread_count": 0})
+
+    def test_unread_notifications_count_authenticated(self):
+        """
+        Test that the unread notifications count is correct when logged in
+        """
+        self.client.login(username="testuser", password="password")   
+        response = self.client.get(self.unread_notifications_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"unread_count": 1})
+
+
 class DatabaseLoginViewTests(TestCase):
     """
     Tests for the login view
@@ -501,6 +550,9 @@ class UserDetailsViewTests(TestCase):
         cls.technician_group = Group.objects.get(name="Technician")
         cls.user2 = User.objects.create_user(username="testuser2", password="password")
         cls.user2.groups.add(cls.technician_group)
+        
+        cls.user3 = User.objects.create_user(username="testuser3", password="password")
+        # User 3 is not assigned to any group
 
         cls.users_url = reverse("authentication:users")
         cls.client = Client()
@@ -520,6 +572,16 @@ class UserDetailsViewTests(TestCase):
         if "groups" in response.context:
             group_names = [g.name for g in response.context["groups"]]
             self.assertIn("Technician", group_names)
+        # Access user details for User 3
+        user_detail_url = reverse("authentication:user_details", kwargs={"pk": self.user3.pk})
+        response = self.client.get(user_detail_url)
+        self.assertEqual(response.status_code, 200)
+        # Check that the context contains the correct user
+        self.assertEqual(response.context["user"].username, "testuser3")
+        # Check for group info in context (no groups assigned)
+        if "groups" in response.context:
+            group_names = [g.name for g in response.context["groups"]]
+            self.assertEqual(group_names, [], "User 3 should not have any groups assigned.")
         self.client.logout()
 
         # Log in as technician and access own details
@@ -584,6 +646,64 @@ class UserCreateViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         new_user = User.objects.filter(username="newuser").first()
         self.assertIsNotNone(new_user, "The new user does not exist.")
+
+
+class UserUpdateViewTests(TestCase):
+    """
+    Tests for UserUpdateView
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.user1 = User.objects.create_user(username="testuser1", password="password")
+        cls.user1.groups.add(cls.superuser_group)
+
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.user2 = User.objects.create_user(username="testuser2", password="password")
+        cls.user2.groups.add(cls.technician_group)
+
+        cls.users_url = reverse("authentication:users")
+        cls.client = Client()
+        cls.user_update_url = reverse(
+            "authentication:user_update_form", kwargs={"pk": cls.user2.pk}
+        )
+
+    def test_user_update_view_access_control(self):
+        """
+        Test that only superusers can access the user update view.
+        """
+        # Log in as superuser and access user update view
+        self.client.login(username="testuser1", password="password")
+        response = self.client.get(self.user_update_url)
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+
+        # Log in as technician and try to access user update view
+        self.client.login(username="testuser2", password="password")
+        response = self.client.get(self.user_update_url)
+        self.assertEqual(response.status_code, 403)
+        
+    def test_update_user(self):
+        """
+        Test the update user functionality for the user update view.
+        """
+        # Log in as superuser and access user update view
+        self.client.login(username="testuser1", password="password")
+        response = self.client.post(
+            self.user_update_url,
+            {
+                "username": "updateduser",
+                "password": "updatedpassword",
+                "user_group": self.technician_group.name,
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        updated_user = User.objects.filter(username="updateduser").first()
+        self.assertIsNotNone(updated_user, "The updated user does not exist.")
 
 
 class UserDeleteViewTests(TestCase):

@@ -2379,12 +2379,93 @@ class ItemRequestDeleteViewTests(TestCase):
     Tests for ItemRequestDeleteView
     """
 
-    # TODO: Tests for ItemRequestDeleteView
     @classmethod
     def setUpTestData(cls):
         """
         Setup
         """
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.superuser = User.objects.create_superuser(
+            username="testsuperuser", password="password"
+        )
+        cls.superuser.groups.add(cls.superuser_group)
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.technician1 = User.objects.create_user(
+            username="testtechnician1", password="password"
+        )
+        cls.technician1.groups.add(cls.technician_group)
+        cls.technician2 = User.objects.create_user(
+            username="testtechnician2", password="password"
+        )
+        cls.technician2.groups.add(cls.technician_group)
+        cls.item_request = ItemRequest.objects.create(
+            manufacturer="Test MFG",
+            model_part_num="Delete Model",
+            quantity_requested=1,
+            unit_price=0.01,
+            requested_by=cls.technician1,
+        )
+        cls.delete_url = reverse(
+            "inventory:item_request_confirm_delete", kwargs={"pk": cls.item_request.pk}
+        )
+
+    def test_item_request_delete_view_access_control(self):
+        """
+        Test that only the technician that created the item request can access the view.
+        """
+        # Technician 1 access
+        self.client.login(username="testtechnician1", password="password")
+        response = self.client.get(self.delete_url)
+        self.assertEqual(
+            response.status_code,
+            200,
+            "Technician 1 failed to access the item request delete view.",
+        )
+        self.client.logout()
+        
+        # Technician 2 forbidden
+        self.client.login(username="testtechnician2", password="password")
+        response = self.client.get(self.delete_url)
+        self.assertEqual(
+            response.status_code,
+            403,
+            "Technician 2 was able to access the item request delete view.",
+        )
+        self.client.logout()
+        
+        # Superuser forbidden
+        self.client.login(username="testsuperuser", password="password")
+        response = self.client.get(self.delete_url)
+        self.assertEqual(
+            response.status_code,
+            403,
+            "Superuser was able to access the item request delete view.",
+        )
+        self.client.logout()        
+
+    def test_post(self):
+        """
+        Test that the item request is deleted successfully.
+        """
+        self.client.login(username="testtechnician1", password="password")
+        response = self.client.post(self.delete_url, {"Confirm": "Confirm"})
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(
+            ItemRequest.objects.filter(pk=self.item_request.pk).exists(),
+            "The item request was not deleted.",
+        )
+
+    def test_post_cancel(self):
+        """
+        Test that the item request is not deleted when canceling.
+        """
+        self.client.login(username="testtechnician1", password="password")
+        response = self.client.post(self.delete_url, {"Cancel": "Cancel"})
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            ItemRequest.objects.filter(pk=self.item_request.pk).exists(),
+            "The item request was deleted.",
+        )
 
 
 ###################################################################################################
@@ -2825,3 +2906,31 @@ class UsedItemDeleteViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("object", response.context)
         self.assertEqual(response.context["object"], self.used_item)
+
+    def test_post(self):
+        """
+        Test that the used item is deleted successfully.
+        """
+        # Log in
+        self.client.login(username="testsuperuser", password="password")
+        # Simulate POST request
+        response = self.client.post(self.used_item_delete_url, {"Confirm": "Confirm"})
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(
+            UsedItem.objects.filter(pk=self.used_item.pk).exists(),
+            "The used item was not deleted.",
+        )
+
+    def test_post_cancel(self):
+        """
+        Test that the used item is not deleted when canceling.
+        """
+        # Log in
+        self.client.login(username="testsuperuser", password="password")
+        # Simulate POST request
+        response = self.client.post(self.used_item_delete_url, {"Cancel": "Cancel"})
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            UsedItem.objects.filter(pk=self.used_item.pk).exists(),
+            "The used item was deleted.",
+        )
