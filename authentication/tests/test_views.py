@@ -235,14 +235,10 @@ class NotificationViewTests(TestCase):
         )
 
     def test_notification_no_notifs(self):
-        # TODO: test_notification_no_notifs
         """
         No notifications or notification badge will be shown.
         """
-        # [x]: Delete all notifications from the database (We only need to do this for this test.)
-        # [x]: Log in and access the notification page
-        # [x]: Check for no notifications and a message that says so
-        # [ ]: Make sure the notification badge doesn't show
+        # TODO: Make sure the notification badge doesn't show; need selenium for this
         Notification.objects.all().delete()
 
         login = self.client.login(username="testuser1", password="password")
@@ -260,14 +256,11 @@ class NotificationViewTests(TestCase):
         self.assertContains(response, "<p>There are no notifications.</p>")
 
     def test_notification_all_unread_notifs(self):
-        # TODO: test_notification_all_unread_notifs
         """
         Test that all (unread) notifications are shown in bold, and the notification badge is shown
         with the number of unread notifications.
         """
-        # [x]: Log in and access the notification page
-        # [ ]: Check for notifications (all should be bold)
-        # [x]: Make sure notification badge shows with correct number of unread notifications
+        # TODO: Check for notifications (all should be bold); need selenium for this
         login = self.client.login(username="testuser1", password="password")
         self.assertTrue(login, "Login failed.")
 
@@ -283,14 +276,11 @@ class NotificationViewTests(TestCase):
         self.assertContains(response, '<span id="notification-badge" class="badge">2</span>')
 
     def test_notification_all_read_notifs(self):
-        # TODO: test_notification_all_read_notifs
         """
         All notifications are not shown in bold, and the notification badge won't be shown.
         """
-        # [ ]: Mark all notifications as read
-        # [x]: Log in and access the notification page
-        # [ ]: Check for notifications (none should be bold)
-        # [ ]: Make sure the notification badge doesn't show
+        # Mark all notifications as read
+        Notification.objects.filter(user=self.user1).update(is_read=True)
         login = self.client.login(username="testuser1", password="password")
         self.assertTrue(login, "Login failed.")
 
@@ -303,17 +293,22 @@ class NotificationViewTests(TestCase):
             "notifications.html",
             "The correct template for the view is not used.",
         )
+
+        # Check that notifications are not bold (assuming bold is <strong>)
+        for notif in Notification.objects.filter(user=self.user1):
+            self.assertNotContains(response, f"<strong>{notif.subject}</strong>")
 
     def test_notification_read_and_unread_notifs(self):
         """
         Unread notifications are shown in bold while read notifications are not in bold. 
         The notification badge will only count unread notifications.
         """
-        # TODO: test_notification_read_and_unread_notifs
-        # [ ]: Mark some notifications as read
-        # [x]: Log in and access the notification page
-        # [ ]: Check for unread notifications (shown in bold) and read notifications (now shown in bold)
-        # [ ]: Make sure notification badge shows with correct number of unread notifications
+        # Mark one notification as read, one as unread
+        notifs = Notification.objects.filter(user=self.user1)
+        unread_notif = notifs.first()
+        read_notif = notifs.last()
+        read_notif.is_read = True
+        read_notif.save()
         login = self.client.login(username="testuser1", password="password")
         self.assertTrue(login, "Login failed.")
 
@@ -326,6 +321,12 @@ class NotificationViewTests(TestCase):
             "notifications.html",
             "The correct template for the view is not used.",
         )
+        # Badge should show 1 unread
+        self.assertContains(response, '<span id="notification-badge" class="badge">1</span>')
+        # TODO: Unread notification should be bold; need selenium for this
+        # self.assertContains(response, f"<strong>{unread_notif.subject}</strong>")
+        # TODO: Read notification should not be bold; need selenium for this
+        # self.assertNotContains(response, f"<strong>{read_notif.subject}</strong>")
 
 
 class NotificationUpdateViewTests(TestCase):
@@ -390,16 +391,25 @@ class NotificationUpdateViewTests(TestCase):
         """
         Test the context data for the notification update view.
         """
-        # TODO: test_get_context_data
-        # [ ]: Log in as the user with access to the notification
-        # [ ]: Make a GET request to the notification update view
         self.client.login(username="testuser1", password="password")
+        response = self.client.get(self.notification_update_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("notification", response.context)
+        self.assertEqual(response.context["notification"], self.notification)
 
     def test_update_notification(self):
         """
         Test that the notification can be updated correctly.
         """
-        # TODO: test_update_notification
+        self.client.login(username="testuser1", password="password")
+        # Mark as read
+        response = self.client.post(
+            self.notification_update_url,
+            {"is_read": True, "subject": self.notification.subject, "message": self.notification.message},
+        )
+        self.assertEqual(response.status_code, 302)
+        notif = Notification.objects.get(pk=self.notification.pk)
+        self.assertTrue(notif.is_read)
 
 
 class NotificationDeleteViewTests(TestCase):
