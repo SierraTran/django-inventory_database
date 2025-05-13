@@ -77,6 +77,7 @@ More info about [OpenPyXL](https://openpyxl.readthedocs.io/en/stable/)
 
 |Software|Version|
 |--------|-------|
+|Git|2.48.1|
 |Python|3.13.2|
 
 ## Required Packages
@@ -257,7 +258,7 @@ Feel free to fork the repository and submit pull requests. For major changes, pl
 
 ## Known Issues
 
-- When running tests, your computer's antivirus may be alerted and think the program is ransomware. This is because of files in the `whoosh_index` folder being created, modified and deleting during testing. This only affects the `whoosh_index` files.
+- When running tests, your computer's antivirus may be alerted and think the program is ransomware. This is because of files in the `whoosh_index` folder being created, modified and deleting during testing. This only affects the `whoosh_index` files. For now, tests for the search indexes have been commented out so they won't be run.
 
 ## Author
 
@@ -265,7 +266,7 @@ Sierra Tran
 
 ### Contact Info
 
-Email: <sierra.tran@mail.com>
+Email: [sierra.tran@mail.com](mailto:sierra.tran@mail.com)
 
 ## License
 
