@@ -3,7 +3,7 @@
 ![Python Version](https://img.shields.io/badge/python-3.13.2-blue)
 ![Django Version](https://img.shields.io/badge/django-5.2-green)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![Coverage](https://img.shields.io/badge/coverage-83%25-D9FF00)
+![Coverage](https://img.shields.io/badge/coverage-92%25-66FF00)
 
 This is a Django-based web application for managing an inventory. The application allows users to browse, search, and manage items in the inventory. It also includes user authentication and authorization features. It is specifically tailored for [Hayes Instrument Service](https://hayesinstruments.com/) to make keeping inventory much easier.
 
@@ -22,6 +22,7 @@ This is a Django-based web application for managing an inventory. The applicatio
   - [Required Packages](#required-packages)
   - [Installation and Setup Instructions](#installation-and-setup-instructions)
   - [Usage](#usage)
+  - [Known Issues](#known-issues)
   - [Contributing](#contributing)
   - [Author](#author)
   - [License](#license)
@@ -256,7 +257,7 @@ Feel free to fork the repository and submit pull requests. For major changes, pl
 
 ## Known Issues
 
-- When running tests, your computer's antivirus may be alerted and think the program is ransomware. This is because of the files in the `whoosh_index` folder being created, modified and deleting during testing. This only affects the `whoosh_index` files. 
+- When running tests, your computer's antivirus may be alerted and think the program is ransomware. This is because of files in the `whoosh_index` folder being created, modified and deleting during testing. This only affects the `whoosh_index` files.
 
 ## Author
 
