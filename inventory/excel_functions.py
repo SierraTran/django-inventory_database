@@ -1,4 +1,6 @@
-from openpyxl import load_workbook
+"""
+
+"""
 from openpyxl.utils import range_boundaries
 from openpyxl.styles import Alignment, Border, Side, NamedStyle
 from openpyxl.worksheet.datavalidation import DataValidation
@@ -33,13 +35,12 @@ def format_row(worksheet, row):
     - Adds a formula to calculate the total price in a specific cell.
 
     Args:
-        worksheet (openpyxl.worksheet.worksheet.Worksheet): The worksheet object where the row is located.
+        worksheet (openpyxl.worksheet.worksheet.Worksheet): The worksheet object where the row is 
+            located.
         row (int): The row index of the new row.
     """
     border_side = Side(style="thin")
-    cell_border = Border(
-        top=border_side, bottom=border_side, left=border_side, right=border_side
-    )
+    cell_border = Border(top=border_side, bottom=border_side, left=border_side, right=border_side)
     cell_vert_align = Alignment(vertical="center")
     cell_all_align = Alignment(vertical="center", horizontal="center")
 
@@ -57,20 +58,6 @@ def format_row(worksheet, row):
     # Border formatting
     for letter in ["B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "M", "N", "O"]:
         worksheet[f"{letter}{row}"].border = cell_border
-        
-    # worksheet[f"B{row}"].border = cell_border
-    # worksheet[f"C{row}"].border = cell_border
-    # worksheet[f"D{row}"].border = cell_border
-    # worksheet[f"E{row}"].border = cell_border
-    # worksheet[f"F{row}"].border = cell_border
-    # worksheet[f"G{row}"].border = cell_border
-    # worksheet[f"H{row}"].border = cell_border
-    # worksheet[f"I{row}"].border = cell_border
-    # worksheet[f"J{row}"].border = cell_border
-    # worksheet[f"K{row}"].border = cell_border
-    # worksheet[f"M{row}"].border = cell_border
-    # worksheet[f"N{row}"].border = cell_border
-    # worksheet[f"O{row}"].border = cell_border
 
     # Alignment formatting
     for letter in ["B", "C", "D", "E", "G", "H", "I", "J"]:
@@ -78,32 +65,23 @@ def format_row(worksheet, row):
         if letter in ["B", "I"]:
             align_format = cell_vert_align
         worksheet[f"{letter}{row}"].alignment = align_format
-        
-        
-    # worksheet[f"B{row}"].alignment = cell_vert_align
-    # worksheet[f"C{row}"].alignment = cell_all_align
-    # worksheet[f"D{row}"].alignment = cell_all_align
-    # worksheet[f"E{row}"].alignment = cell_all_align
-    # worksheet[f"G{row}"].alignment = cell_all_align
-    # worksheet[f"H{row}"].alignment = cell_all_align
-    # worksheet[f"I{row}"].alignment = cell_vert_align
-    # worksheet[f"J{row}"].alignment = cell_all_align
 
     # Formula for Total Price
-    worksheet[f"J{row}"] = f"=+I{row}*D{row}"
-    worksheet[f"J{row+1}"] = f"=+I{row+1}*D{row+1}"
-    worksheet[f"J{row+2}"] = f"=+I{row+2}*D{row+2}"
+    for r in range(row, row+3):
+        worksheet[f"J{r}"] = f"=+I{r}*D{r}"
 
 
-def setup_worksheet(worksheet, itemCount):
+def setup_worksheet(worksheet, item_count):
     """
-    Sets up and adjusts the worksheet to accomodate 8 or more items submitted in the Purchase Order Item Form. 
+    Sets up and adjusts the worksheet to accomodate 8 or more items submitted in the Purchase Order 
+    Item Form. 
 
     Arguments:
-        worksheet (openpyxl.worksheet.worksheet.Worksheet): The worksheet object that needs to be set up and adjusted.
+        worksheet (openpyxl.worksheet.worksheet.Worksheet): The worksheet object that needs to be 
+            set up and adjusted.
         itemCount (int): The total number of items that have been submitted.
     """
-    amount = itemCount - 7
+    amount = item_count - 8
 
     # Variables for initial row numbers
     initial_last_item_row = 24
@@ -124,10 +102,8 @@ def setup_worksheet(worksheet, itemCount):
 
     # Unmerge the "Notes" rows
     worksheet.unmerge_cells("C27:H27")
-    worksheet.unmerge_cells("B28:H28")
-    worksheet.unmerge_cells("B29:H29")
-    worksheet.unmerge_cells("B30:H30")
-    worksheet.unmerge_cells("B31:H31")
+    for r in range(28, 32):
+        worksheet.unmerge_cells(f"B{r}:H{r}")
 
     # Unmerge the "Total" cells
     worksheet.unmerge_cells("I30:I31")

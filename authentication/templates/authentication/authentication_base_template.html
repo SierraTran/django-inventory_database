@@ -58,10 +58,10 @@
                 <a onclick="logout.submit()">Log Out</a>
             </form>   
         </div>
-            <span class="user" onclick="openNav()"> 
-                <span class="notification-star" style="color: red; font-weight: bold;">*</span>
-                Hello, {{ request.user.username }}
-            </span>
+        <span class="user" onclick="openNav()"> 
+            <span class="notification-star" style="color: red; font-weight: bold;">*</span>
+            Hello, {{ request.user.username }}
+        </span>
         {% endif %}
     </div>
     <div class="page-title">{% block page-title %}{% endblock page-title %}</div>

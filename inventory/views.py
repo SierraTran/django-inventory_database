@@ -1,11 +1,14 @@
 """
-This module defines class-based views for displaying and managing items, item history, used items, item requests, and purchase order forms.
+This module defines class-based views for displaying and managing items, item history, used items, 
+item requests, and purchase order forms.
 
 ### Mixins
     - LoginRequiredMixin:
-        Restricts access to authenticated users. Unauthenticated users will be redirected to the login page. After logging in, they
-        will be redirected back to the original destination preserved by the query parameter defined by `redirect_field_name`.
-    - SuperuserOrTechnicianRequiredMixin, SuperuserRequiredMixin, TechnicianRequiredMixin, InternRequiredMixin, UserPassesTestMixin:
+        Restricts access to authenticated users. Unauthenticated users will be redirected to the 
+        login page. After logging in, they will be redirected back to the original destination 
+        preserved by the query parameter defined by `redirect_field_name`.
+    - SuperuserOrTechnicianRequiredMixin, SuperuserRequiredMixin, TechnicianRequiredMixin, 
+    InternRequiredMixin, UserPassesTestMixin:
         Restricts access based on user-specific conditions.
 
 ### Base Classes
@@ -27,7 +30,6 @@ This module defines class-based views for displaying and managing items, item hi
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.db import IntegrityError
 from django.views.generic import TemplateView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
@@ -35,21 +37,24 @@ from django.views.generic.edit import CreateView, UpdateView, FormView, DeleteVi
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
-
 from haystack.query import SearchQuerySet
-
 from openpyxl import load_workbook
-
-from inventory_database.mixins import SuperuserOrTechnicianRequiredMixin, SuperuserRequiredMixin, TechnicianRequiredMixin, InternRequiredMixin
-
-from .forms import ImportFileForm, PurchaseOrderItemFormSet, UsedItemForm, ItemRequestForm
-
+from inventory_database.mixins import (
+    SuperuserOrTechnicianRequiredMixin,
+    SuperuserRequiredMixin,
+    TechnicianRequiredMixin,
+    InternRequiredMixin,
+)
+from .forms import (
+    ImportFileForm,
+    ItemSuperuserForm,
+    ItemTechnicianForm,
+    PurchaseOrderItemFormSet,
+    UsedItemForm,
+    ItemRequestForm,
+)
 from .models import Item, ItemHistory, ItemRequest, PurchaseOrderItem, UsedItem
-
 from .excel_functions import setup_worksheet
-
-
-# Create your views here.
 
 
 ###################################################################################################
@@ -67,7 +72,8 @@ class ItemView(LoginRequiredMixin, ListView):
 
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
-        redirect_field_name (str): The query parameter for the URL the user will be redirected to after logging in.
+        redirect_field_name (str): The query parameter for the URL the user will be redirected to 
+            after logging in.
         model (Item): The model that this view will display.
         template_name (str): The name of the template to use for rendering the view.
         context_object_name (str): The name of the context variable to use for the list of items.
@@ -84,9 +90,11 @@ class ItemView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """
-        Retrieves the list of items to be displayed in alphanumerical order by manufacturer, model, and part number.
+        Retrieves the list of items to be displayed in alphanumerical order by manufacturer, model,
+        and part number.
 
-        This method fetches all items from the database and orders them alphanumerically by manufacturer, model, and part number.
+        This method fetches all items from the database and orders them alphanumerically by 
+        manufacturer, model, and part number.
 
         Returns:
             QuerySet: a queryset containing all items.
@@ -106,7 +114,8 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
 
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
-        redirect_field_name (str): The query parameter for the URL the user will be redirected to after logging in.
+        redirect_field_name (str): The query parameter for the URL the user will be redirected to 
+            after logging in.
         model (Item): The model that this view operates on.
         template_name (str): The template used to render the detail view.
 
@@ -123,8 +132,9 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
         """
         Adds the user's group to the context data.
 
-        This method calls the base class's `get_context_data` function to retrieve the base context data,
-        obtains the first group the current user belongs to, and includes it in the context data.
+        This method calls the base class's `get_context_data` function to retrieve the base context
+        data, obtains the first group the current user belongs to, and includes it in the context 
+        data.
 
         Args:
             **kwargs: Additional keyword arguments passed to the parent method.
@@ -140,7 +150,7 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
 class ItemCreateSuperuserView(SuperuserRequiredMixin, CreateView):
     """
     Class-based view for creating a new item.
-    Only users in the "Superuser" group have access to this view. 
+    Only users in the "Superuser" group have access to this view.
 
     Inherits functionality from:
         - SuperuserRequiredMixin
@@ -149,7 +159,7 @@ class ItemCreateSuperuserView(SuperuserRequiredMixin, CreateView):
 
     Attributes:
         model (Item): The model that this view operates on.
-        fields (list): The fields to be displayed in the form.
+        form_class (ItemSuperuserForm): The form that this view operates on.
         template_name (str): The name of the template used to render the view.
 
     Methods:
@@ -157,25 +167,16 @@ class ItemCreateSuperuserView(SuperuserRequiredMixin, CreateView):
     """
 
     model = Item
-    fields = [
-        "manufacturer",
-        "model",
-        "part_or_unit",
-        "part_number",
-        "description",
-        "location",
-        "quantity",
-        "min_quantity",
-        "unit_price",
-    ]
+    form_class = ItemSuperuserForm
     template_name = "item_create_form.html"
 
     def form_valid(self, form):
         """
-        Overrides the form_valid function of the base class (`CreateView`) to pass the current user to the save method.
+        Overrides the form_valid function of the base class (`CreateView`) to pass the current user
+        to the save method.
 
-        This method sets the `last_modified_by` field of the new Item object to the current user before calling the base class's
-        `form_valid` method with the updated form.
+        This method sets the `last_modified_by` field of the new Item object to the current user 
+        before calling the base class's `form_valid` method with the updated form.
 
         Args:
             form (ModelForm): The form that handles the data for updating the Item object.
@@ -199,7 +200,7 @@ class ItemCreateTechnicianView(TechnicianRequiredMixin, CreateView):
 
     Attributes:
         model (Item): The model that this view operates on.
-        fields (list[str]): The fields to be displayed in the form.
+        form_class (ItemTechnicianForm): The form that this view operates on.
         template_name (str): The name of the template used to render the view.
 
     Methods:
@@ -207,31 +208,23 @@ class ItemCreateTechnicianView(TechnicianRequiredMixin, CreateView):
     """
 
     model = Item
-    fields = [
-        "manufacturer",
-        "model",
-        "part_or_unit",
-        "part_number",
-        "description",
-        "location",
-        "quantity",
-        "unit_price",
-    ]
+    form_class = ItemTechnicianForm
     template_name = "item_create_form.html"
 
     def form_valid(self, form):
         """
-        Overrides the form_valid function of the base class (`CreateView`) to pass the current user to the save method.
+        Overrides the form_valid function of the base class (`CreateView`) to pass the current user 
+        to the save method.
 
-        This method sets the `last_modified_by` field of the new Item object to the current user before calling the base class's
-        `form_valid` method with the updated form.
+        This method sets the `last_modified_by` field of the new Item object to the current user 
+        before calling the base class's `form_valid` method with the updated form.
 
         Args:
             form (ModelForm): The form that handles the data for updating the Item object.
 
         Returns:
             HttpResponse: The HTTP response object.
-        """        
+        """
         form.instance.last_modified_by = self.request.user
         return super().form_valid(form)
 
@@ -248,34 +241,24 @@ class ItemUpdateSuperuserView(SuperuserRequiredMixin, UpdateView):
 
     Attributes:
         model (Item): The model that this view operates on.
-        fields (list[str]): The fields to be displayed in the form.
+        form_class (ItemSuperuserForm): The form that this view operates on.
         template_name (str): The name of the template used to render the view.
 
     Methods:
         `form_valid()`: Passes the current user to the save method.
-        `save()`: Saves the updated item with additional keyword arguments.
     """
 
     model = Item
-    fields = [
-        "manufacturer",
-        "model",
-        "part_or_unit",
-        "part_number",
-        "description",
-        "location",
-        "quantity",
-        "min_quantity",
-        "unit_price",
-    ]
+    form_class = ItemSuperuserForm
     template_name = "item_update_form.html"
 
     def form_valid(self, form):
         """
-        Overrides the form_valid function of the base class `UpdateView` to pass the current user to the save method.
-        
-        This method sets the `last_modified_by` field of the updated Item object to the current user. Then, it calls 
-        the base class's `form_valid` method with the updated form.
+        Overrides the form_valid function of the base class `UpdateView` to pass the current user 
+        to the save method.
+
+        This method sets the `last_modified_by` field of the updated Item object to the current 
+        user. Then, it calls the base class's `form_valid` method with the updated form.
 
         Args:
             form (ModelForm): The form that handles the data for updating the Item object.
@@ -283,24 +266,8 @@ class ItemUpdateSuperuserView(SuperuserRequiredMixin, UpdateView):
         Returns:
             HttpResponse: The HTTP response object.
         """
-        form.instance.last_modified_by = self.request.user
-        return super().form_valid(form)
-
-    def save(self, *args, **kwargs):
-        """
-        Saves the updated item with additional keyword arguments.
-
-        This method updates `kwargs` to include the current user before delegating the save operation to the base class.
-
-        Args:
-            *args: Additional positional arguments.
-            **kwargs: Additional keyword arguments.
-
-        Returns:
-            HttpResponse: The HTTP response object.
-        """
-        kwargs["user"] = self.request.user
-        return super().save(*args, **kwargs)
+        form.instance.save(user=self.request.user)
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class ItemUpdateTechnicianView(TechnicianRequiredMixin, UpdateView):
@@ -315,33 +282,25 @@ class ItemUpdateTechnicianView(TechnicianRequiredMixin, UpdateView):
 
     Attributes:
         model (Item): The model that this view operates on.
-        fields (list[str]): The fields to be displayed in the form.
+        form_class (ItemTechnicianForm): The form that this view operates on.
         template_name (str): The name of the template used to render the view.
 
     Methods:
-        `form_valid()`: Overrides form_valid function of the `UpdateView` base class to pass the current user to the save method.
-        `save()`: Saves the current user as an argument for the save function of the `UpdateView` base class.
+        `form_valid()`: Overrides form_valid function of the `UpdateView` base class to pass the 
+            current user to the save method.
     """
 
     model = Item
-    fields = [
-        "manufacturer",
-        "model",
-        "part_or_unit",
-        "part_number",
-        "description",
-        "location",
-        "quantity",
-        "unit_price",
-    ]
+    form_class = ItemTechnicianForm
     template_name = "item_update_form.html"
 
     def form_valid(self, form):
         """
-        Overrides form_valid function of the `UpdateView` base class to pass the current user to the save method.
+        Overrides form_valid function of the `UpdateView` base class to pass the current user to 
+        the save method.
 
-        This method sets the `last_modified_by` field of the updated Item object to the current user. Then, it calls
-        the base class's `form_valid` method with the updated form.
+        This method sets the `last_modified_by` field of the updated Item object to the current 
+        user. Then, it calls the base class's `form_valid` method with the updated form.
 
         Args:
             form (ModelForm): The form that handles the data for updating the Item object.
@@ -351,19 +310,6 @@ class ItemUpdateTechnicianView(TechnicianRequiredMixin, UpdateView):
         """
         form.instance.updated_by = self.request.user
         return super().form_valid(form)
-
-    def save(self, *args, **kwargs):
-        """
-        Saves the current user as an argument for the save function of the `UpdateView` base class.
-
-        This method updates `kwargs` to include the current user before delegating the save operation to the base class.
-
-        Args:
-            *args: Additional positional arguments
-            **kwargs: Additional keyword arguments
-        """
-        kwargs["user"] = self.request.user
-        return super().save(*args, **kwargs)
 
 
 class ItemUpdateInternView(InternRequiredMixin, UpdateView):
@@ -378,12 +324,13 @@ class ItemUpdateInternView(InternRequiredMixin, UpdateView):
 
     Attributes:
         model (Item): The model that this view operates on.
-        fields (list[str]): The fields to be displayed in the form. For interns, only the quantity is available to them.
+        fields (list[str]): The fields to be displayed in the form. For interns, only the quantity 
+            is available to them.
         template_name (str): The name of the template used to render the view.
 
     Methods:
-        `form_valid()`: Overrides the `form_valid` function of the base class `UpdateView` to pass the current user to the save method.
-        `save()`: Saves the item with the current user included in the keyword arguments.
+        `form_valid()`: Overrides the `form_valid` function of the base class `UpdateView` to pass 
+            the current user to the save method.
     """
 
     model = Item
@@ -392,10 +339,11 @@ class ItemUpdateInternView(InternRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         """
-        Overrides the form_valid function of the base class `UpdateView` to pass the current user to the save method.
-        
-        This method sets the `last_modified_by` field of the updated Item object to the current user. Then, it calls
-        the base class's `form_valid` method with the updated form.
+        Overrides the form_valid function of the base class `UpdateView` to pass the current user 
+        to the save method.
+
+        This method sets the `last_modified_by` field of the updated Item object to the current 
+        user. Then, it calls the base class's `form_valid` method with the updated form.
 
         Args:
             form (ModelForm): The form that handles the data for updating the Item object.
@@ -405,23 +353,6 @@ class ItemUpdateInternView(InternRequiredMixin, UpdateView):
         """
         form.instance.last_modified_by = self.request.user
         return super().form_valid(form)
-
-    def save(self, *args, **kwargs):
-        """
-        Saves the item with the current user included in the keyword arguments.
-
-        This method retrieves the current user object from the request, adds it to the `kwargs` under the key "user"
-        and calls the base class's `save` method with the provided arguments
-
-        Args:
-            *args: Additional positional arguments passed to the base class's `save` method.
-            **kwargs: Additional keyword arguments passed to the base class's `save` method.
-
-        Returns:
-            HttpResponse: The HTTP response object.
-        """
-        kwargs["user"] = self.request.user
-        return super().save(*args, **kwargs)
 
 
 class ItemDeleteView(SuperuserOrTechnicianRequiredMixin, DeleteView):
@@ -437,8 +368,8 @@ class ItemDeleteView(SuperuserOrTechnicianRequiredMixin, DeleteView):
     Attributes:
         model (Item): The model that this view operates on.
         template_name (str): The name of the template that the view will render.
-        success_url (str): The URL to redirect to upon successful deletion (resolved using reverse_lazy).
-        fail_url (str): The URL to redirect to if the deletion is canceled (resolved using the `get_fail_url` method).
+        success_url (str): The URL to redirect to upon successful deletion.
+        fail_url (str): The URL to redirect to if the deletion is canceled.
 
     Methods:
         `get_fail_url()`: Returns the URL to redirect to if the deletion is canceled.
@@ -453,8 +384,8 @@ class ItemDeleteView(SuperuserOrTechnicianRequiredMixin, DeleteView):
         """
         Returns the URL to redirect to if the deletion is canceled.
 
-        This method uses reverse_lazy to resolve the failure URL with the primary key (pk) of the object
-        being processed and returns it.
+        This method uses reverse_lazy to resolve the failure URL with the primary key (pk) of the 
+        object being processed and returns it.
 
         Returns:
             str: The URL to redirect to.
@@ -469,10 +400,11 @@ class ItemDeleteView(SuperuserOrTechnicianRequiredMixin, DeleteView):
         """
         Handles POST requests to delete the item or cancel the deletion.
 
-        This method first checks which button was pressed in the form. If the "Cancel" button was pressed, the user is
-        redirected back to the Item Detail page (the failure URL). If the "Confirm" button was pressed (the else case),
-        the item is deleted. If there are other objects that reference the item, an IntegrityError is caught and an error
-        message is displayed after the user is redirected to the item Detail page.
+        This method first checks which button was pressed in the form. If the "Cancel" button was 
+        pressed, the user is redirected back to the Item Detail page (the failure URL). If the 
+        "Confirm" button was pressed (the else case), the item is deleted. If there are other 
+        objects that reference the item, an IntegrityError is caught and an error message is 
+        displayed after the user is redirected to the item Detail page.
 
         Args:
             request (HttpRequest): The HTTP request object containing metadata about the request.
@@ -484,8 +416,7 @@ class ItemDeleteView(SuperuserOrTechnicianRequiredMixin, DeleteView):
         """
         if "Cancel" in request.POST:
             return redirect(self.fail_url)
-        else:
-            return super(ItemDeleteView, self).post(request, *args, **kwargs)
+        return super(ItemDeleteView, self).post(request, *args, **kwargs)
 
 
 class SearchItemsView(LoginRequiredMixin, ListView):
@@ -500,7 +431,8 @@ class SearchItemsView(LoginRequiredMixin, ListView):
 
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
-        redirect_field_name (str): The query parameter for the URL the user will be redirected to after logging in.
+        redirect_field_name (str): The query parameter for the URL the user will be redirected to 
+            after logging in.
         model (Item): The model that this view operates on.
         template_name (str): The template used to render the search results.
         context_object_name (str): The name of the context variable to use for the search results.
@@ -524,7 +456,8 @@ class SearchItemsView(LoginRequiredMixin, ListView):
         "manufacturer", "model", and "part_number".
 
         Returns:
-            list: A list of filtered and ordered search results. Returns an empty list if no query is provided.
+            list: A list of filtered and ordered search results. Returns an empty list if no query 
+                is provided.
         """
         query = self.request.GET.get("q")
         results = (
@@ -550,11 +483,10 @@ class ImportItemDataView(SuperuserOrTechnicianRequiredMixin, FormView):
     Attributes:
         form_class (Form): The form that the view operates on.
         template_name (str): The name of the template to be rendered by the class.
-        success_url (str): The URL to redirect to after the form is successfully processed (resolved using reverse_lazy).
+        success_url (str): The URL to redirect to after the form is successfully processed.
 
     Methods:
         `form_valid(form)`: Processes data from an uploaded Excel file to the database.
-        `save()`: Saves the item with the current user included in the keyword arguments.
     """
 
     form_class = ImportFileForm
@@ -571,7 +503,8 @@ class ImportItemDataView(SuperuserOrTechnicianRequiredMixin, FormView):
             form (Form): The form containing the uploaded Excel file.
 
         Returns:
-            HttpResponseRedirect: The HTTP response to redirect to the items list view after processing the file.
+            HttpResponseRedirect: The HTTP response to redirect to the items list view after 
+                processing the file.
         """
         file = form.cleaned_data["file"]
         workbook = load_workbook(file)
@@ -613,23 +546,6 @@ class ImportItemDataView(SuperuserOrTechnicianRequiredMixin, FormView):
         # Go to items page after finishing
         return HttpResponseRedirect(reverse("inventory:items"))
 
-    def save(self, *args, **kwargs):
-        """
-        Saves the item with the current user included in the keyword arguments.
-
-        This method retrieves the current user object from the request, adds it to the `kwargs` under
-        the key "user" and calls the base class's `save` method with the provided arguments
-
-        Args:
-            *args: Additional positional arguments passed to the base class's `save` method.
-            **kwargs: Additional keyword arguments passed to the base class's `save` method.
-
-        Returns:
-            HttpResponse: The HTTP response object.
-        """
-        kwargs["user"] = self.request.user
-        return super().save(*args, **kwargs)
-
 
 ###################################################################################################
 # Views for the ItemHistory Model #################################################################
@@ -646,13 +562,15 @@ class ItemHistoryView(LoginRequiredMixin, ListView):
 
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
-        redirect_field_name (str): The query parameter for the URL the user will be redirected to after logging in.
+        redirect_field_name (str): The query parameter for the URL the user will be redirected to 
+            after logging in.
         model (ItemHistory): The model that this view operates on.
         template_name (str): The template used to render the history view.
         context_object_name (str): The context variable name for the list of item history records.
 
     Methods:
-        `get_queryset()`: Retrieves the history records for the specific item in reverse chronological order.
+        `get_queryset()`: Retrieves the history records for the specific item in reverse 
+            chronological order.
         `get_context_data()`: Adds the specific item to the context data.
     """
 
@@ -666,12 +584,13 @@ class ItemHistoryView(LoginRequiredMixin, ListView):
         """
         Retrieves the history records for the specific item in reverse chronological order.
 
-        This method extracts the ID of the item from the URL parameters, filters the `ItemHistory` objects to match
-        the given item ID, and orders the resulting queryset by the `timestamp` field in descending order (most
-        recent first).
+        This method extracts the ID of the item from the URL parameters, filters the `ItemHistory` 
+        objects to match the given item ID, and orders the resulting queryset by the `timestamp` 
+        field in descending order (most recent first).
 
         Returns:
-            QuerySet: A queryset containing the history records for the specified item in reverse chronological order.
+            QuerySet: A queryset containing the history records for the specified item in reverse 
+                chronological order.
         """
         item_id = self.kwargs["pk"]
         history = ItemHistory.objects.filter(item_id=item_id).order_by("-timestamp")
@@ -697,7 +616,7 @@ class ItemHistoryView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["item"] = get_object_or_404(Item, id=item_id)
         return context
-    
+
 
 ###################################################################################################
 # Views for the ItemRequest Model #################################################################
@@ -732,7 +651,7 @@ class ItemRequestView(SuperuserOrTechnicianRequiredMixin, ListView):
         Returns:
             QuerySet: The queryset containing all item requests.
         """
-        return ItemRequest.objects.all().order_by("-timestamp")
+        return ItemRequest.objects.all().order_by("timestamp")
 
 
 class ItemRequestDetailView(SuperuserOrTechnicianRequiredMixin, DetailView):
@@ -755,20 +674,21 @@ class ItemRequestDetailView(SuperuserOrTechnicianRequiredMixin, DetailView):
 
     model = ItemRequest
     template_name = "item_request_detail.html"
-    
+
     def get_context_data(self, **kwargs):
         """
         Adds the name of the current user's group to the context.
 
-        This method retrieves the base context by calling the base class's `get_context_data` method.
-        Then, it retrieves the name of the first group the current user belongs to and adds it to the
-        context data under the "current_user_group_name" key.
+        This method retrieves the base context by calling the base class's `get_context_data` 
+        method. Then, it retrieves the name of the first group the current user belongs to 
+        and adds it to the context data under the "current_user_group_name" key.
 
         Arguments:
             **kwargs: Additional keyword arguments.
 
         Returns:
-            dict: The context data, including the name of the current user's first group, for use in the view.
+            dict: The context data, including the name of the current user's first group, for use 
+                in the view.
         """
         context = super().get_context_data(**kwargs)
         context["current_user_group_name"] = self.request.user.groups.first().name
@@ -797,44 +717,37 @@ class ItemRequestCreateView(TechnicianRequiredMixin, CreateView):
 
     model = ItemRequest
     form_class = ItemRequestForm
-    # fields = [
-    #     "manufacturer",
-    #     "model_part_num",
-    #     "quantity_requested",
-    #     "description",
-    #     "unit_price",
-    #     "requested_by",
-    # ]
     template_name = "item_request_form.html"
 
     def get_initial(self):
         """
         Retrieves initial item data from the GET parameters and the request.
 
-        This method calls the base class's `get_initial` method to get the base initial data. Then, it extracts the
-        manufacturer, model_part_num, description, and unit_price from the GET parameters under the keys
-        "manufacturer", "model_part_num", "description", and "unit_price", respectively. After that, the current user
-        is saved under the "requested_by" key. The initial data is then returned.
+        This method calls the base class's `get_initial` method to get the base initial data. Then,
+        it extracts the manufacturer, model_part_num, description, and unit_price from the GET 
+        parameters under the keys "manufacturer", "model_part_num", "description", and 
+        "unit_price", respectively. After that, the current user is saved under the "requested_by" 
+        key. The initial data is then returned.
 
         Returns:
             dict: The initial data for the form.
         """
         initial = super().get_initial()
-        initial["manufacturer"] = self.request.GET.get("manufacturer")
-        initial["model_part_num"] = self.request.GET.get("model_part_num")
-        initial["description"] = self.request.GET.get("description")
-        initial["unit_price"] = self.request.GET.get("unit_price")
-        initial["requested_by"] = self.request.user
+        initial["manufacturer"] = self.request.GET.get("manufacturer", "")
+        initial["model_part_num"] = self.request.GET.get("model_part_num", "")
+        initial["description"] = self.request.GET.get("description", "")
+        initial["unit_price"] = self.request.GET.get("unit_price", "")
         return initial
 
     def get_context_data(self, **kwargs):
         """
         Adds the specific item to the context data.
 
-        This method retrieves the base context by calling the base class's `get_context_data` method.
-        Then, it obtains the "item_id" through the GET parameters of the request. Finally, it fetches
-        the `Item` object with the provided ID and adds it to the context under the "item" key. If no
-        `Item` object is found, an `Http404` exception is raised. The context data is then returned.
+        This method retrieves the base context by calling the base class's `get_context_data` 
+        method. Then, it obtains the "item_id" through the GET parameters of the request. Finally, 
+        it fetches the `Item` object with the provided ID and adds it to the context under the 
+        "item" key. If no `Item` object is found, an `Http404` exception is raised. The context 
+        data is then returned.
 
         Args:
             **kwargs: Additional keyword arguments ot pass to the base class.
@@ -844,8 +757,28 @@ class ItemRequestCreateView(TechnicianRequiredMixin, CreateView):
         """
         context = super().get_context_data(**kwargs)
         item_id = self.request.GET.get("item_id")
-        context["item"] = get_object_or_404(Item, pk=item_id)
+        if item_id:
+            context["item"] = get_object_or_404(Item, pk=item_id)
+        else:
+            context["item"] = None
         return context
+
+    def form_valid(self, form):
+        """
+        Overrides the form_valid function of the base class (`CreateView`) to pass the current user
+        to the save method.
+
+        This method sets the `requested_by` field of the new ItemRequest object to the current user
+        before calling the base class's `form_valid` method with the updated form.
+
+        Args:
+            form (ModelForm): The form that handles the data for creating the ItemRequest object.
+
+        Returns:
+            HttpResponse: The HTTP response object.
+        """
+        form.instance.requested_by = self.request.user
+        return super().form_valid(form)
 
 
 class ItemRequestAcceptView(SuperuserRequiredMixin, TemplateView):
@@ -861,13 +794,14 @@ class ItemRequestAcceptView(SuperuserRequiredMixin, TemplateView):
     Attributes:
         model (ItemRequest): The model that this view operates on.
         template_name (str): The name of the template used to render the view.
-        fail_url (str): The URL to redirect to if the acceptance is canceled (resolved using the `get_fail_url` method).
+        fail_url (str): The URL to redirect to if the acceptance is canceled.
 
     Methods:
         `get_object()`: Retrieves the specific ItemRequest object for the view.
         `get_fail_url()`: Returns the URL to redirect to if the acceptance is canceled.
         `get_context_data()`: Adds the specific item request to the context data.
-        `post()`: Handles POST requests to set the item request's status to "Accepted" or cancel the operation.
+        `post()`: Handles POST requests to set the item request's status to "Accepted" or cancel
+            the operation.
     """
 
     model = ItemRequest
@@ -877,9 +811,9 @@ class ItemRequestAcceptView(SuperuserRequiredMixin, TemplateView):
         """
         Retrieves the specific ItemRequest object for the view.
 
-        This method fetches the ItemRequest object with the primary key (pk) extracted from the `kwargs`
-        using the `get_object_or_404` function. If no ItemRequest object is found with the given primary
-        key, an `Http404` exception is raised.
+        This method fetches the ItemRequest object with the primary key (pk) extracted from the
+        `kwargs` using the `get_object_or_404` function. If no ItemRequest object is found with
+        the given primary key, an `Http404` exception is raised.
 
         Returns:
             ItemRequest: The ItemRequest object that may or may not be accepted by a Superuser.
@@ -890,8 +824,8 @@ class ItemRequestAcceptView(SuperuserRequiredMixin, TemplateView):
         """
         Resolves the URL to redirect to if the acceptance is canceled.
 
-        This method uses reverse_lazy to resolve the failure URL with the primary key (pk) of the object
-        being processed and returns it.
+        This method uses reverse_lazy to resolve the failure URL with the primary key (pk) of the
+        object being processed and returns it.
 
         Returns:
             str: The resolved URL for redirction.
@@ -906,8 +840,9 @@ class ItemRequestAcceptView(SuperuserRequiredMixin, TemplateView):
         """
         Adds the specific item request to the context data.
 
-        This method retrieves the base context by calling the base class's `get_context_data` method.
-        Then, it adds the object returned by `get_object` method to the context under the "object" key.
+        This method retrieves the base context by calling the base class's `get_context_data`
+        method. Then, it adds the object returned by `get_object` method to the context under 
+        the "object" key.
 
         Returns:
             dict: The context data for the view including the specific item request.
@@ -917,28 +852,32 @@ class ItemRequestAcceptView(SuperuserRequiredMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        # NOTE: Although this function doesn't use *args or **kwargs, they need to be included to avoid errors.
+        # NOTE: Although this function doesn't use *args or **kwargs,
+        # they need to be included to avoid errors.
         """
-        Handles POST requests to set the item request's status to "Accepted" or cancel the operation.
+        Handles POST requests to set the item request's status to "Accepted" or cancel the
+        operation.
 
-        This method checks the submitted form data to determine if the operation should be canceled (redirecting
-        to the failure URL) or if the item request's status should be updated to "Accepted". If the item request's
-        status is updated, the object will be saved and the user will be redirected to the item request's detail page.
+        This method checks the submitted form data to determine if the operation should be 
+        canceled (redirecting to the failure URL) or if the item request's status should be
+        updated to "Accepted". If the item request's status is updated, the object will be
+        saved and the user will be redirected to the item request's detail page.
 
         Arguments:
             request (HttpRequest): The HTTP request object containing POST data.
 
         Returns:
-            HttpResponseRedirect: A redirect response after canceling or confirming the status change.
+            HttpResponseRedirect: A redirect response after canceling or confirming the status 
+                change.
         """
         if "Cancel" in request.POST:
             return redirect(self.fail_url)
-        else:
-            item_request = self.get_object()
-            item_request.status = "Accepted"
-            item_request.status_changed_by = self.request.user
-            item_request.save()
-            return redirect(item_request.get_absolute_url())
+
+        item_request = self.get_object()
+        item_request.status = "Accepted"
+        item_request.status_changed_by = self.request.user
+        item_request.save()
+        return redirect(item_request.get_absolute_url())
 
 
 class ItemRequestRejectView(SuperuserRequiredMixin, TemplateView):
@@ -954,13 +893,14 @@ class ItemRequestRejectView(SuperuserRequiredMixin, TemplateView):
     Attributes:
         model (ItemRequest): The model that this view operates on.
         template_name (str): The name of the template used to render the view.
-        fail_url (str): The URL to redirect to if the rejection is canceled (resolved using the `get_fail_url` method).
+        fail_url (str): The URL to redirect to if the rejection is canceled.
 
     Methods:
         `get_object()`: Retrieves the specific item request for the view.
         `get_fail_url()`: Returns the URL to redirect if the rejection is canceled.
         `get_context_data()`: Adds the specific item request to the context data.
-        `post()`: Handles POST requests to set the item request's status to "Rejected" or cancel the operation.
+        `post()`: Handles POST requests to set the item request's status to "Rejected" or cancel the 
+            operation.
     """
 
     model = ItemRequest
@@ -970,8 +910,9 @@ class ItemRequestRejectView(SuperuserRequiredMixin, TemplateView):
         """
         Retrieves the specific item request for the view.
 
-        This method retrieves the primary key (pk) from `kwargs` and then fetches the `ItemRequest` object with the matching primary key.
-        If no `ItemRequest` object is found with the given primary key, an `Http404` exception is raised.
+        This method retrieves the primary key (pk) from `kwargs` and then fetches the `ItemRequest` 
+        object with the matching primary key. If no `ItemRequest` object is found with the given 
+        primary key, an `Http404` exception is raised.
 
         Returns:
             ItemRequest: The item request that may or may not be rejected by a Superuser.
@@ -982,8 +923,8 @@ class ItemRequestRejectView(SuperuserRequiredMixin, TemplateView):
         """
         Resolves the URL to redirect to if the rejection is canceled.
 
-        This method uses reverse_lazy to resolve the failure URL with the primary key (pk) of the object
-        being processed and returns it.
+        This method uses reverse_lazy to resolve the failure URL with the primary key (pk) of the 
+        object being processed and returns it.
 
         Returns:
             str: The resolvd URL for redirection.
@@ -998,8 +939,9 @@ class ItemRequestRejectView(SuperuserRequiredMixin, TemplateView):
         """
         Adds the specific item request to the context data.
 
-        This method retrieves the base context by calling the base class's `get_context_data` method.
-        Then, it adds the object returned by `get_object` method to the context under the "object" key.
+        This method retrieves the base context by calling the base class's `get_context_data` 
+        method. Then, it adds the object returned by `get_object` method to the context under 
+        the "object" key.
 
         Args:
             **kwargs: Additional keyword arguments passed to the base class.
@@ -1012,31 +954,34 @@ class ItemRequestRejectView(SuperuserRequiredMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        # NOTE: Although this function doesn't use *args or **kwargs, they need to be included to avoid errors.
+        # NOTE: Although this function doesn't use *args or **kwargs, they need to be included to
+        # avoid errors.
         """
-        Handles POST requests to set the item request's status to "Rejected" or cancel the operation.
+        Handles POST requests to set the item request's status to "Rejected" or cancel the 
+        operation.
 
-        This method checks the submitted form data to determine if the operation should be canceled (redirecting to the failure URL)
-        or if the item request's status should be updated to "Rejected". If the item request's status is updated, the object will be saved
-        and the user will be redirected to the item request's detail page.
+        This method checks the submitted form data to determine if the operation should be canceled
+        (redirecting to the failure URL) or if the item request's status should be updated to 
+        "Rejected". If the item request's status is updated, the object will be saved and the user 
+        will be redirected to the item request's detail page.
 
         Arguments:
             request (HttpRequest): The HTTP request object containing POST data.
 
         Returns:
-            HttpResponseRedirect: A redirect response after canceling or confirming the status change.
+            HttpResponseRedirect: A redirect response after canceling or confirming the status 
+                change.
         """
         if "Cancel" in request.POST:
             return redirect(self.fail_url)
-        else:
-            item_request = self.get_object()
-            item_request.status = "Rejected"
-            item_request.save()
-            return redirect(item_request.get_absolute_url())
+
+        item_request = self.get_object()
+        item_request.status = "Rejected"
+        item_request.save()
+        return redirect(item_request.get_absolute_url())
 
 
 class ItemRequestDeleteView(UserPassesTestMixin, DeleteView):
-    # TODO: ItemRequestDeleteView docstring
     """
     Class-based view for confirming or canceling the deletion of an item request.
     Only users who made the request can access this view.
@@ -1049,28 +994,30 @@ class ItemRequestDeleteView(UserPassesTestMixin, DeleteView):
     Attributes:
         model (ItemRequest): The model that this view operates on.
         template_name (str): The name of the template used to render the view.
-        success_url (str): The URL to redirect to upon successful deletion (resolved using reverse_lazy).
-        fail_url (str): The URL to redirect to if the deletion is canceled (resolved using the `get_fail_url` method).
+        success_url (str): The URL to redirect to upon successful deletion.
+        fail_url (str): The URL to redirect to if the deletion is canceled.
 
     Methods:
         `test_func()`: Checks if the item request belongs to the user.
-        `handle_no_permission()`: Renders the 403 page with a message explaining the reason for the error.
+        `handle_no_permission()`: Renders the 403 page with a message explaining the reason for the 
+            error.
         `get_fail_url()`: Returns the URL to redirect if the deletion is canceled.
-        
-        `post()`: Handles POST requests to set the item request's status to "Rejected" or cancel the operation.
+        `post()`: Handles POST requests to delete the item or cancel the deletion.
     """
+
     model = ItemRequest
     template_name = "item_request_confirm_delete.html"
     success_url = reverse_lazy("inventory:item_requests")
-    
+
     def test_func(self):
         """
         Checks if the item request belongs to the user.
-        
-        This method retrieves the primary key (pk) from `kwargs` and then fetches the `ItemRequest` object with the matching primary key.
-        If no object is found, an `Http404` exception is raised. Then, it checks if the `requested_by` field of the `ItemRequest` object 
-        matches the current user. If it does, True is returned, indicating that the user is allowed to delete the item request. Otherwise, 
-        False is returned.
+
+        This method retrieves the primary key (pk) from `kwargs` and then fetches the `ItemRequest`
+        object with the matching primary key. If no object is found, an `Http404` exception is 
+        raised. Then, it checks if the `requested_by` field of the `ItemRequest` object matches the
+        current user. If it does, True is returned, indicating that the user is allowed to delete 
+        the item request. Otherwise, False is returned.
 
         Returns:
             bool: True if the user is the one who made the item request. False otherwise.
@@ -1079,7 +1026,7 @@ class ItemRequestDeleteView(UserPassesTestMixin, DeleteView):
         item_request_id = self.kwargs.get("pk")
         request_from = get_object_or_404(ItemRequest, id=item_request_id).requested_by
         return request_from == user
-    
+
     def handle_no_permission(self):
         """
         Renders the 403 page with a message explaining the reason for the error.
@@ -1088,14 +1035,16 @@ class ItemRequestDeleteView(UserPassesTestMixin, DeleteView):
             HttpResponse: The HTTP response object with the rendered 403 page.
         """
         message = "You didn't make this item request, so you can't delete it. Please ask the author of the item request to delete it."
-        return HttpResponseForbidden(render(self.request, "403.html", {"message": message})) 
-    
+        return HttpResponseForbidden(
+            render(self.request, "403.html", {"message": message})
+        )
+
     def get_fail_url(self):
         """
         Returns the URL to redirect to if the deletion is canceled.
 
-        This method uses reverse_lazy to resolve the failure URL with the primary key (pk) of the object
-        being processed and returns it.
+        This method uses reverse_lazy to resolve the failure URL with the primary key (pk) of the 
+        object being processed and returns it.
 
         Returns:
             str: The URL to redirect to.
@@ -1103,14 +1052,14 @@ class ItemRequestDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy("inventory:item_requests")
 
     fail_url = property(get_fail_url)
-    
+
     def post(self, request, *args, **kwargs):
         """
         Handles POST requests to delete the item or cancel the deletion.
 
-        This method first checks which button was pressed in the form. If the "Cancel" button was pressed, the user is
-        redirected back to the Notifications page (the failure URL). If the "Confirm" button was pressed (the else case),
-        the notification is deleted.
+        This method first checks which button was pressed in the form. If the "Cancel" button was 
+        pressed, the user is redirected back to the Item Requests page (the failure URL). If the 
+        "Confirm" button was pressed (the else case), the item request is deleted.
 
         Args:
             request (HttpRequest): The HTTP request object containing metadata about the request.
@@ -1122,10 +1071,8 @@ class ItemRequestDeleteView(UserPassesTestMixin, DeleteView):
         """
         if "Cancel" in request.POST:
             return redirect(self.fail_url)
-        else:
-            return super(ItemRequestDeleteView, self).post(request, *args, **kwargs)
-    
-    
+        return super(ItemRequestDeleteView, self).post(request, *args, **kwargs)
+
 
 ###################################################################################################
 # Views for the UsedItem Model ####################################################################
@@ -1142,13 +1089,15 @@ class UsedItemView(LoginRequiredMixin, ListView):
 
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
-        redirect_field_name (str): The query parameter for the URL the user will be redirected to after logging in.
+        redirect_field_name (str): The query parameter for the URL the user will be redirected to
+            after logging in.
         model (UsedItem): The model that the view will operate on.
         template_name (str): The template that will be used to render the view.
         context_object_name (str): The name of the context object.
 
     Methods:
-        `get_queryset()`: Retrieves all UsedItems from the database in order of their work order and item.
+        `get_queryset()`: Retrieves all UsedItems from the database in order of their work order 
+            and item.
     """
 
     login_url = reverse_lazy("authentication:login")
@@ -1161,12 +1110,13 @@ class UsedItemView(LoginRequiredMixin, ListView):
         """
         Retrieves all UsedItems from the database in order of their work order and item.
 
-        This method retrieves all UsedItem objects from the database and orders them by work_order and item.
+        This method retrieves all UsedItem objects from the database and orders them by work_order
+        and item.
 
         Returns:
             QuerySet: A queryset containing all used items.
         """
-        return UsedItem.objects.all().order_by("datetime_used", "work_order", "item")
+        return UsedItem.objects.all().order_by("-datetime_used", "work_order", "item")
 
 
 class UsedItemDetailView(LoginRequiredMixin, DetailView):
@@ -1181,7 +1131,8 @@ class UsedItemDetailView(LoginRequiredMixin, DetailView):
 
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
-        redirect_field_name (str): The query parameter for the URL the user will be redirected to after logging in.
+        redirect_field_name (str): The query parameter for the URL the user will be redirected to 
+            after logging in.
         model (UsedItem): The model on which the view will operate.
         template_name (str): The template that will be used to render the view.
 
@@ -1198,12 +1149,13 @@ class UsedItemDetailView(LoginRequiredMixin, DetailView):
         """
         Adds the specific used item to the context data.
 
-        This method retrieves the base context data by calling the base class's `get_context_data` function.
-        Then, it adds the specific `UsedItem` object, represented by `self.object`, to the context under the
-        "used_item" key.
+        This method retrieves the base context data by calling the base class's `get_context_data`
+        function. Then, it adds the specific `UsedItem` object, represented by `self.object`, to 
+        the context under the "used_item" key.
 
         Args:
-            **kwargs: Additional keyword arguments passed to the base class's `get_context_data` method.
+            **kwargs: Additional keyword arguments passed to the base class's `get_context_data` 
+                method.
 
         Returns:
             dict: The context data, including the used item, for use in the template.
@@ -1231,26 +1183,28 @@ class UsedItemCreateView(SuperuserOrTechnicianRequiredMixin, CreateView):
     Methods:
         `get_initial()`: Adds the specific item to the initial data to be used in the form.
         `get_context_data()`: Adds the item and initial data for the form to the context.
-        `dispatch()`: Checks if the item's quantity is greater than 0 before allowing access to the view.
-        `form_valid()`: Decrements the quantity of the associated Item when a new UsedItem is created and updates the ItemHistory record to explain the decrement.
+        `dispatch()`: Checks if the item's quantity is greater than 0 before allowing access to the
+            view.
+        `form_valid()`: Decrements the quantity of the associated Item when a new UsedItem is 
+            created and updates the ItemHistory record to explain the decrement.
     """
 
     model = UsedItem
     form_class = UsedItemForm
-    # fields = ["item", "work_order", "used_by"]
     template_name = "item_use_form.html"
 
     def get_initial(self):
         """
         Adds the specific item and current user to the initial data to be used in the form.
 
-        This method retrieves the base initial data by calling the base class's `get_initial` function.
-        Then, it adds the current user to the initial data under they "used_by" key. If an "item_id"
-        is detected in the GET parameters, the corresponding `Item` object is retrieved and added to the
-        initial data under the "item" key.
+        This method retrieves the base initial data by calling the base class's `get_initial`
+        function. Then, it adds the current user to the initial data under they "used_by" key. If 
+        an "item_id" is detected in the GET parameters, the corresponding `Item` object is 
+        retrieved and added to the initial data under the "item" key.
 
         Returns:
-            dict: The initial data for creating a Used Item, including the user and, if applicable, the specified item.
+            dict: The initial data for creating a Used Item, including the user and, if applicable,
+                the specified item.
         """
         initial = super().get_initial()
         current_user = self.request.user
@@ -1269,10 +1223,11 @@ class UsedItemCreateView(SuperuserOrTechnicianRequiredMixin, CreateView):
         """
         Adds the item and initial data for the form to the context.
 
-        This method retrieves the base context data by calling the base class's `get_context_data` function.
-        Then, if an "item_id" is detected in the GET parameters, the corresponding Item object is retrieved
-        and added to the context data under the "item" key. If the request method is GET, the form in the context
-        (under the "form" key) has itsinitial data updated with values from `get_initial`.
+        This method retrieves the base context data by calling the base class's `get_context_data`
+        function. Then, if an "item_id" is detected in the GET parameters, the corresponding Item 
+        object is retrieved and added to the context data under the "item" key. If the request 
+        method is GET, the form in the context (under the "form" key) has itsinitial data updated 
+        with values from `get_initial`.
 
         Args:
             **kwargs: Additional keyword arguments passed to the base class's method.
@@ -1293,10 +1248,10 @@ class UsedItemCreateView(SuperuserOrTechnicianRequiredMixin, CreateView):
         """
         Checks if the item's quantity is greater than 0 before allowing access to the view.
 
-        This method first retrieves the item_id from the GET parameters and then retrieves the Item object with the
-        corresponding ID. If the quantity of the item is less than or equal to 0, an error message is displayed
-        and the user is redirected to the detail page for the item. Otherwise, the request is dispatched to the
-        base class's `dispatch` method.
+        This method first retrieves the item_id from the GET parameters and then retrieves the Item
+        object with the corresponding ID. If the quantity of the item is less than or equal to 0, 
+        an error message is displayed and the user is redirected to the detail page for the item.
+        Otherwise, the request is dispatched to theof base class's `dispatch` method.
 
         Args:
             request (HttpRequest): The HTTP request object.
@@ -1315,15 +1270,16 @@ class UsedItemCreateView(SuperuserOrTechnicianRequiredMixin, CreateView):
 
     def form_valid(self, form):
         """
-        Decrements the quantity of the associated Item when a new UsedItem is created and updates the ItemHistory
-        record to explain the decrement.
+        Decrements the quantity of the associated Item when a new UsedItem is created and updates
+        the ItemHistory record to explain the decrement.
 
-        This method first calls the base class's `form_valid` method to process the form data. Then, it retrieves the
-        UsedItem from the form and decremented the quantity of the associated Item by 1 and saves it. Next, the URL of
-        the UsedItem is resolved with `reverse` with its primary key (pk) and stored in `used_item_url`. After that,
-        the last ItemHistory record, which was created when the Item was saved, is retrieved and updated with the
-        action "use" and a link to where the UsedItem is used in the changes field. Finally, it saves the history
-        record and returns the response.
+        This method first calls the base class's `form_valid` method to process the form data. 
+        Then, it retrieves the UsedItem from the form and decremented the quantity of the
+        associated Item by 1 and saves it. Next, the URL of the UsedItem is resolved with `reverse`
+        with its primary key (pk) and stored in `used_item_url`. After that, the last ItemHistory 
+        record, which was created when the Item was saved, is retrieved and updated with the
+        action "use" and a link to where the UsedItem is used in the changes field. Finally, it
+        saves the history record and returns the response.
 
         Args:
             form (ModelForm): The form that handles the data for creating a new UsedItem object.
@@ -1350,6 +1306,64 @@ class UsedItemCreateView(SuperuserOrTechnicianRequiredMixin, CreateView):
         return response
 
 
+class UsedItemDeleteView(SuperuserOrTechnicianRequiredMixin, DeleteView):
+    """
+    Class-based view for confirming or canceling the deletion of a used item.
+    Only users in the "Superuser" or "Technician" group can access this view.
+
+    Inherits functionality from:
+        - SuperuserOrTechnicianRequiredMixin
+        - DeleteView
+
+    Attributes:
+        model (UsedItem): The model that this view operates on.
+        template_name (str): The name of the template used to render the view.
+        success_url (str): Redirection URL if deletionis confirmed
+        fail_url (str): Redirection URL if deletion is canceled
+
+    Methods:
+        `get_fail_url()`: Returns the URL to redirect if the deletion is canceled.
+        `post()`: Handles POST requests to delete the used item or cancel the deletion.
+    """
+    model = UsedItem
+    template_name = "used_item_confirm_delete.html"
+    success_url = reverse_lazy("inventory:used_items")
+
+    def get_fail_url(self):
+        """
+        Returns the URL to redirect to if the deletion is canceled.
+
+        This method uses reverse_lazy to resolve the failure URL with the primary key (pk) of the
+        object being processed and returns it.
+
+        Returns:
+            str: The URL to redirect to.
+        """
+        return reverse_lazy("inventory:used_items")
+
+    fail_url = property(get_fail_url)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Handles POST requests to delete the item or cancel the deletion.
+
+        This method first checks which button was pressed in the form. If the "Cancel" button was
+        pressed, the user is redirected back to the Used Items page (the failure URL). If the 
+        "Confirm" button was pressed (the else case), the used item is deleted.
+
+        Args:
+            request (HttpRequest): The HTTP request object containing metadata about the request.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            HttpResponse: The HTTP response object.
+        """
+        if "Cancel" in request.POST:
+            return redirect(self.fail_url)
+        return super(UsedItemDeleteView, self).post(request, *args, **kwargs)
+
+
 class SearchUsedItemsView(LoginRequiredMixin, ListView):
     """
     Class-based view for searching used items.
@@ -1362,7 +1376,8 @@ class SearchUsedItemsView(LoginRequiredMixin, ListView):
 
     Attributes:
         login_url (str): The URL to the login page (resolved using reverse_lazy).
-        redirect_field_name (str): The query parameter for the URL the user will be redirected to after logging in.
+        redirect_field_name (str): The query parameter for the URL the user will be redirected to 
+            after logging in.
         model (UsedItem): The model that this view operates on.
         template_name (str): The template used to render the search results.
         context_object_name (str): The name of the context variable to use for the search results.
@@ -1431,8 +1446,8 @@ class PurchaseOrderItemsFormView(SuperuserRequiredMixin, FormView):
         """
         Returns the initial data to use for the formset.
 
-        This method retrieves initial data from the GET parameters and returns it as a list of dictionaries,
-        each representing the initial data for one form in the formset.
+        This method retrieves initial data from the GET parameters and returns it as a list of 
+        dictionaries, each representing the initial data for one form in the formset.
 
         Returns:
             list: A list of dictionaries containing the initial data for the formset.
@@ -1460,13 +1475,15 @@ class PurchaseOrderItemsFormView(SuperuserRequiredMixin, FormView):
         """
         Adds the formset and query parameters to the context data.
 
-        This method first retrieves the base context data by calling the base class's `get_context_data` method.
-        Then, if a POST request is detected, the submitted form data is added as a formset to the context under
-        the "formset" key. Otherwise, an empty queryset is used to initialize the `PurchaseOrderItemFormSet`,
-        which is also added to the context under the "formset" key.
+        This method first retrieves the base context data by calling the base class's 
+        `get_context_data` method. Then, if a POST request is detected, the submitted form data is
+        added as a formset to the context under the "formset" key. Otherwise, an empty queryset is
+        used to initialize the `PurchaseOrderItemFormSet`, which is also added to the context under
+        the "formset" key.
 
         Args:
-            **kwargs: Additional keyword arguments passed to the base class's `get_context_data` method.
+            **kwargs: Additional keyword arguments passed to the base class's `get_context_data` 
+                method.
 
         Returns:
             dict: The context data, including the formset and query parameters.
@@ -1485,9 +1502,9 @@ class PurchaseOrderItemsFormView(SuperuserRequiredMixin, FormView):
         """
         Processes the formset data and writes it to an Excel file for download.
 
-        This method is called when valid form data has been POSTed. It writes the purchase order data
-        from the formset to an Excel file using a predefined template and returns an HTTP response
-        to download the generated Excel file.
+        This method is called when valid form data has been POSTed. It writes the purchase order 
+        data from the formset to an Excel file using a predefined template and returns an HTTP 
+        response to download the generated Excel file.
 
         Args:
             formset (FormSet): The formset containing the purchase order data.
@@ -1506,13 +1523,16 @@ class PurchaseOrderItemsFormView(SuperuserRequiredMixin, FormView):
         worksheet = workbook.active
 
         # Count the items in the form
-        itemCount = 0
+        item_count = 0
         for form in formset:
-            itemCount += 1
+            # Skip forms marked for deletion
+            if form.cleaned_data.get("DELETE"):
+                continue
+            item_count += 1
 
-        # If there are 8 or more items, set up the worksheet to accommodate them
-        if itemCount >= 8:
-            setup_worksheet(worksheet, itemCount)
+        # If there are more than 8 items, set up the worksheet to accommodate them
+        if item_count > 8:
+            setup_worksheet(worksheet, item_count)
 
         # Write data to the worksheet
         # In the worksheet, the first item row is 16

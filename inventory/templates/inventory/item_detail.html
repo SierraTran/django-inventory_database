@@ -28,7 +28,7 @@
             <th>Model</th><td>{{ item.model }}</td>
         </tr>
         <tr>
-            <th>Part or Unit?</th><td>{{ item.part_or_unit }}</td>
+            <th>Part or Unit</th><td>{{ item.part_or_unit }}</td>
         </tr>
         <tr>
             <th>Part Number</th><td>{{ item.part_number }}</td>
@@ -37,16 +37,16 @@
             <th>Description</th><td>{{ item.description }}</td>
         </tr>
         <tr>
-            <th>Location</th><td>{{ item.location }}</td>
+            <th>Storage Location</th><td>{{ item.location }}</td>
         </tr>
         <tr {% if item.low_stock %} style="color: red;" title="This item is low in stock."{% endif %}>
-            <th>Quantity</th><td>{{ item.quantity }}</td>
+            <th>Quantity in Stock</th><td>{{ item.quantity }}</td>
         </tr>
         <tr>
-            <th>Min. Quantity</th><td>{{ item.min_quantity }}</td>
+            <th>Minimum Quantity</th><td>{{ item.min_quantity }}</td>
         </tr>
         <tr>
-            <th>Unit Price</th><td>{{ item.unit_price }}</td>
+            <th>Unit Price ($)</th><td>{{ item.unit_price }}</td>
         </tr>
     </table>
 {% else %}

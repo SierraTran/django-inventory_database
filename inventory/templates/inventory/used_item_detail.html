@@ -34,8 +34,7 @@
 {% endif %}
 <div class="buttons">
     <button class="back" onclick="window.location.href='{% url "inventory:used_items" %}'">Back to Used Items</button>
-    {# TODO: Delete button #}
-    <button class="delete">Delete</button>
+    <button class="delete" onclick="window.location.href='{% url "inventory:used_item_confirm_delete" used_item.id %}'">Delete</button>
 </div>
 
 {% endblock content %}

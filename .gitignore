@@ -1,7 +1,6 @@
-superuser.txt
+.env
+*.pyc
 /inventory_database/__pycache__
 /inventory/__pycache__
 /authentication/__pycache__
-/inventory_database/static/admin
-*.pyc
-/staticfiles/admin
+db.sqlite3

@@ -1,20 +1,13 @@
+{% extends "confirm_base_template.html" %}
 {% load static %}
 
-{# TODO: Use confirm_base_template.html #}
+{% block other_stylesheets %}
+<link rel="stylesheet" href="{% static "item_confirm_delete.css" %}" />
+{% endblock other_stylesheets %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}Item - Confirm Deletion{% endblock title %}
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="shortcut icon" href="https://hayesinstruments.com/HayesLogo.ico">
-    <link rel="stylesheet" href="{% static "item_confirm_delete.css" %}" />
-    <title>Item - Confirm Deletion</title>
-</head>
-
-
-<body>
+{% block content %}
     <form method="post" class="card"> {% csrf_token %}
         <h3>Are you sure you want to delete</h3>
         <h3>"{{ object }}"?</h3>
@@ -24,7 +17,4 @@
             <input type="submit" name="Confirm" id="confirm" value="Confirm" />
         </div>
     </form>
-</body>
-
-</html>
-
+{% endblock content %}

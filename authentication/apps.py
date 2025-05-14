@@ -2,28 +2,29 @@ from django.apps import AppConfig
 
 
 class AuthenticationConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'authentication'
-    
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "authentication"
+
     def ready(self):
         from django.db.models.signals import post_migrate
 
         post_migrate.connect(assign_permissions_to_groups, sender=self)
 
- 
-def get_permission(codename):
-        from django.contrib.auth.models import Permission
-        try:
-            return Permission.objects.get(codename=codename)
-        except Permission.DoesNotExist:
-            print(f"\nPermission {codename} not found")
-            return None   
 
-    
+def get_permission(codename):
+    from django.contrib.auth.models import Permission
+
+    try:
+        return Permission.objects.get(codename=codename)
+    except Permission.DoesNotExist:
+        print(f"\nPermission {codename} not found")
+        return None
+
+
 def assign_permissions_to_groups(sender, **kwargs):
     from django.contrib.auth.models import Group
+
     # Define permissions and groups
-    
 
     # Permissions for the User model
     add_user_permission = get_permission("add_user")
@@ -67,43 +68,82 @@ def assign_permissions_to_groups(sender, **kwargs):
 
     superuser_group = Group.objects.get(name="Superuser")
     superuser_group.permissions.add(
-        add_user_permission, change_user_permission, delete_user_permission, view_user_permission,
-        change_notification_permission, delete_notification_permission, view_notification_permission,
-        add_item_permission, change_item_permission, delete_item_permission, view_item_permission,
+        # User (object) permissions
+        add_user_permission,
+        change_user_permission,
+        delete_user_permission,
+        view_user_permission,
+        # Notification permissions
+        change_notification_permission,
+        delete_notification_permission,
+        view_notification_permission,
+        # Item permissions
+        add_item_permission,
+        change_item_permission,
+        delete_item_permission,
+        view_item_permission,
+        # ItemHistory permissions
         view_itemhistory_permission,
+        # ItemRequest permissions
         view_itemrequest_permission,
-        add_useditem_permission, change_useditem_permission, delete_useditem_permission, view_useditem_permission,
-        add_purchaseorderitem_permission, change_purchaseorderitem_permission, delete_purchaseorderitem_permission, view_purchaseorderitem_permission,
+        # UsedItem permissions
+        add_useditem_permission,
+        change_useditem_permission,
+        delete_useditem_permission,
+        view_useditem_permission,
+        # PurchaseOrderItem permissions
+        add_purchaseorderitem_permission,
+        change_purchaseorderitem_permission,
+        delete_purchaseorderitem_permission,
+        view_purchaseorderitem_permission,
     )
 
     technician_group = Group.objects.get(name="Technician")
     technician_group.permissions.add(
-        change_notification_permission, delete_notification_permission, view_notification_permission,
-        add_item_permission, change_item_permission, delete_item_permission, view_item_permission,
+        # Notification permissions
+        change_notification_permission,
+        delete_notification_permission,
+        view_notification_permission,
+        # Item permissions
+        add_item_permission,
+        change_item_permission,
+        delete_item_permission,
+        view_item_permission,
+        # ItemHistory permissions
         view_itemhistory_permission,
-        add_itemrequest_permission, change_itemrequest_permission, delete_itemrequest_permission, view_itemrequest_permission,
-        add_useditem_permission, change_useditem_permission, delete_useditem_permission, view_useditem_permission,
-        # No PurchaseOrderItem permissions
+        # ItemRequest permissions
+        add_itemrequest_permission,
+        change_itemrequest_permission,
+        delete_itemrequest_permission,
+        view_itemrequest_permission,
+        # UsedItem permissions
+        add_useditem_permission,
+        change_useditem_permission,
+        delete_useditem_permission,
+        view_useditem_permission,
     )
 
     intern_group = Group.objects.get(name="Intern")
     intern_group.permissions.add(
-        change_notification_permission, delete_notification_permission, view_notification_permission,
-        change_item_permission, view_item_permission,
+        # Notification permissions
+        change_notification_permission,
+        delete_notification_permission,
+        view_notification_permission,
+        # Item permissions
+        change_item_permission,
+        view_item_permission,
+        # ItemHistory permissions
         view_itemhistory_permission,
-        # No ItemRequest permissions
-        # No UsedItem permissions
-        # No PurchaseOrderItem permissions
     )
 
     viewer_group = Group.objects.get(name="Viewer")
     viewer_group.permissions.add(
-        change_notification_permission, delete_notification_permission, view_notification_permission,
+        # Notification permissions
+        change_notification_permission,
+        delete_notification_permission,
+        view_notification_permission,
+        # Item permissions
         view_item_permission,
+        # ItemHistory permissions
         view_itemhistory_permission,
-        # No ItemRequest permissions
-        # No UsedItem permissions
-        # No PurchaseOrderItem permissions
     )
-    
-    

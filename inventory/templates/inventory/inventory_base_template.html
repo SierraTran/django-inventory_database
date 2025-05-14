@@ -11,6 +11,25 @@
     {% block other_stylesheets %}{% endblock other_stylesheets %}
     <title>{% block title %}{% endblock title %} | Inventory Database</title>
     <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch("/inventory_database/notifications/unread_count/")
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const badge = document.getElementById("notification-badge");
+                    const star = document.querySelector(".notification-star");
+                    badge.textContent = data.unread_count;
+                    badge.style.display = data.unread_count > 0 ? "inline" : "none";
+                    star.style.display = data.unread_count > 0 ? "inline" : "none";
+                })
+                .catch(error => {
+                    console.error("Error fetching notifications:", error);
+                });
+        });
         function openNav() {
             document.getElementById("sidenav").style.width = "250px";
         }
@@ -27,18 +46,23 @@
                 alt="Hayes Instrument Service"
                 title="Click here to go to the Home page.">
         </a>
+        {% if request.user.is_authenticated %}
         <div id="sidenav" class="sidenav">
             <h1 class="username">{{ request.user.username }}</h1>
             <hr class="sidenav-divider">
             <a href="javascript:void(0)" class="close-button" onclick="closeNav()">&times;</a>
-            <a href="{% url "authentication:notifications" %}">Notifications</a>
+            <a href="{% url 'authentication:notifications' %}">
+                Notifications <span id="notification-badge" class="badge">{{ unread_notifications_count }}</span>
+            </a>
             <form name="logout" action="{% url 'logout' %}" method="post"> {% csrf_token %}
                 <a onclick="logout.submit()">Log Out</a>
             </form>   
         </div>
-            <span class="user" onclick="openNav()">        
+            <span class="user" onclick="openNav()"> 
+                <span class="notification-star" style="color: red; font-weight: bold;">*</span>
                 Hello, {{ request.user.username }}
             </span>
+        {% endif %}
         {% block header %}
         {% endblock header %}
     </div>

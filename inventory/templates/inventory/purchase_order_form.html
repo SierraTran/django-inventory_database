@@ -159,7 +159,7 @@
 
     {% endfor %}
     <div class="buttons">
-        <button type="button" id="back-to-home-page">Back to Home Page</button>
+        <button type="button" id="back-to-home-page" onclick="window.location.href='{% url "authentication:home" %}'">Back to Home Page</button>
         <button type="button" id="add-item-button" onclick="addItem()">Add Item</button>
         <input type="submit" value="Submit" />
     </div>

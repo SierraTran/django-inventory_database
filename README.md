@@ -1,11 +1,11 @@
 # Inventory Database
 
 ![Python Version](https://img.shields.io/badge/python-3.13.2-blue)
-![Django Version](https://img.shields.io/badge/django-5.1.5-green)
+![Django Version](https://img.shields.io/badge/django-5.2-green)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![Coverage](https://img.shields.io/badge/coverage-69%-A8FF00)
+![Coverage](https://img.shields.io/badge/coverage-92%25-66FF00)
 
-This is a Django-based web application for managing an inventory database. The application allows users to browse, search, and manage items in the inventory. It also includes user authentication and authorization features.
+This is a Django-based web application for managing inventory. The application allows users to browse, search, and manage items in the inventory. It also includes user authentication and authorization features. It is specifically tailored for [Hayes Instrument Service](https://hayesinstruments.com/) to make keeping inventory much easier.
 
 ## Table of Contents
 
@@ -22,6 +22,7 @@ This is a Django-based web application for managing an inventory database. The a
   - [Required Packages](#required-packages)
   - [Installation and Setup Instructions](#installation-and-setup-instructions)
   - [Usage](#usage)
+  - [Known Issues](#known-issues)
   - [Contributing](#contributing)
   - [Author](#author)
   - [License](#license)
@@ -74,24 +75,36 @@ More info about [OpenPyXL](https://openpyxl.readthedocs.io/en/stable/)
 
 ## Required Software
 
-- Python 3.13.2
+|Software|Version|
+|--------|-------|
+|Git|2.48.1|
+|Python|3.13.2|
 
 ## Required Packages
 
 The list of required software below will also be included in the `requirements.txt` file.
 
-- Django
-- django-haystack
-- openpyxl
-- whitenoise
-- Whoosh
+|Package|Version|
+|-------|-------|
+|coverage|7.6.12|
+|Django|5.2|
+|django-haystack|3.3.0|
+|django-model-utils|5.0.0|
+|freezegun|1.5.1|
+|gunicorn|23.0.0|
+|openpyxl|3.1.5|
+|python-decouple|3.8|
+|waitress|3.0.2|
+|whitenoise|6.9.0|
+|Whoosh|2.7.4|
 
 ## Installation and Setup Instructions
 
 ### Step 1: Download the Application
 
-1. Go to the [GitHub repository](https://github.com/SierraTran/django-inventory_database).
-2. Click the **Code** button and select **Download ZIP**.
+1. Go to the [GitHub repository](https://github.com/SierraTran/inventory_database). (You're already here if the URL in your browser starts with "<https://github.com/SierraTran/inventory_database>"!)
+2. Click the **Code** button on the right side of the page.
+3. Select **Download ZIP**.
 
 ### Step 2: Extract the Files
 
@@ -103,31 +116,151 @@ The list of required software below will also be included in the `requirements.t
 1. Download and install Python from the [official Python website](https://www.python.org/downloads/). At the time of writing this, the latest version of Python is 3.13.2.
 2. During installation, make sure to check the box that says **Add Python to PATH**.
 
-### Step 4: Start and Run the Application
+### Step 4: Configure Environment Variables
+
+1. Create a file named `.env` in the root directory of the project (where `manage.py` is located).
+   - **Important**: Ensure that the `.env` file is excluded from version control to protect sensitive information like the `DJANGO_SECRET_KEY`. Add `.env` to your `.gitignore` file if it is not already included.
+2. Add the following environment variables to the `.env` file:
+
+   ```plaintext
+   DJANGO_SECRET_KEY=your-secret-key
+   DEBUG=False
+   ALLOWED_HOSTS=localhost,127.0.0.1
+   ```
+
+3. Replace `your-secret-key` with a strong, unique key. To generate this key:
+  
+    - Open a terminal or command prompt. You can do this by pressing `Win + R`, typing `cmd`, and pressing Enter on Windows. On Mac, you can open the Terminal app from the Applications folder. If you're using Linux, open the terminal from your applications menu.
+    - Copy and paste the following command and press Enter:
+
+        ```shell
+        py -c "import secrets; print(secrets.token_urlsafe(50))"
+        ```
+
+      - *Note: This command uses `py` to run Python on Windows. If you're using Linux or Mac, you can use `python3` or `python` instead.*
+
+    - This will output a long, random string. it will look something like this:
+
+        ```plaintext
+        n3w5tr0ng53cr3tK3y-EXAMPLE-1234567890
+        ```
+
+    - Copy this string and paste it into the `DJANGO_SECRET_KEY` variable in the `.env` file. The variable should look something like this now:
+
+        ```plaintext
+        DJANGO_SECRET_KEY=n3w5tr0ng53cr3tK3y-EXAMPLE-1234567890
+        ```
+
+4. Set `DEBUG` to `True` for development and debugging. For production, set to `False`
+
+5. Update `ALLOWED_HOSTS` with the domain names or IP addresses you want the application to run on.
+
+    - For local development: `localhost,127.0.0.1`
+    - For production: Add your domain name (e.g., `example.com`)
+
+6. Save the `.env` file.
+
+### Step 5: Start and Run the Application
 
 1. Open the folder where you extracted the files.
-2. Double-click the app.bat file. This will automatically install all the required packages and set up the application for you.
+2. There are two files: `deploy.bat` and `deploy.sh`. These files are used to run the application. Choose the one that matches your operating system:
+
+   - For Windows: Double-click `deploy_windows.bat` to run the application.
+   - For Mac/Linux: Open a terminal, navigate to the folder where you extracted the files, and run the following command:
+
+     ```bash
+     chmod +x deploy_mac_linux.sh
+     ./deploy_mac_linux.sh
+     ```
 
 ## Usage
 
-- **Home Page**: Displays links to browse items, create new items, import item data, and manage users (based on user permissions).
-- **Items Page**: Lists all available items with search functionality.
-- **Item Detail Page**: Shows detailed information about a specific item.
-- **User Management**: Superusers can create, view, and delete users.
+### 1. Logging In
+
+- Navigate to the application's URL in your browser.
+- Enter your username and password to log in.
+- Depending on your role, you will see different options on the home page.
+
+### 2. Home Page
+
+- Provides quick links to:
+  - Browse all items
+  - Create new items (if permitted)
+  - Import item data from Excel
+  - Make new item requests
+  - Manage users (Superuser only)
+  - View notifications
+
+### 3. Browsing and Searching Items
+
+- Go to the **Items Page** to see a list of all inventory items.
+- Use the search bar at the top to filter items by name, description, or other attributes by full words.
+- Click on an item to view its details.
+
+### 4. Item Detail Page
+
+- Shows detailed information about the selected item, including quantity, description, and other fields.
+- Depending on your role:
+  - **Technician/Superuser**: Can edit or delete the item.
+  - **Intern**: Can update the quantity.
+  - **Viewer**: Can only view item details.
+
+### 5. Creating and Managing Items
+
+- Users with appropriate permissions (Technician/Superuser) can create new items using the "Add Item" button.
+- Fill in the required fields and submit the form.
+- Edit or delete items from their detail pages.
+
+### 6. Importing Item Data
+
+- Use the "Import Items" option to upload an Excel file (.xlsx) containing item data.
+- Follow on-screen instructions to map columns and confirm import.
+
+### 7. Item Requests
+
+- Request new items or additional quantities using the "Request Item" feature.
+- View and manage your requests from the Item Requests page.
+
+### 8. Purchase Orders
+
+- Add items to a purchase order list.
+- Export the list to an Excel file for processing orders.
+
+### 9. Notifications
+
+- View notifications about inventory changes, requests, or approvals.
+- Mark notifications as read or delete them directly from the notifications page.
+
+### 10. User Management
+
+- **Superusers**: Can create, view, and delete users.
+- **Other users**: Can view the list of users and their details.
+
+### 11. Logging Out
+
+- Click the "Logout" link in the navigation bar to securely end your session.
 
 ## Future Enhancements
 
-This list contains features that may possibly be added to the application in the future.
+### UI Improvements
 
-- Allow all users access to *only* view the list of all users and their details
-- More seamless notification marking and deleting
-- Extensive help page and/or contextual help messages
-- "Shopping cart" feature for saving a list of items to purchase for purchase order form
-- Export items in the inventory to an Excel File
+- **Seamless Notification Management**: Users can mark and delete notifications directly from the notifications page, avoiding unnecessary navigation.
+- **Help page and/or messages**: Users can refer to an extensive page or contextual messages throughout the application for guidance.
+
+### Inventory Management Features
+
+- **"Shopping Cart" for Items**: Users can add items to a list for purchasing. This list will serve as a temporary holding area for selected items, which can then be reviewed and finalized before being used to populate purchase order forms on the application.
+- **Export Inventory to Excel**: Users can generate an Excel file for reports, audits, and backup offline copies.
+- **Images for Items**: A picture of the item will be shown on the detail page for easier recognition in the real world use cases (finding the item in the building, counting how many there are, etc.).
 
 ## Contributing
 
 Feel free to fork the repository and submit pull requests. For major changes, please open an issue first to discuss what you would like to change.
+
+## Known Issues
+
+- When running tests, your computer's antivirus may be alerted and think the program is ransomware. This is because of files in the `whoosh_index` folder being created, modified and deleting during testing. This only affects the `whoosh_index` files. For now, tests for the search indexes have been commented out so they won't be run.
+  - To re-enable these tests, locate the commented-out test cases in the test files (usually in the `tests` directory) and uncomment them. Ensure your antivirus software is configured to allow modifications to the `whoosh_index` folder during testing.
 
 ## Author
 
@@ -135,8 +268,10 @@ Sierra Tran
 
 ### Contact Info
 
-Email: <sierra.tran@mail.com>
+Email: [sierra.tran@mail.com](mailto:sierra.tran@mail.com)
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+[Back to Top](#inventory-database)
