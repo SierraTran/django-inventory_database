@@ -9,6 +9,7 @@ from django.test import Client, RequestFactory, TestCase, tag
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth.models import User, Group
+from freezegun import freeze_time
 from inventory.models import Item, ItemHistory, ItemRequest, UsedItem
 from inventory.views import (
     ItemHistoryView,
@@ -1732,7 +1733,6 @@ class ItemHistoryViewTests(TestCase):
         """
         Test the context data for the view
         """
-        # TODO: test_get_context_data
         # Simulate GET request
         request = self.factory.get(self.item_history_url)
         view = ItemHistoryView()
@@ -1816,7 +1816,7 @@ class ItemHistoryViewTests(TestCase):
             "The changes field does not match the expected value.",
         )
 
-        # [ ]: Check that the item history view shows the complete history for the item
+        # TODO: Check that the item history view shows the complete history for the item
 
     def test_item_history_view_record_of_update(self):
         """
@@ -1848,7 +1848,6 @@ class ItemHistoryViewTests(TestCase):
         # [ ]: Refresh with `self.item.refresh_from_db()`
         # [ ]: Check that the item history view shows the complete history for the item
 
-
 ###################################################################################################
 # Tests for the Views for the ItemRequest Model ###################################################
 ###################################################################################################
@@ -1861,15 +1860,11 @@ class ItemRequestViewTests(TestCase):
     aware_datetime = timezone.make_aware(datetime.datetime(2025, 1, 3, 13, 0, 0))
 
     @classmethod
+    @freeze_time(aware_datetime)
     def setUpTestData(cls):
         """
         Setup
         """
-        # TODO: Set up for ItemRequestViewTests
-        # [x]: Get the user groups
-        # [x]: Create one user for each group
-        # [ ]: One or more item requests to view for the list (at ifferent times)
-        # [ ]: Set time for the tests
         cls.superuser_group = Group.objects.get(name="Superuser")
         cls.technician_group = Group.objects.get(name="Technician")
         cls.intern_group = Group.objects.get(name="Intern")
@@ -2247,31 +2242,63 @@ class ItemRequestAcceptViewTests(TestCase):
         """
         Setup
         """
-        # TODO: Set up for ItemRequestAcceptViewTests
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.superuser = User.objects.create_superuser(
+            username="testsuperuser", password="password"
+        )
+        cls.superuser.groups.add(cls.superuser_group)
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.technician = User.objects.create_user(
+            username="testtechnician", password="password"
+        )
+        cls.technician.groups.add(cls.technician_group)
+        cls.item_request = ItemRequest.objects.create(
+            manufacturer="Test MFG",
+            model_part_num="Accept Model",
+            quantity_requested=1,
+            unit_price=0.01,
+            requested_by=cls.technician,
+        )
+        cls.accept_url = reverse(
+            "inventory:item_request_confirm_accept", kwargs={"pk": cls.item_request.pk}
+        )
 
     def test_get_object(self):
         """
-        Test the get_object method for ItemRequestAcceptView
+        Test that the correct object is returned in the context
         """
-        # TODO: test_get_object
+        self.client.login(username="testsuperuser", password="password")
+        response = self.client.get(self.accept_url)
+        self.assertEqual(response.context["object"], self.item_request)
 
     def test_get_context_data(self):
         """
-        Test the get_context_data method for ItemRequestAcceptView
+        Test the context data for the view
         """
-        # TODO: test_get_context_data
+        self.client.login(username="testsuperuser", password="password")
+        response = self.client.get(self.accept_url)
+        self.assertIn("object", response.context)
+        self.assertEqual(response.context["object"], self.item_request)
 
     def test_post(self):
         """
-        Test the post method for ItemRequestAcceptView
+        Test that the item request is accepted successfully.
         """
-        # TODO: test_post
+        self.client.login(username="testsuperuser", password="password")
+        response = self.client.post(self.accept_url, {"Confirm": "Confirm"})
+        self.assertEqual(response.status_code, 302)
+        self.item_request.refresh_from_db()
+        self.assertEqual(self.item_request.status, "Accepted")
 
     def test_post_cancel(self):
         """
-        Test the post method for ItemRequestAcceptView with cancel
+        Test that the item request is not accepted when canceling.
         """
-        # TODO: test_post_cancel
+        self.client.login(username="testsuperuser", password="password")
+        response = self.client.post(self.accept_url, {"Cancel": "Cancel"})
+        self.assertEqual(response.status_code, 302)
+        self.item_request.refresh_from_db()
+        self.assertNotEqual(self.item_request.status, "Accepted")
 
 
 class ItemRequestRejectViewTests(TestCase):
@@ -2284,31 +2311,67 @@ class ItemRequestRejectViewTests(TestCase):
         """
         Setup
         """
-        # TODO: Set up for ItemRequestRejectView
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.superuser = User.objects.create_superuser(
+            username="testsuperuser", password="password"
+        )
+        cls.superuser.groups.add(cls.superuser_group)
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.technician = User.objects.create_user(
+            username="testtechnician", password="password"
+        )
+        cls.technician.groups.add(cls.technician_group)
+        cls.item_request = ItemRequest.objects.create(
+            manufacturer="Test MFG",
+            model_part_num="Reject Model",
+            quantity_requested=1,
+            unit_price=0.01,
+            requested_by=cls.technician,
+        )
+        cls.reject_url = reverse(
+            "inventory:item_request_confirm_reject", kwargs={"pk": cls.item_request.pk}
+        )
 
     def test_get_object(self):
         """
-        Test the get_object method for ItemRequestRejectView
+        Test that the correct object is returned in the context
         """
-        # TODO: test_get_object
+        self.client.login(username="testsuperuser", password="password")
+        response = self.client.get(self.reject_url)
+        self.assertEqual(response.context["object"], self.item_request)
 
     def test_get_context_data(self):
         """
-        Test the get_context_data method for ItemRequestRejectView
+        Test the context data for the view
         """
-        # TODO: test_get_context_data
+        self.client.login(username="testsuperuser", password="password")
+        response = self.client.get(self.reject_url)
+        self.assertIn("object", response.context)
+        self.assertEqual(response.context["object"], self.item_request)
 
     def test_post(self):
         """
-        Test the post method for ItemRequestRejectView
+        Test that the item request is rejected successfully.
         """
-        # TODO: test_post
+        self.client.login(username="testsuperuser", password="password")
+        self.item_request.status_changed_by = self.superuser
+        self.item_request.save()
+        response = self.client.post(self.reject_url, {"Confirm": "Confirm"})
+        self.assertEqual(response.status_code, 302)
+        self.item_request.refresh_from_db()
+        self.assertEqual(self.item_request.status, "Rejected")
 
     def test_post_cancel(self):
         """
-        Test the post method for ItemRequestRejectView with cancel
+        Test that the item request is not rejected when canceling.
         """
-        # TODO: test_post_cancel
+        self.client.login(username="testsuperuser", password="password")
+        self.item_request.status_changed_by = self.superuser
+        self.item_request.save()
+        response = self.client.post(self.reject_url, {"Cancel": "Cancel"})
+        self.assertEqual(response.status_code, 302)
+        self.item_request.refresh_from_db()
+        self.assertNotEqual(self.item_request.status, "Rejected")
 
 
 class ItemRequestDeleteViewTests(TestCase):
@@ -2316,7 +2379,93 @@ class ItemRequestDeleteViewTests(TestCase):
     Tests for ItemRequestDeleteView
     """
 
-    # TODO: Tests for ItemRequestDeleteView
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.superuser = User.objects.create_superuser(
+            username="testsuperuser", password="password"
+        )
+        cls.superuser.groups.add(cls.superuser_group)
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.technician1 = User.objects.create_user(
+            username="testtechnician1", password="password"
+        )
+        cls.technician1.groups.add(cls.technician_group)
+        cls.technician2 = User.objects.create_user(
+            username="testtechnician2", password="password"
+        )
+        cls.technician2.groups.add(cls.technician_group)
+        cls.item_request = ItemRequest.objects.create(
+            manufacturer="Test MFG",
+            model_part_num="Delete Model",
+            quantity_requested=1,
+            unit_price=0.01,
+            requested_by=cls.technician1,
+        )
+        cls.delete_url = reverse(
+            "inventory:item_request_confirm_delete", kwargs={"pk": cls.item_request.pk}
+        )
+
+    def test_item_request_delete_view_access_control(self):
+        """
+        Test that only the technician that created the item request can access the view.
+        """
+        # Technician 1 access
+        self.client.login(username="testtechnician1", password="password")
+        response = self.client.get(self.delete_url)
+        self.assertEqual(
+            response.status_code,
+            200,
+            "Technician 1 failed to access the item request delete view.",
+        )
+        self.client.logout()
+        
+        # Technician 2 forbidden
+        self.client.login(username="testtechnician2", password="password")
+        response = self.client.get(self.delete_url)
+        self.assertEqual(
+            response.status_code,
+            403,
+            "Technician 2 was able to access the item request delete view.",
+        )
+        self.client.logout()
+        
+        # Superuser forbidden
+        self.client.login(username="testsuperuser", password="password")
+        response = self.client.get(self.delete_url)
+        self.assertEqual(
+            response.status_code,
+            403,
+            "Superuser was able to access the item request delete view.",
+        )
+        self.client.logout()        
+
+    def test_post(self):
+        """
+        Test that the item request is deleted successfully.
+        """
+        self.client.login(username="testtechnician1", password="password")
+        response = self.client.post(self.delete_url, {"Confirm": "Confirm"})
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(
+            ItemRequest.objects.filter(pk=self.item_request.pk).exists(),
+            "The item request was not deleted.",
+        )
+
+    def test_post_cancel(self):
+        """
+        Test that the item request is not deleted when canceling.
+        """
+        self.client.login(username="testtechnician1", password="password")
+        response = self.client.post(self.delete_url, {"Cancel": "Cancel"})
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            ItemRequest.objects.filter(pk=self.item_request.pk).exists(),
+            "The item request was deleted.",
+        )
 
 
 ###################################################################################################
@@ -2630,19 +2779,41 @@ class UsedItemCreateViewTests(TestCase):
         """
         Test the dispatch method of the UsedItemCreateView.
         """
-        # TODO: test_dispatch
-        # [ ]: Test that items with quantities over 0 can be used
-        # [ ]: Test that items with quantities equal to 0 cannot be used
+        # Items with quantity > 0 can be used
+        self.client.login(username="testtechnician", password="password")
+        response = self.client.get(self.item2_use_url)
+        self.assertEqual(response.status_code, 200)
+
+        # Items with quantity == 0 cannot be used (should redirect or error)
+        response = self.client.get(self.item1_use_url)
+        self.assertNotEqual(response.status_code, 200)
 
     def test_form_valid(self):
         """
         Test that the form_valid function works as expected.
         """
-        # TODO: test_form_valid
-        # [ ]: The quantity of the item being used is decremented by 1
-        # [ ]: The `last_modified_by` field is set to the user who used the item
-        # [ ]: The used_item_url is resolved correctly
-        # [ ]: The latest ItemHistory record is updated with the correct action and changes
+        self.client.login(username="testtechnician", password="password")
+        # Use item2 (quantity=1)
+        response = self.client.post(
+            self.item2_use_url,
+            {
+                "item": self.item2.pk,
+                "work_order": 123456,
+                "used_by": self.technician.pk,
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        item = Item.objects.get(pk=self.item2.pk)
+        self.assertEqual(item.quantity, 0)
+        # Check that the latest UsedItem exists
+        used_item = UsedItem.objects.filter(item=item, work_order=123456).first()
+        self.assertIsNotNone(used_item)
+        # Check that the `used_by` field is set correctly
+        self.assertEqual(used_item.used_by, self.technician)
+        # Check that the latest ItemHistory record is for "use"
+        history = ItemHistory.objects.filter(item=item).order_by("-timestamp").first()
+        self.assertIsNotNone(history)
+        self.assertEqual(history.action, "use")
 
 
 class UsedItemDeleteViewTests(TestCase):
@@ -2655,9 +2826,42 @@ class UsedItemDeleteViewTests(TestCase):
         """
         Setup
         """
-        # TODO: Set up test data
-        # [ ]: Create a used item for deletion
-        # [ ]: Create users
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.intern_group = Group.objects.get(name="Intern")
+        cls.viewer_group = Group.objects.get(name="Viewer")
+        cls.superuser = User.objects.create_superuser(
+            username="testsuperuser", password="password"
+        )
+        cls.superuser.groups.add(cls.superuser_group)
+        cls.technician = User.objects.create_user(
+            username="testtechnician", password="password"
+        )
+        cls.technician.groups.add(cls.technician_group)
+        cls.intern = User.objects.create_user(
+            username="testintern", password="password"
+        )
+        cls.intern.groups.add(cls.intern_group)
+        cls.viewer = User.objects.create_user(
+            username="testviewer", password="password"
+        )
+        cls.viewer.groups.add(cls.viewer_group)
+
+        cls.item = Item.objects.create(
+            manufacturer="Test",
+            model="Test",
+            part_or_unit=Item.PART,
+            part_number="123",
+            quantity=1,
+        )
+        cls.used_item = UsedItem.objects.create(
+            item=cls.item,
+            work_order=8888888,
+            used_by=cls.technician,
+        )
+        cls.used_item_delete_url = reverse(
+            "inventory:used_item_confirm_delete", kwargs={"pk": cls.used_item.pk}
+        )
 
         cls.client = Client()
         cls.factory = RequestFactory()
@@ -2667,12 +2871,66 @@ class UsedItemDeleteViewTests(TestCase):
         """
         Test that only superusers and technicians can access the UsedItemDeleteView.
         """
-        # TODO: test_used_item_delete_view_access_control
+        # Superuser access
+        self.client.login(username="testsuperuser", password="password")
+        response = self.client.get(self.used_item_delete_url)
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+
+        # Technician access
+        self.client.login(username="testtechnician", password="password")
+        response = self.client.get(self.used_item_delete_url)
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+
+        # Intern forbidden
+        self.client.login(username="testintern", password="password")
+        response = self.client.get(self.used_item_delete_url)
+        self.assertEqual(response.status_code, 403)
+        self.client.logout()
+
+        # Viewer forbidden
+        self.client.login(username="testviewer", password="password")
+        response = self.client.get(self.used_item_delete_url)
+        self.assertEqual(response.status_code, 403)
+        self.client.logout()
 
     def test_get_context_data(self):
         """
         Test the context data for the UsedItemDeleteView.
         """
-        # TODO: test_get_context_data
-        # [ ]: Log in
-        # [ ]: Simulate GET request
+        # Log in
+        self.client.login(username="testsuperuser", password="password")
+        # Simulate GET request
+        response = self.client.get(self.used_item_delete_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("object", response.context)
+        self.assertEqual(response.context["object"], self.used_item)
+
+    def test_post(self):
+        """
+        Test that the used item is deleted successfully.
+        """
+        # Log in
+        self.client.login(username="testsuperuser", password="password")
+        # Simulate POST request
+        response = self.client.post(self.used_item_delete_url, {"Confirm": "Confirm"})
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(
+            UsedItem.objects.filter(pk=self.used_item.pk).exists(),
+            "The used item was not deleted.",
+        )
+
+    def test_post_cancel(self):
+        """
+        Test that the used item is not deleted when canceling.
+        """
+        # Log in
+        self.client.login(username="testsuperuser", password="password")
+        # Simulate POST request
+        response = self.client.post(self.used_item_delete_url, {"Cancel": "Cancel"})
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            UsedItem.objects.filter(pk=self.used_item.pk).exists(),
+            "The used item was deleted.",
+        )

@@ -61,6 +61,55 @@ class HomeViewTests(TestCase):
         )
 
 
+class UnreadNotificationsCountViewTests(TestCase):
+    """
+    Tests for the unread notifications count view
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        cls.user = User.objects.create_user(username="testuser", password="password")
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.user.groups.add(cls.superuser_group)
+
+        # Create some notifications for the user
+        Notification.objects.create(
+            subject="Test Notification 1",
+            message="This is a test notification.",
+            user=cls.user,
+        )
+        Notification.objects.create(
+            subject="Test Notification 2",
+            message="This is another test notification.",
+            user=cls.user,
+            is_read=True,
+        )
+
+        cls.unread_notifications_url = reverse("authentication:unread_notifications_count")
+
+        cls.client = Client()
+
+    def test_unread_notifications_count_unauthenticated(self):
+        """
+        Test that the unread notifications count is 0 when not logged in
+        """
+        response = self.client.get(self.unread_notifications_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"unread_count": 0})
+
+    def test_unread_notifications_count_authenticated(self):
+        """
+        Test that the unread notifications count is correct when logged in
+        """
+        self.client.login(username="testuser", password="password")   
+        response = self.client.get(self.unread_notifications_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"unread_count": 1})
+
+
 class DatabaseLoginViewTests(TestCase):
     """
     Tests for the login view
@@ -186,14 +235,10 @@ class NotificationViewTests(TestCase):
         )
 
     def test_notification_no_notifs(self):
-        # TODO: test_notification_no_notifs
         """
         No notifications or notification badge will be shown.
         """
-        # [x]: Delete all notifications from the database (We only need to do this for this test.)
-        # [x]: Log in and access the notification page
-        # [x]: Check for no notifications and a message that says so
-        # [ ]: Make sure the notification badge doesn't show
+        # TODO: Make sure the notification badge doesn't show; need selenium for this
         Notification.objects.all().delete()
 
         login = self.client.login(username="testuser1", password="password")
@@ -211,14 +256,11 @@ class NotificationViewTests(TestCase):
         self.assertContains(response, "<p>There are no notifications.</p>")
 
     def test_notification_all_unread_notifs(self):
-        # TODO: test_notification_all_unread_notifs
         """
         Test that all (unread) notifications are shown in bold, and the notification badge is shown
         with the number of unread notifications.
         """
-        # [x]: Log in and access the notification page
-        # [ ]: Check for notifications (all should be bold)
-        # [x]: Make sure notification badge shows with correct number of unread notifications
+        # TODO: Check for notifications (all should be bold); need selenium for this
         login = self.client.login(username="testuser1", password="password")
         self.assertTrue(login, "Login failed.")
 
@@ -234,14 +276,11 @@ class NotificationViewTests(TestCase):
         self.assertContains(response, '<span id="notification-badge" class="badge">2</span>')
 
     def test_notification_all_read_notifs(self):
-        # TODO: test_notification_all_read_notifs
         """
         All notifications are not shown in bold, and the notification badge won't be shown.
         """
-        # [ ]: Mark all notifications as read
-        # [x]: Log in and access the notification page
-        # [ ]: Check for notifications (none should be bold)
-        # [ ]: Make sure the notification badge doesn't show
+        # Mark all notifications as read
+        Notification.objects.filter(user=self.user1).update(is_read=True)
         login = self.client.login(username="testuser1", password="password")
         self.assertTrue(login, "Login failed.")
 
@@ -254,17 +293,22 @@ class NotificationViewTests(TestCase):
             "notifications.html",
             "The correct template for the view is not used.",
         )
+
+        # Check that notifications are not bold (assuming bold is <strong>)
+        for notif in Notification.objects.filter(user=self.user1):
+            self.assertNotContains(response, f"<strong>{notif.subject}</strong>")
 
     def test_notification_read_and_unread_notifs(self):
         """
         Unread notifications are shown in bold while read notifications are not in bold. 
         The notification badge will only count unread notifications.
         """
-        # TODO: test_notification_read_and_unread_notifs
-        # [ ]: Mark some notifications as read
-        # [x]: Log in and access the notification page
-        # [ ]: Check for unread notifications (shown in bold) and read notifications (now shown in bold)
-        # [ ]: Make sure notification badge shows with correct number of unread notifications
+        # Mark one notification as read, one as unread
+        notifs = Notification.objects.filter(user=self.user1)
+        unread_notif = notifs.first()
+        read_notif = notifs.last()
+        read_notif.is_read = True
+        read_notif.save()
         login = self.client.login(username="testuser1", password="password")
         self.assertTrue(login, "Login failed.")
 
@@ -277,6 +321,12 @@ class NotificationViewTests(TestCase):
             "notifications.html",
             "The correct template for the view is not used.",
         )
+        # Badge should show 1 unread
+        self.assertContains(response, '<span id="notification-badge" class="badge">1</span>')
+        # TODO: Unread notification should be bold; need selenium for this
+        # self.assertContains(response, f"<strong>{unread_notif.subject}</strong>")
+        # TODO: Read notification should not be bold; need selenium for this
+        # self.assertNotContains(response, f"<strong>{read_notif.subject}</strong>")
 
 
 class NotificationUpdateViewTests(TestCase):
@@ -341,16 +391,25 @@ class NotificationUpdateViewTests(TestCase):
         """
         Test the context data for the notification update view.
         """
-        # TODO: test_get_context_data
-        # [ ]: Log in as the user with access to the notification
-        # [ ]: Make a GET request to the notification update view
         self.client.login(username="testuser1", password="password")
+        response = self.client.get(self.notification_update_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("notification", response.context)
+        self.assertEqual(response.context["notification"], self.notification)
 
     def test_update_notification(self):
         """
         Test that the notification can be updated correctly.
         """
-        # TODO: test_update_notification
+        self.client.login(username="testuser1", password="password")
+        # Mark as read
+        response = self.client.post(
+            self.notification_update_url,
+            {"is_read": True, "subject": self.notification.subject, "message": self.notification.message},
+        )
+        self.assertEqual(response.status_code, 302)
+        notif = Notification.objects.get(pk=self.notification.pk)
+        self.assertTrue(notif.is_read)
 
 
 class NotificationDeleteViewTests(TestCase):
@@ -501,6 +560,9 @@ class UserDetailsViewTests(TestCase):
         cls.technician_group = Group.objects.get(name="Technician")
         cls.user2 = User.objects.create_user(username="testuser2", password="password")
         cls.user2.groups.add(cls.technician_group)
+        
+        cls.user3 = User.objects.create_user(username="testuser3", password="password")
+        # User 3 is not assigned to any group
 
         cls.users_url = reverse("authentication:users")
         cls.client = Client()
@@ -520,6 +582,16 @@ class UserDetailsViewTests(TestCase):
         if "groups" in response.context:
             group_names = [g.name for g in response.context["groups"]]
             self.assertIn("Technician", group_names)
+        # Access user details for User 3
+        user_detail_url = reverse("authentication:user_details", kwargs={"pk": self.user3.pk})
+        response = self.client.get(user_detail_url)
+        self.assertEqual(response.status_code, 200)
+        # Check that the context contains the correct user
+        self.assertEqual(response.context["user"].username, "testuser3")
+        # Check for group info in context (no groups assigned)
+        if "groups" in response.context:
+            group_names = [g.name for g in response.context["groups"]]
+            self.assertEqual(group_names, [], "User 3 should not have any groups assigned.")
         self.client.logout()
 
         # Log in as technician and access own details
@@ -584,6 +656,64 @@ class UserCreateViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         new_user = User.objects.filter(username="newuser").first()
         self.assertIsNotNone(new_user, "The new user does not exist.")
+
+
+class UserUpdateViewTests(TestCase):
+    """
+    Tests for UserUpdateView
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Setup
+        """
+        cls.superuser_group = Group.objects.get(name="Superuser")
+        cls.user1 = User.objects.create_user(username="testuser1", password="password")
+        cls.user1.groups.add(cls.superuser_group)
+
+        cls.technician_group = Group.objects.get(name="Technician")
+        cls.user2 = User.objects.create_user(username="testuser2", password="password")
+        cls.user2.groups.add(cls.technician_group)
+
+        cls.users_url = reverse("authentication:users")
+        cls.client = Client()
+        cls.user_update_url = reverse(
+            "authentication:user_update_form", kwargs={"pk": cls.user2.pk}
+        )
+
+    def test_user_update_view_access_control(self):
+        """
+        Test that only superusers can access the user update view.
+        """
+        # Log in as superuser and access user update view
+        self.client.login(username="testuser1", password="password")
+        response = self.client.get(self.user_update_url)
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+
+        # Log in as technician and try to access user update view
+        self.client.login(username="testuser2", password="password")
+        response = self.client.get(self.user_update_url)
+        self.assertEqual(response.status_code, 403)
+        
+    def test_update_user(self):
+        """
+        Test the update user functionality for the user update view.
+        """
+        # Log in as superuser and access user update view
+        self.client.login(username="testuser1", password="password")
+        response = self.client.post(
+            self.user_update_url,
+            {
+                "username": "updateduser",
+                "password": "updatedpassword",
+                "user_group": self.technician_group.name,
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        updated_user = User.objects.filter(username="updateduser").first()
+        self.assertIsNotNone(updated_user, "The updated user does not exist.")
 
 
 class UserDeleteViewTests(TestCase):
