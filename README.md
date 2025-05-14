@@ -119,6 +119,7 @@ The list of required software below will also be included in the `requirements.t
 ### Step 4: Configure Environment Variables
 
 1. Create a file named `.env` in the root directory of the project (where `manage.py` is located).
+   - **Important**: Ensure that the `.env` file is excluded from version control to protect sensitive information like the `DJANGO_SECRET_KEY`. Add `.env` to your `.gitignore` file if it is not already included.
 2. Add the following environment variables to the `.env` file:
 
    ```plaintext
@@ -138,7 +139,7 @@ The list of required software below will also be included in the `requirements.t
 
       - *Note: This command uses `py` to run Python on Windows. If you're using Linux or Mac, you can use `python3` or `python` instead.*
 
-    - This will output a long, random string. it will look somehting like this:
+    - This will output a long, random string. it will look something like this:
 
         ```plaintext
         n3w5tr0ng53cr3tK3y-EXAMPLE-1234567890
@@ -248,7 +249,7 @@ The list of required software below will also be included in the `requirements.t
 
 ### Inventory Management Features
 
-- **"Shopping Cart" for Items**: Users can add items to a list for purchasing, which will be used to populate purchase order forms on the application.
+- **"Shopping Cart" for Items**: Users can add items to a list for purchasing. This list will serve as a temporary holding area for selected items, which can then be reviewed and finalized before being used to populate purchase order forms on the application.
 - **Export Inventory to Excel**: Users can generate an Excel file for reports, audits, and backup offline copies.
 - **Images for Items**: A picture of the item will be shown on the detail page for easier recognition in the real world use cases (finding the item in the building, counting how many there are, etc.).
 
@@ -259,6 +260,7 @@ Feel free to fork the repository and submit pull requests. For major changes, pl
 ## Known Issues
 
 - When running tests, your computer's antivirus may be alerted and think the program is ransomware. This is because of files in the `whoosh_index` folder being created, modified and deleting during testing. This only affects the `whoosh_index` files. For now, tests for the search indexes have been commented out so they won't be run.
+  - To re-enable these tests, locate the commented-out test cases in the test files (usually in the `tests` directory) and uncomment them. Ensure your antivirus software is configured to allow modifications to the `whoosh_index` folder during testing.
 
 ## Author
 
