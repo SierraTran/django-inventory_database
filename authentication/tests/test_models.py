@@ -8,8 +8,6 @@ from authentication.models import Notification
 
 import datetime
 
-# Create your tests here.
-
 
 class NotificationModelTests(TestCase):
     # NOTE: Local date and time is set to January 1, 2025 at 12:00 for testing purposes
