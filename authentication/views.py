@@ -576,7 +576,7 @@ class UserDeleteView(SuperuserRequiredMixin, DeleteView):
 
     model = User
     success_url = reverse_lazy("authentication:users")
-    template_name = "auth\\user_confirm_delete.html"
+    template_name = "auth/user_confirm_delete.html"
 
     def get_fail_url(self):
         """
