@@ -63,13 +63,13 @@ More info about [Django](https://www.djangoproject.com/)
 
 ### Haystack and Whoosh
 
-For database searching, the Haystack search framework has been implemented with the Whoosh backend. Whoosh is easy to set up and well-suited for small applications, which makes it an ideal choice for this application.
+The Haystack search framework has been implemented with the Whoosh backend for database searching. Whoosh is easy to set up and well-suited for small applications, which makes it an ideal choice for this application.
 
 More info about [Haystack](https://django-haystack.readthedocs.io/en/master/) and [Whoosh](https://whoosh.readthedocs.io/en/latest/)
 
 ### OpenPyXL
 
-For writing to Excel files, OpenPyXL is used. It is a powerful library that allows for easy manipulation of Excel files in Python. This is mainly used for writing item data to an Excel file for purchase orders.
+For writing to Excel files, OpenPyXL is used. It is a powerful library that allows for easy manipulation of Excel files in Python. This is used primarily for writing item data to an Excel file for purchase orders.
 
 More info about [OpenPyXL](https://openpyxl.readthedocs.io/en/stable/)
 
@@ -139,7 +139,7 @@ The list of required software below will also be included in the `requirements.t
 
       - *Note: This command uses `py` to run Python on Windows. If you're using Linux or Mac, you can use `python3` or `python` instead.*
 
-    - This will output a long, random string. it will look something like this:
+    - This will output a long, random string. It will look something like this:
 
         ```plaintext
         n3w5tr0ng53cr3tK3y-EXAMPLE-1234567890
@@ -160,7 +160,18 @@ The list of required software below will also be included in the `requirements.t
 
 6. Save the `.env` file.
 
-### Step 5: Start and Run the Application
+### Step 5: Create a Superuser for the Database
+
+This requires more technical knowledge, specifically for navigating directories on a command line. 
+
+1. Open a terminal or command prompt.
+2. `cd` to the directory of the application.
+3. Run the command `py manage.py makemigrations` and then `py manage.py migrate`. This will set up the database tables for authentication.
+4. Run the command `py manage.py createsuperuser`.
+5. You will be asked to input a username, email address, and password for the superuser. The email address is optional and can be left blank. You will need to confirm your password by typing it again when prompted.
+6. Once the superuser has been successfully created, you can use the credentials to log in to the Inventory Database application.
+
+### Step 6: Start and Run the Application
 
 1. Open the folder where you extracted the files.
 2. There are two files: `deploy.bat` and `deploy.sh`. These files are used to run the application. Choose the one that matches your operating system:
@@ -251,7 +262,7 @@ The list of required software below will also be included in the `requirements.t
 
 - **"Shopping Cart" for Items**: Users can add items to a list for purchasing. This list will serve as a temporary holding area for selected items, which can then be reviewed and finalized before being used to populate purchase order forms on the application.
 - **Export Inventory to Excel**: Users can generate an Excel file for reports, audits, and backup offline copies.
-- **Images for Items**: A picture of the item will be shown on the detail page for easier recognition in the real world use cases (finding the item in the building, counting how many there are, etc.).
+- **Images for Items**: A picture of the item is shown on the details page for easier recognition in real-world use cases (finding the item in the building, counting how many there are, etc.).
 
 ## Contributing
 
@@ -259,7 +270,7 @@ Feel free to fork the repository and submit pull requests. For major changes, pl
 
 ## Known Issues
 
-- When running tests, your computer's antivirus may be alerted and think the program is ransomware. This is because of files in the `whoosh_index` folder being created, modified and deleting during testing. This only affects the `whoosh_index` files. For now, tests for the search indexes have been commented out so they won't be run.
+- When running tests, your computer's antivirus may be alerted and think the program is ransomware. This is because of files in the `whoosh_index` folder being created, modified, and deleted during testing. This only affects the `whoosh_index` files. For now, tests for the search indexes have been commented out so they won't be run.
   - To re-enable these tests, locate the commented-out test cases in the test files (usually in the `tests` directory) and uncomment them. Ensure your antivirus software is configured to allow modifications to the `whoosh_index` folder during testing.
 
 ## Author
